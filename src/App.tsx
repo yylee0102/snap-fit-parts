@@ -20,6 +20,7 @@ import CenterEstimatesPage from "./domains/centers/pages/CenterEstimatesPage";
 import ChatPage from "./domains/chat/pages/ChatPage";
 import SupportPage from "./domains/support/pages/SupportPage";
 import MyPage from "./domains/mypage/pages/MyPage";
+import CenterMyPage from "./domains/centers/pages/CenterMyPage";
 import AdminDashboard from "./domains/admin/pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
@@ -65,6 +66,7 @@ const App = () => (
           
           {/* 마이페이지 관련 */}
           <Route path="/mypage" element={<MyPage />} />
+          <Route path="/center/mypage" element={<CenterMyPage />} />
           <Route path="/owner" element={<MyPage />} />
           
           {/* 관리자 관련 */}
