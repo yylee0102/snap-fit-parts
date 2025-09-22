@@ -8,7 +8,10 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import WBListPage from "./domains/wb/pages/WBListPage";
 import CentersPage from "./domains/centers/pages/CentersPage";
-import EstimatesPage from "./domains/estimates/pages/EstimatesPage";
+import CenterDetailPage from "./domains/centers/pages/CenterDetailPage";
+import EstimateListPage from "./domains/estimates/pages/EstimateListPage";
+import EstimateCreatePage from "./domains/estimates/pages/EstimateCreatePage";
+import EstimateDetailPage from "./domains/estimates/pages/EstimateDetailPage";
 import ChatPage from "./domains/chat/pages/ChatPage";
 import SupportPage from "./domains/support/pages/SupportPage";
 import MyPage from "./domains/mypage/pages/MyPage";
@@ -32,12 +35,12 @@ const App = () => (
           
           {/* 카센터 관련 */}
           <Route path="/centers" element={<CentersPage />} />
-          <Route path="/centers/:centerId" element={<CentersPage />} />
+          <Route path="/centers/:centerId" element={<CenterDetailPage />} />
           
           {/* 견적서 관련 */}
-          <Route path="/estimates" element={<EstimatesPage />} />
-          <Route path="/estimates/create" element={<EstimatesPage />} />
-          <Route path="/estimates/:estimateId" element={<EstimatesPage />} />
+          <Route path="/estimates" element={<EstimateListPage />} />
+          <Route path="/estimates/create" element={<EstimateCreatePage />} />
+          <Route path="/estimates/:estimateId" element={<EstimateDetailPage />} />
           
           {/* 고객센터 관련 */}
           <Route path="/support" element={<SupportPage />} />
