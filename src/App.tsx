@@ -8,6 +8,7 @@ import { AuthProvider } from "@/shared/contexts/AuthContext";
 // Pages
 import HomePage from "./pages/HomePage";
 import WBListPage from "./domains/wb/pages/WBListPage";
+import WBDetailPage from "./domains/wb/pages/WBDetailPage";
 import CentersListPage from "./domains/centers/pages/CentersListPage";
 import CenterDetailPage from "./domains/centers/pages/CenterDetailPage";
 import EstimateListPage from "./domains/estimates/pages/EstimateListPage";
@@ -37,7 +38,7 @@ const App = () => (
           
           {/* WB (중고부품) 관련 라우트 */}
           <Route path="/wb" element={<WBListPage />} />
-          <Route path="/wb/:partId" element={<WBListPage />} />
+          <Route path="/wb/:partId" element={<WBDetailPage />} />
           
           {/* 카센터 관련 */}
           <Route path="/centers" element={<CentersListPage />} />
