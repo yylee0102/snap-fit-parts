@@ -11,7 +11,7 @@ import { formatTimeAgo } from "@/shared/utils/format";
 
 interface ChatRoom {
   id: string;
-  type: "part" | "center" | "general" | "bot";
+  type: "part" | "center" | "general" | "bot" | "estimate";
   name: string;
   avatar?: string;
   lastMessage?: string;
@@ -63,9 +63,19 @@ export default function ChatPage() {
       // 임시 데이터 (실제로는 API 호출)
       const mockRooms: ChatRoom[] = [
         {
+          id: "estimate_ai",
+          type: "estimate",
+          name: "AI 견적 상담",
+          avatar: "/placeholder.svg",
+          lastMessage: "안녕하세요! AI 견적 상담을 도와드립니다.",
+          lastMessageAt: "2024-01-15T09:00:00Z",
+          unreadCount: 0,
+          isOnline: true
+        },
+        {
           id: "bot",
           type: "bot",
-          name: "카파트너 도우미",
+          name: "카파트너 고객상담",
           avatar: "/placeholder.svg",
           lastMessage: "안녕하세요! 무엇을 도와드릴까요?",
           lastMessageAt: "2024-01-15T09:00:00Z",

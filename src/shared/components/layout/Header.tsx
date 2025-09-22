@@ -1,6 +1,8 @@
-import { Search, Bell, MessageCircle, Menu, ArrowLeft, User } from "lucide-react";
+import { Search, Bell, MessageCircle, Menu, ArrowLeft, User, LogIn } from "lucide-react";
 import { useState } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
+import { useAuth } from "@/shared/contexts/AuthContext";
+import AuthModal from "@/shared/modals/AuthModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -24,8 +26,10 @@ interface HeaderProps {
 export default function Header({ className }: HeaderProps) {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user, isLoggedIn, logout } = useAuth();
   const [searchType, setSearchType] = useState("parts");
   const [searchQuery, setSearchQuery] = useState("");
+  const [showAuthModal, setShowAuthModal] = useState(false);
   
   // 루트(/)에서는 뒤로가기 숨김
   const showBackButton = location.pathname !== "/";
@@ -128,24 +132,44 @@ export default function Header({ className }: HeaderProps) {
             </Button>
 
             {/* 프로필/로그인 드롭다운 */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm">
-                  <User className="h-5 w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48 bg-surface border-outline-variant">
-                <DropdownMenuItem onClick={() => navigate("/mypage")}>
-                  마이페이지
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/owner")}>
-                  사장님 페이지
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  로그아웃
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {isLoggedIn ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="flex items-center gap-2">
+                    <User className="h-5 w-5" />
+                    <span className="hidden md:inline text-sm">{user?.name}</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48 bg-surface border-outline-variant">
+                  <DropdownMenuItem onClick={() => navigate("/mypage")}>
+                    마이페이지
+                  </DropdownMenuItem>
+                  {user?.userType === "카센터" && (
+                    <DropdownMenuItem onClick={() => navigate("/owner")}>
+                      사장님 페이지
+                    </DropdownMenuItem>
+                  )}
+                  {user?.userType === "관리자" && (
+                    <DropdownMenuItem onClick={() => navigate("/admin")}>
+                      관리자 페이지
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem onClick={logout}>
+                    로그아웃
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => setShowAuthModal(true)}
+                className="flex items-center gap-2"
+              >
+                <LogIn className="h-5 w-5" />
+                <span className="hidden md:inline">로그인</span>
+              </Button>
+            )}
 
             {/* 햄버거 메뉴 */}
             <Button variant="ghost" size="sm" className="lg:hidden">
@@ -154,6 +178,12 @@ export default function Header({ className }: HeaderProps) {
           </div>
         </div>
       </div>
+      
+      {/* 로그인/회원가입 모달 */}
+      <AuthModal 
+        open={showAuthModal} 
+        onClose={() => setShowAuthModal(false)}
+      />
     </header>
   );
 }

@@ -5,6 +5,7 @@ import WBCard from "../components/WBCard";
 import PartDetailModal from "../modals/PartDetailModal";
 import PartCreateModal from "../modals/PartCreateModal";
 import SortFilterModal from "../modals/SortFilterModal";
+import EstimateRequestModal from "../modals/EstimateRequestModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -57,6 +58,7 @@ export default function WBListPage() {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showSortFilterModal, setShowSortFilterModal] = useState(false);
+  const [showEstimateModal, setShowEstimateModal] = useState(false);
   
   // 필터 및 정렬 상태
   const [currentSort, setCurrentSort] = useState("latest");
@@ -241,6 +243,15 @@ export default function WBListPage() {
             </Button>
             
             <Button
+              variant="outline"
+              onClick={() => setShowEstimateModal(true)}
+              className="flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              견적내기
+            </Button>
+            
+            <Button
               onClick={() => setShowCreateModal(true)}
               className="bg-primary hover:bg-primary/90 flex items-center gap-2"
             >
@@ -329,6 +340,15 @@ export default function WBListPage() {
           currentSort={currentSort}
           currentFilters={currentFilters}
           onApply={handleApplyFilters}
+        />
+
+        <EstimateRequestModal
+          open={showEstimateModal}
+          onClose={() => setShowEstimateModal(false)}
+          onSubmit={(data) => {
+            console.log("견적 요청:", data);
+            setShowEstimateModal(false);
+          }}
         />
       </div>
     </PageContainer>

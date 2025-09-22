@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "@/shared/contexts/AuthContext";
 
 // Pages
 import HomePage from "./pages/HomePage";
@@ -15,6 +16,7 @@ import EstimateDetailPage from "./domains/estimates/pages/EstimateDetailPage";
 import ChatPage from "./domains/chat/pages/ChatPage";
 import SupportPage from "./domains/support/pages/SupportPage";
 import MyPage from "./domains/mypage/pages/MyPage";
+import AdminDashboard from "./domains/admin/pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,7 +26,8 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <Router>
+      <AuthProvider>
+        <Router>
         <Routes>
           {/* 홈페이지 */}
           <Route path="/" element={<HomePage />} />
@@ -58,9 +61,9 @@ const App = () => (
           <Route path="/owner" element={<MyPage />} />
           
           {/* 관리자 관련 */}
-          <Route path="/admin" element={<MyPage />} />
-          <Route path="/admin/notices" element={<MyPage />} />
-          <Route path="/admin/reports" element={<MyPage />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/notices" element={<AdminDashboard />} />
+          <Route path="/admin/reports" element={<AdminDashboard />} />
           
           {/* 기타 페이지들 */}
           <Route path="/about" element={<MyPage />} />
@@ -70,7 +73,8 @@ const App = () => (
           {/* 404 페이지 - 가장 마지막에 위치 */}
           <Route path="*" element={<NotFound />} />
         </Routes>
-      </Router>
+        </Router>
+      </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
