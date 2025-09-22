@@ -7,7 +7,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 // Pages
 import HomePage from "./pages/HomePage";
 import WBListPage from "./domains/wb/pages/WBListPage";
-import CentersPage from "./domains/centers/pages/CentersPage";
+import CentersListPage from "./domains/centers/pages/CentersListPage";
 import CenterDetailPage from "./domains/centers/pages/CenterDetailPage";
 import EstimateListPage from "./domains/estimates/pages/EstimateListPage";
 import EstimateCreatePage from "./domains/estimates/pages/EstimateCreatePage";
@@ -34,7 +34,7 @@ const App = () => (
           <Route path="/wb/:partId" element={<WBListPage />} />
           
           {/* 카센터 관련 */}
-          <Route path="/centers" element={<CentersPage />} />
+          <Route path="/centers" element={<CentersListPage />} />
           <Route path="/centers/:centerId" element={<CenterDetailPage />} />
           
           {/* 견적서 관련 */}
