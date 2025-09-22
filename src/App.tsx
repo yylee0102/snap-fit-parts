@@ -7,6 +7,11 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 // Pages
 import HomePage from "./pages/HomePage";
 import WBListPage from "./domains/wb/pages/WBListPage";
+import CentersPage from "./domains/centers/pages/CentersPage";
+import EstimatesPage from "./domains/estimates/pages/EstimatesPage";
+import ChatPage from "./domains/chat/pages/ChatPage";
+import SupportPage from "./domains/support/pages/SupportPage";
+import MyPage from "./domains/mypage/pages/MyPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,40 +30,39 @@ const App = () => (
           <Route path="/wb" element={<WBListPage />} />
           <Route path="/wb/:partId" element={<WBListPage />} />
           
-          {/* TODO: 추가 라우트들 - API 연결 시 실제 페이지로 교체 */}
           {/* 카센터 관련 */}
-          <Route path="/centers" element={<div className="p-8 text-center">카센터 목록 페이지 (구현 예정)</div>} />
-          <Route path="/centers/:centerId" element={<div className="p-8 text-center">카센터 상세 페이지 (구현 예정)</div>} />
+          <Route path="/centers" element={<CentersPage />} />
+          <Route path="/centers/:centerId" element={<CentersPage />} />
           
           {/* 견적서 관련 */}
-          <Route path="/estimates" element={<div className="p-8 text-center">견적서 목록 페이지 (구현 예정)</div>} />
-          <Route path="/estimates/create" element={<div className="p-8 text-center">견적서 작성 페이지 (구현 예정)</div>} />
-          <Route path="/estimates/:estimateId" element={<div className="p-8 text-center">견적서 상세 페이지 (구현 예정)</div>} />
+          <Route path="/estimates" element={<EstimatesPage />} />
+          <Route path="/estimates/create" element={<EstimatesPage />} />
+          <Route path="/estimates/:estimateId" element={<EstimatesPage />} />
           
           {/* 고객센터 관련 */}
-          <Route path="/support" element={<div className="p-8 text-center">고객센터 페이지 (구현 예정)</div>} />
-          <Route path="/support/faq" element={<div className="p-8 text-center">FAQ 페이지 (구현 예정)</div>} />
-          <Route path="/support/contact" element={<div className="p-8 text-center">1:1 문의 페이지 (구현 예정)</div>} />
-          <Route path="/support/notices" element={<div className="p-8 text-center">공지사항 페이지 (구현 예정)</div>} />
-          <Route path="/support/notices/:noticeId" element={<div className="p-8 text-center">공지사항 상세 페이지 (구현 예정)</div>} />
+          <Route path="/support" element={<SupportPage />} />
+          <Route path="/support/faq" element={<SupportPage />} />
+          <Route path="/support/contact" element={<SupportPage />} />
+          <Route path="/support/notices" element={<SupportPage />} />
+          <Route path="/support/notices/:noticeId" element={<SupportPage />} />
           
           {/* 채팅 관련 */}
-          <Route path="/chat" element={<div className="p-8 text-center">채팅 페이지 (구현 예정)</div>} />
-          <Route path="/chat/:roomId" element={<div className="p-8 text-center">채팅방 페이지 (구현 예정)</div>} />
+          <Route path="/chat" element={<ChatPage />} />
+          <Route path="/chat/:roomId" element={<ChatPage />} />
           
           {/* 마이페이지 관련 */}
-          <Route path="/mypage" element={<div className="p-8 text-center">개인 마이페이지 (구현 예정)</div>} />
-          <Route path="/owner" element={<div className="p-8 text-center">사장님 마이페이지 (구현 예정)</div>} />
+          <Route path="/mypage" element={<MyPage />} />
+          <Route path="/owner" element={<MyPage />} />
           
           {/* 관리자 관련 */}
-          <Route path="/admin" element={<div className="p-8 text-center">관리자 페이지 (구현 예정)</div>} />
-          <Route path="/admin/notices" element={<div className="p-8 text-center">관리자 공지사항 관리 (구현 예정)</div>} />
-          <Route path="/admin/reports" element={<div className="p-8 text-center">관리자 신고 관리 (구현 예정)</div>} />
+          <Route path="/admin" element={<MyPage />} />
+          <Route path="/admin/notices" element={<MyPage />} />
+          <Route path="/admin/reports" element={<MyPage />} />
           
           {/* 기타 페이지들 */}
-          <Route path="/about" element={<div className="p-8 text-center">회사소개 페이지 (구현 예정)</div>} />
-          <Route path="/terms" element={<div className="p-8 text-center">이용약관 페이지 (구현 예정)</div>} />
-          <Route path="/privacy" element={<div className="p-8 text-center">개인정보처리방침 페이지 (구현 예정)</div>} />
+          <Route path="/about" element={<MyPage />} />
+          <Route path="/terms" element={<MyPage />} />
+          <Route path="/privacy" element={<MyPage />} />
           
           {/* 404 페이지 - 가장 마지막에 위치 */}
           <Route path="*" element={<NotFound />} />

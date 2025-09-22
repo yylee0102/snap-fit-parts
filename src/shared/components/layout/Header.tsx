@@ -1,6 +1,6 @@
 import { Search, Bell, MessageCircle, Menu, ArrowLeft, User } from "lucide-react";
 import { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -57,14 +57,14 @@ export default function Header({ className }: HeaderProps) {
                 <ArrowLeft className="h-5 w-5" />
               </Button>
             )}
-            <a 
-              href="/" 
+            <Link 
+              to="/" 
               className="flex items-center space-x-2 text-2xl font-bold text-primary hover:text-primary/80 transition-colors"
             >
               <span className="bg-gradient-to-r from-primary to-brand-primary bg-clip-text text-transparent">
                 CAR PARTER
               </span>
-            </a>
+            </Link>
           </div>
 
           {/* 중앙: 검색바 */}

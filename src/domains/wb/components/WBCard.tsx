@@ -1,6 +1,7 @@
 import { Heart, Eye, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { formatKRW, formatTimeAgo } from "@/shared/utils/format";
 
 interface WBCardProps {
   part: {
@@ -22,9 +23,6 @@ interface WBCardProps {
 }
 
 export default function WBCard({ part, onClick, onLike }: WBCardProps) {
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('ko-KR').format(price) + '원';
-  };
 
   const getConditionColor = (condition: string) => {
     switch (condition) {
@@ -33,17 +31,6 @@ export default function WBCard({ part, onClick, onLike }: WBCardProps) {
       case "중고B급": return "bg-tertiary text-tertiary-foreground";
       default: return "bg-muted text-muted-foreground";
     }
-  };
-
-  const formatTimeAgo = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-    
-    if (diffInHours < 1) return "방금 전";
-    if (diffInHours < 24) return `${diffInHours}시간 전`;
-    if (diffInHours < 24 * 7) return `${Math.floor(diffInHours / 24)}일 전`;
-    return date.toLocaleDateString('ko-KR');
   };
 
   return (
@@ -124,7 +111,7 @@ export default function WBCard({ part, onClick, onLike }: WBCardProps) {
 
         {/* 가격 */}
         <div className="text-lg font-bold text-primary">
-          {formatPrice(part.price)}
+          {formatKRW(part.price)}
         </div>
 
         {/* 하단 정보 */}
