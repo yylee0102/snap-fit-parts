@@ -150,20 +150,12 @@ export default function MyPage() {
 
         {/* 활동 통계 */}
         {activity && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             <Card>
               <CardContent className="p-4 text-center">
                 <FileText className="h-8 w-8 text-primary mx-auto mb-2" />
                 <div className="text-2xl font-bold text-on-surface">{activity.estimates}</div>
                 <div className="text-sm text-on-surface-variant">견적 요청</div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="p-4 text-center">
-                <ShoppingBag className="h-8 w-8 text-primary mx-auto mb-2" />
-                <div className="text-2xl font-bold text-on-surface">{activity.purchases}</div>
-                <div className="text-sm text-on-surface-variant">구매 내역</div>
               </CardContent>
             </Card>
             
@@ -187,9 +179,8 @@ export default function MyPage() {
 
         {/* 메뉴 탭 */}
         <Tabs defaultValue="estimates" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="estimates">견적 내역</TabsTrigger>
-            <TabsTrigger value="purchases">구매 내역</TabsTrigger>
             <TabsTrigger value="reviews">내 리뷰</TabsTrigger>
             <TabsTrigger value="favorites">찜한 목록</TabsTrigger>
           </TabsList>
@@ -204,15 +195,6 @@ export default function MyPage() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="purchases" className="space-y-4">
-            <Card>
-              <CardContent className="p-8 text-center">
-                <ShoppingBag className="h-12 w-12 text-on-surface-variant mx-auto mb-4" />
-                <p className="text-on-surface-variant">구매 내역이 없습니다</p>
-                <Button className="mt-4">중고부품 둘러보기</Button>
-              </CardContent>
-            </Card>
-          </TabsContent>
 
           <TabsContent value="reviews" className="space-y-4">
             <Card>

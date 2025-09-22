@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Eye, EyeOff } from "lucide-react";
+import VehicleRegisterModal from "./VehicleRegisterModal";
 
 interface AuthModalProps {
   open: boolean;
@@ -20,6 +21,7 @@ export default function AuthModal({ open, onClose, onLogin }: AuthModalProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
+  const [showVehicleModal, setShowVehicleModal] = useState(false);
   
   // 로그인 폼 데이터
   const [loginData, setLoginData] = useState({
@@ -39,6 +41,8 @@ export default function AuthModal({ open, onClose, onLogin }: AuthModalProps) {
     businessNumber: "", // 카센터용
     centerName: "",     // 카센터용
     address: "",        // 카센터용
+    centerPhone: "",    // 카센터용
+    centerEmail: "",    // 카센터용
     agreeTerms: false,
     agreePrivacy: false,
     agreeMarketing: false
@@ -80,12 +84,21 @@ export default function AuthModal({ open, onClose, onLogin }: AuthModalProps) {
       return;
     }
 
-    // TODO: API 연결 - 회원가입
-    // POST /api/auth/signup
+    // API 연결: 회원가입
     try {
-      console.log("회원가입 요청:", signupData);
-      alert("회원가입이 완료되었습니다!");
-      setActiveTab("login");
+      if (signupData.userType === "일반") {
+        // POST /api/auth/signup (일반 사용자)
+        console.log("일반 사용자 회원가입 요청:", signupData);
+        alert("회원가입이 완료되었습니다!");
+        onClose();
+        // 일반 사용자는 차량 등록 모달 표시
+        setTimeout(() => setShowVehicleModal(true), 300);
+      } else {
+        // POST /api/car-centers/register (카센터)
+        console.log("카센터 회원가입 요청:", signupData);
+        alert("카센터 회원가입 신청이 완료되었습니다. 승인 후 이용 가능합니다.");
+        setActiveTab("login");
+      }
     } catch (error) {
       console.error("회원가입 실패:", error);
     }
@@ -297,15 +310,15 @@ export default function AuthModal({ open, onClose, onLogin }: AuthModalProps) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="name">{userType === "카센터용" ? "사업자등록번호" : "이름"}</Label>
+                  <Label htmlFor="name">{userType === "카센터용" ? "카센터명" : "이름"}</Label>
                   <Input
                     id="name"
                     type="text"
-                    placeholder={userType === "카센터용" ? "사업자등록번호를 입력하세요" : "이름을 입력하세요"}
-                    value={userType === "카센터용" ? signupData.businessNumber : signupData.name}
+                    placeholder={userType === "카센터용" ? "카센터명을 입력하세요" : "이름을 입력하세요"}
+                    value={userType === "카센터용" ? signupData.centerName : signupData.name}
                     onChange={(e) => setSignupData(prev => ({ 
                       ...prev, 
-                      [userType === "카센터용" ? "businessNumber" : "name"]: e.target.value 
+                      [userType === "카센터용" ? "centerName" : "name"]: e.target.value 
                     }))}
                     required
                   />
@@ -314,25 +327,49 @@ export default function AuthModal({ open, onClose, onLogin }: AuthModalProps) {
                 {userType === "카센터용" && (
                   <>
                     <div className="space-y-2">
-                      <Label htmlFor="centerName">대표자명</Label>
+                      <Label htmlFor="businessNumber">사업자등록번호</Label>
                       <Input
-                        id="centerName"
+                        id="businessNumber"
                         type="text"
-                        placeholder="대표자명을 입력하세요"
-                        value={signupData.centerName}
-                        onChange={(e) => setSignupData(prev => ({ ...prev, centerName: e.target.value }))}
+                        placeholder="사업자등록번호를 입력하세요"
+                        value={signupData.businessNumber}
+                        onChange={(e) => setSignupData(prev => ({ ...prev, businessNumber: e.target.value }))}
                         required
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="address">주소</Label>
+                      <Label htmlFor="address">카센터 주소</Label>
                       <Input
                         id="address"
                         type="text"
                         placeholder="카센터 주소를 입력하세요"
                         value={signupData.address}
                         onChange={(e) => setSignupData(prev => ({ ...prev, address: e.target.value }))}
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="centerPhone">카센터 전화번호</Label>
+                      <Input
+                        id="centerPhone"
+                        type="tel"
+                        placeholder="카센터 전화번호를 입력하세요"
+                        value={signupData.centerPhone}
+                        onChange={(e) => setSignupData(prev => ({ ...prev, centerPhone: e.target.value }))}
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="centerEmail">카센터 이메일</Label>
+                      <Input
+                        id="centerEmail"
+                        type="email"
+                        placeholder="카센터 이메일을 입력하세요"
+                        value={signupData.centerEmail}
+                        onChange={(e) => setSignupData(prev => ({ ...prev, centerEmail: e.target.value }))}
                         required
                       />
                     </div>
@@ -418,6 +455,14 @@ export default function AuthModal({ open, onClose, onLogin }: AuthModalProps) {
       </Dialog>
 
       <TermsModal />
+      <VehicleRegisterModal 
+        open={showVehicleModal}
+        onClose={() => setShowVehicleModal(false)}
+        onComplete={() => {
+          setShowVehicleModal(false);
+          alert("차량 등록이 완료되었습니다!");
+        }}
+      />
     </>
   );
 }

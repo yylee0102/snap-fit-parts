@@ -32,17 +32,10 @@ export default function HomePage() {
     },
     {
       icon: MessageCircle,
-      title: "채팅 상담",
-      description: "실시간 문의",
+      title: "채팅",
+      description: "실시간 채팅",
       color: "bg-brand-accent text-on-surface",
       onClick: () => navigate("/chat")
-    },
-    {
-      icon: Search,
-      title: "부품 찾기",
-      description: "중고부품 검색",
-      color: "bg-surface-container text-on-surface",
-      onClick: () => navigate("/wb")
     },
     {
       icon: Star,
@@ -127,7 +120,7 @@ export default function HomePage() {
         {/* 퀵 액션 */}
         <div className="mb-12">
           <h2 className="text-2xl font-bold text-on-surface mb-6">빠른 이용</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             {quickActions.map((action, index) => {
               const Icon = action.icon;
               return (

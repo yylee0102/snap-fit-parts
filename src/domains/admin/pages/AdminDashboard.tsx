@@ -91,8 +91,7 @@ export default function AdminDashboard() {
   ];
 
   useEffect(() => {
-    // TODO: API 연결 - 관리자 대시보드 데이터 조회
-    // GET /api/admin/dashboard
+    // API 연결: 관리자 대시보드 데이터 조회
     fetchDashboardData();
   }, []);
 
@@ -100,7 +99,15 @@ export default function AdminDashboard() {
     try {
       setLoading(true);
 
-      // 임시 통계 데이터
+      // API 연결: 각종 통계 데이터 조회
+      // GET /api/admin/stats/users/count - 전체 유저 수
+      // GET /api/admin/stats/centers/count - 전체 카센터 수  
+      // GET /api/admin/stats/approvals/pending/count - 대기 승인 건수
+      // GET /api/admin/stats/reports/reviews/count - 신고된 리뷰 건수
+      // GET /api/admin/stats/gender - 성별 분포
+      // GET /api/admin/stats/age - 연령대 분포
+      
+      // 임시 통계 데이터 (실제 API 연결 시 위 API 응답으로 교체)
       const mockStats: DashboardStats = {
         users: { total: 30, new: 120, centers: 15 },
         orders: { total: 5, completed: 0, pending: 0, cancelled: 0 },
