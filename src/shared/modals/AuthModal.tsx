@@ -326,26 +326,15 @@ export default function AuthModal({ open, onClose, onLogin }: AuthModalProps) {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="address">비밀번호 확인</Label>
-                      <div className="relative">
-                        <Input
-                          id="address"
-                          type={showConfirmPassword ? "text" : "password"}
-                          placeholder="비밀번호를 다시 입력하세요"
-                          value={signupData.confirmPassword}
-                          onChange={(e) => setSignupData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                          required
-                        />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="absolute right-2 top-1/2 -translate-y-1/2 h-auto p-1"
-                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        >
-                          {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                        </Button>
-                      </div>
+                      <Label htmlFor="address">주소</Label>
+                      <Input
+                        id="address"
+                        type="text"
+                        placeholder="카센터 주소를 입력하세요"
+                        value={signupData.address}
+                        onChange={(e) => setSignupData(prev => ({ ...prev, address: e.target.value }))}
+                        required
+                      />
                     </div>
                   </>
                 )}

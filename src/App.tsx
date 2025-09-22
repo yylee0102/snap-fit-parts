@@ -13,6 +13,9 @@ import CenterDetailPage from "./domains/centers/pages/CenterDetailPage";
 import EstimateListPage from "./domains/estimates/pages/EstimateListPage";
 import EstimateCreatePage from "./domains/estimates/pages/EstimateCreatePage";
 import EstimateDetailPage from "./domains/estimates/pages/EstimateDetailPage";
+import EstimateAIPage from "./domains/estimates/pages/EstimateAIPage";
+import EstimateRequestPage from "./domains/estimates/pages/EstimateRequestPage";
+import CenterEstimatesPage from "./domains/centers/pages/CenterEstimatesPage";
 import ChatPage from "./domains/chat/pages/ChatPage";
 import SupportPage from "./domains/support/pages/SupportPage";
 import MyPage from "./domains/mypage/pages/MyPage";
@@ -43,6 +46,9 @@ const App = () => (
           {/* 견적서 관련 */}
           <Route path="/estimates" element={<EstimateListPage />} />
           <Route path="/estimates/create" element={<EstimateCreatePage />} />
+          <Route path="/estimates/ai" element={<EstimateAIPage />} />
+          <Route path="/estimates/requests" element={<EstimateRequestPage />} />
+          <Route path="/estimates/center" element={<CenterEstimatesPage />} />
           <Route path="/estimates/:estimateId" element={<EstimateDetailPage />} />
           
           {/* 고객센터 관련 */}

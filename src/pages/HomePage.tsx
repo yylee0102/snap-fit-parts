@@ -10,11 +10,11 @@ export default function HomePage() {
 
   const quickActions = [
     {
-      icon: Search,
-      title: "부품 찾기",
-      description: "중고부품 검색",
+      icon: Wrench,
+      title: "AI 견적",
+      description: "AI 자동견적",
       color: "bg-primary text-primary-foreground",
-      onClick: () => navigate("/wb")
+      onClick: () => navigate("/estimates/ai")
     },
     {
       icon: MapPin,
@@ -38,11 +38,11 @@ export default function HomePage() {
       onClick: () => navigate("/chat")
     },
     {
-      icon: Wrench,
-      title: "고객센터",
-      description: "FAQ & 문의",
+      icon: Search,
+      title: "부품 찾기",
+      description: "중고부품 검색",
       color: "bg-surface-container text-on-surface",
-      onClick: () => navigate("/support")
+      onClick: () => navigate("/wb")
     },
     {
       icon: Star,

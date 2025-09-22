@@ -63,16 +63,6 @@ export default function ChatPage() {
       // 임시 데이터 (실제로는 API 호출)
       const mockRooms: ChatRoom[] = [
         {
-          id: "estimate_ai",
-          type: "estimate",
-          name: "AI 견적 상담",
-          avatar: "/placeholder.svg",
-          lastMessage: "안녕하세요! AI 견적 상담을 도와드립니다.",
-          lastMessageAt: "2024-01-15T09:00:00Z",
-          unreadCount: 0,
-          isOnline: true
-        },
-        {
           id: "bot",
           type: "bot",
           name: "카파트너 고객상담",
@@ -92,6 +82,17 @@ export default function ChatPage() {
           unreadCount: 1,
           isOnline: true,
           relatedId: "center1"
+        },
+        {
+          id: "2",
+          type: "center",
+          name: "스피드카센터",
+          avatar: "/placeholder.svg",
+          lastMessage: "헤드라이트 부품 재고 확인해드리겠습니다.",
+          lastMessageAt: "2024-01-14T15:45:00Z",
+          unreadCount: 2,
+          isOnline: false,
+          relatedId: "center2"
         }
       ];
 
