@@ -6,24 +6,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Camera, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface CarInfo {
-  brand: string;
-  model: string;
-  year: string;
-  mileage: string;
+  carModel: string;
+  carNumber: string;
+  modelYear: string;
 }
 
 interface EstimateRequest {
-  title: string;
-  description: string;
-  carInfo: CarInfo;
-  category: string;
-  location: string;
+  description: string; // = QuoteRequest.requestDetails
+  carInfo: CarInfo;    // UI 입력값 (백엔드 연동 시 UserCar로 매핑)
+  location: string;    // = QuoteRequest.address
   images: File[];
   centerId?: string;
 }
@@ -47,15 +43,12 @@ export default function EstimateCreatePage() {
   const centerInfo = location.state as { centerId?: string; centerName?: string } | null;
 
   const [formData, setFormData] = useState<EstimateRequest>({
-    title: "",
     description: "",
     carInfo: {
-      brand: "",
-      model: "",
-      year: "",
-      mileage: ""
+      carModel: "",
+      carNumber: "",
+      modelYear: ""
     },
-    category: "",
     location: "",
     images: [],
     centerId: centerInfo?.centerId
@@ -126,28 +119,20 @@ export default function EstimateCreatePage() {
   };
 
   const validateForm = () => {
-    if (!formData.title.trim()) {
-      toast({ title: "제목을 입력해주세요", variant: "destructive" });
-      return false;
-    }
     if (!formData.description.trim()) {
-      toast({ title: "상세 내용을 입력해주세요", variant: "destructive" });
+      toast({ title: "요청 상세 내용을 입력해주세요", variant: "destructive" });
       return false;
     }
-    if (!formData.carInfo.brand) {
-      toast({ title: "차량 브랜드를 선택해주세요", variant: "destructive" });
-      return false;
-    }
-    if (!formData.carInfo.model.trim()) {
+    if (!formData.carInfo.carModel.trim()) {
       toast({ title: "차량 모델을 입력해주세요", variant: "destructive" });
       return false;
     }
-    if (!formData.category) {
-      toast({ title: "카테고리를 선택해주세요", variant: "destructive" });
+    if (!formData.carInfo.carNumber.trim()) {
+      toast({ title: "차량 번호를 입력해주세요", variant: "destructive" });
       return false;
     }
     if (!formData.location.trim()) {
-      toast({ title: "지역을 입력해주세요", variant: "destructive" });
+      toast({ title: "주소를 입력해주세요", variant: "destructive" });
       return false;
     }
     return true;
