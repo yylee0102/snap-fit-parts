@@ -33,7 +33,7 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
 
-  // 로컬 스토리지에서 사용자 정보 불러오기
+  // 임시 카센터 사용자로 초기화
   useEffect(() => {
     const savedUser = localStorage.getItem("user");
     if (savedUser) {
@@ -44,6 +44,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
         console.error("사용자 정보 파싱 실패:", error);
         localStorage.removeItem("user");
       }
+    } else {
+      // 임시로 카센터 사용자 설정
+      const tempUser = {
+        id: "center123",
+        name: "우리카센터",
+        email: "center@example.com",
+        phone: "02-1234-5678",
+        userType: "카센터" as const,
+        isLoggedIn: true,
+        profileImage: "",
+        rating: 4.7,
+        responseRate: 95,
+        location: "서울시 강남구"
+      };
+      setUser(tempUser);
+      localStorage.setItem("user", JSON.stringify(tempUser));
     }
   }, []);
 

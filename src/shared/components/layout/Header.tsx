@@ -145,8 +145,8 @@ export default function Header({ className }: HeaderProps) {
                     마이페이지
                   </DropdownMenuItem>
                   {user?.userType === "카센터" && (
-                    <DropdownMenuItem onClick={() => navigate("/owner")}>
-                      사장님 페이지
+                    <DropdownMenuItem onClick={() => navigate("/center/mypage")}>
+                      카센터 관리
                     </DropdownMenuItem>
                   )}
                   {user?.userType === "관리자" && (

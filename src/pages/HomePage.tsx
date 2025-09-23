@@ -38,11 +38,11 @@ export default function HomePage() {
       onClick: () => navigate("/chat")
     },
     {
-      icon: Star,
-      title: "내 정보",
-      description: "마이페이지",
+      icon: FileText,
+      title: "공지사항",
+      description: "새소식 확인",
       color: "bg-surface-container-high text-on-surface",
-      onClick: () => navigate("/mypage")
+      onClick: () => navigate("/support/notices")
     }
   ];
 
