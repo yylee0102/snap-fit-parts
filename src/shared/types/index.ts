@@ -132,3 +132,122 @@ export interface ImageUploadResult {
   size: number;
   mimeType: string;
 }
+
+// ===== 견적 관련 타입 =====
+export interface EstimateResDTO {
+  estimateId: number;
+  quoteRequestId: number;
+  centerId: number;
+  centerName: string;
+  estimatedCost: number;
+  details: string;
+  status: 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'CANCELED';
+  createdAt: string;
+  estimateItems: EstimateItemResDTO[];
+}
+
+export interface EstimateItemResDTO {
+  itemId: number;
+  itemName: string;
+  price: number;
+  requiredHours: number;
+  partType: string;
+}
+
+export interface QuoteRequestResDTO {
+  requestId: number;
+  userId: number;
+  userCarId: number;
+  requestDetails: string;
+  address: string;
+  latitude?: number;
+  longitude?: number;
+  createdAt: string;
+  requestImages: RequestImageResDTO[];
+}
+
+export interface RequestImageResDTO {
+  imageId: number;
+  imageUrl: string;
+}
+
+export interface ReservationResDTO {
+  reservationId: number;
+  centerId: number;
+  customerName: string;
+  customerPhone: string;
+  carInfo: string;
+  reservationDate: string;
+  requestDetails?: string;
+}
+
+export interface ReviewResDTO {
+  reviewId: number;
+  centerId: number;
+  userId: number;
+  completedRepairId?: number;
+  rating: number;
+  content: string;
+  createdAt: string;
+}
+
+export interface ReviewReplyResDTO {
+  replyId: number;
+  reviewId: number;
+  centerId: number;
+  content: string;
+  createdAt: string;
+}
+
+export interface ReviewReportResDTO {
+  reportId: number;
+  reviewId: number;
+  centerId: number;
+  centerName: string;
+  reason: string;
+  content: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  createdAt: string;
+}
+
+// ===== 기존 DTO 타입들 =====
+export interface CarCenterApprovalResDTO {
+  approvalId: number;
+  requestedAt: string;
+  centerId: string;
+  centerName: string;
+  businessNumber?: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  status?: string;
+}
+
+export interface CsInquiryResDTO {
+  inquiryId: number;
+  userName: string;
+  title: string;
+  questionContent: string;
+  answerContent?: string;
+  answeredAt?: string;
+  createdAt: string;
+  status?: string;
+  userId?: string;
+}
+
+export interface AnnouncementResDTO {
+  announcementId: number;
+  title: string;
+  content: string;
+  createdAt: string;
+}
+
+export interface AnnouncementCreateReqDTO {
+  title: string;
+  content: string;
+}
+
+export interface AnnouncementUpdateReqDTO {
+  title?: string;
+  content?: string;
+}

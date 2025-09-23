@@ -174,9 +174,9 @@ export default function HomePage() {
               AI 견적 받기
             </Button>
             <Button 
+              variant="outline"
               size="lg"
               onClick={() => navigate("/search")}
-              className="bg-secondary hover:bg-secondary/90"
             >
               부품 찾기
             </Button>

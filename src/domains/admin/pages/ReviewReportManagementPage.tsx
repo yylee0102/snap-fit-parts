@@ -62,30 +62,33 @@ export default function ReviewReportManagementPage() {
       const tempReports: ReviewReportResDTO[] = [
         {
           reportId: 1,
-          reportedReviewId: 101,
-          reportingCenterName: "홍길동",
+          reviewId: 101,
+          centerId: 1,
+          centerName: "홍길동 카센터",
           reason: "부적절한 언어 사용",
           content: "리뷰에 욕설과 비방이 포함되어 있습니다. 해당 내용은 다른 사용자들에게 불쾌감을 줄 수 있어 신고합니다.",
-          createdAt: "2025-09-08T10:00:00Z",
-          status: 'PENDING'
+          status: 'PENDING',
+          createdAt: "2025-09-08T10:00:00Z"
         },
         {
           reportId: 2,
-          reportedReviewId: 102,
-          reportingCenterName: "김영희",
+          reviewId: 102,
+          centerId: 2,
+          centerName: "김영희 카센터",
           reason: "허위 리뷰 의심",
           content: "해당 리뷰는 실제 서비스를 이용하지 않고 작성된 것으로 보입니다. 경쟁업체의 악의적 리뷰로 판단됩니다.",
-          createdAt: "2025-09-07T10:00:00Z",
-          status: 'PENDING'
+          status: 'PENDING',
+          createdAt: "2025-09-07T10:00:00Z"
         },
         {
           reportId: 3,
-          reportedReviewId: 103,
-          reportingCenterName: "이민수",
+          reviewId: 103,
+          centerId: 3,
+          centerName: "이민수 카센터",
           reason: "스팸성 리뷰",
           content: "동일한 내용의 리뷰를 여러 카센터에 반복적으로 작성하고 있습니다.",
-          createdAt: "2025-09-06T10:00:00Z",
-          status: 'PROCESSED'
+          status: 'PENDING',
+          createdAt: "2025-09-06T10:00:00Z"
         }
       ];
       setReports(tempReports);

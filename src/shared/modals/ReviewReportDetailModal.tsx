@@ -59,12 +59,13 @@ export default function ReviewReportDetailModal({
       // 개발용 임시 데이터
       const tempData: ReviewReportResDTO = {
         reportId: reportId,
-        reportedReviewId: 101,
-        reportingCenterName: "홍길동",
+        reviewId: 101,
+        centerId: 1,
+        centerName: "홍길동 카센터",
         reason: "부적절한 언어 사용",
         content: "리뷰에 욕설과 비방이 포함되어 있습니다. 해당 내용은 다른 사용자들에게 불쾌감을 줄 수 있어 신고합니다.",
-        createdAt: "2025-09-08T10:00:00Z",
-        status: 'PENDING'
+        status: 'PENDING',
+        createdAt: "2025-09-08T10:00:00Z"
       };
       setReportData(tempData);
     } catch (error) {
