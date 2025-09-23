@@ -1,66 +1,109 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Plus, Edit, Trash2, Eye } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import AnnouncementEditModal from "@/shared/modals/AnnouncementEditModal";
+import { useToast } from "@/hooks/use-toast";
+import adminApiService, { Announcement } from "@/services/admin.api";
 
 export default function AdminNoticeManagement() {
-  const [notices, setNotices] = useState([
-    {
-      id: 1,
-      title: "서버 업데이트 안내",
-      content: "안정적인 서비스 제공을 위해 서버 업데이트를 진행합니다.",
-      author: "관리자",
-      createdAt: "2025-09-08",
-      status: "공개",
-      priority: "high"
-    }
-  ]);
+  /**
+   * 공지사항 관리 컴포넌트
+   * 
+   * 주요 기능:
+   * - 공지사항 목록 조회
+   * - 공지사항 작성/수정/삭제
+   * - 공지사항 상세 보기
+   * 
+   * 백엔드 API 연결:
+   * - GET /api/admin/announcements - 공지사항 전체 조회
+   * - POST /api/admin/announcements - 공지사항 등록
+   * - PUT /api/admin/announcements/{id} - 공지사항 수정
+   * - DELETE /api/admin/announcements/{id} - 공지사항 삭제
+   */
+  
+  const [notices, setNotices] = useState<Announcement[]>([]);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedNoticeId, setSelectedNoticeId] = useState<number | undefined>(undefined);
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [newNotice, setNewNotice] = useState({
-    title: "",
-    content: "",
-    priority: "normal"
-  });
+  useEffect(() => {
+    fetchNotices();
+  }, []);
+
+  const fetchNotices = async () => {
+    setIsLoading(true);
+    try {
+      // TODO: 실제 API 연결 시 사용
+      // const data = await adminApiService.getAllAnnouncements();
+      // setNotices(data);
+
+      // 개발용 임시 데이터
+      const tempData: Announcement[] = [
+        {
+          announcementId: 1,
+          title: "서버 업데이트 안내",
+          content: "안정적인 서비스 제공을 위해 서버 업데이트를 진행합니다.",
+          createdAt: "2025-09-08",
+          updatedAt: undefined
+        }
+      ];
+      setNotices(tempData);
+    } catch (error) {
+      console.error("공지사항 조회 실패:", error);
+      toast({
+        title: "조회 실패",
+        description: "공지사항을 불러오는데 실패했습니다.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleCreateNotice = () => {
-    const notice = {
-      id: notices.length + 1,
-      ...newNotice,
-      author: "관리자",
-      createdAt: new Date().toISOString().split('T')[0],
-      status: "공개"
-    };
-    setNotices([...notices, notice]);
-    setNewNotice({ title: "", content: "", priority: "normal" });
-    setIsCreateModalOpen(false);
+    setSelectedNoticeId(undefined);
+    setShowEditModal(true);
   };
 
-  const getPriorityBadge = (priority: string) => {
-    switch (priority) {
-      case "high":
-        return <Badge className="bg-red-100 text-red-800">중요</Badge>;
-      case "medium":
-        return <Badge className="bg-yellow-100 text-yellow-800">보통</Badge>;
-      default:
-        return <Badge className="bg-blue-100 text-blue-800">일반</Badge>;
+  const handleEditNotice = (noticeId: number) => {
+    setSelectedNoticeId(noticeId);
+    setShowEditModal(true);
+  };
+
+  const handleDeleteNotice = async (noticeId: number) => {
+    if (!confirm("정말로 이 공지사항을 삭제하시겠습니까?")) {
+      return;
+    }
+
+    try {
+      await adminApiService.deleteAnnouncement(noticeId);
+      
+      toast({
+        title: "삭제 완료",
+        description: "공지사항이 성공적으로 삭제되었습니다."
+      });
+      
+      fetchNotices();
+    } catch (error) {
+      console.error("공지사항 삭제 실패:", error);
+      toast({
+        title: "삭제 실패",
+        description: "공지사항 삭제 중 오류가 발생했습니다.",
+        variant: "destructive"
+      });
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "공개":
-        return <Badge className="bg-green-100 text-green-800">공개</Badge>;
-      case "비공개":
-        return <Badge className="bg-gray-100 text-gray-800">비공개</Badge>;
-      default:
-        return <Badge variant="outline">{status}</Badge>;
-    }
+  const handleNoticeUpdate = () => {
+    fetchNotices();
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('ko-KR');
   };
 
   return (
@@ -69,58 +112,10 @@ export default function AdminNoticeManagement() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>공지 사항 관리</CardTitle>
-          <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                새 공지사항
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>새 공지사항 작성</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium">제목</label>
-                  <Input
-                    value={newNotice.title}
-                    onChange={(e) => setNewNotice({ ...newNotice, title: e.target.value })}
-                    placeholder="공지사항 제목을 입력하세요"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium">내용</label>
-                  <Textarea
-                    value={newNotice.content}
-                    onChange={(e) => setNewNotice({ ...newNotice, content: e.target.value })}
-                    placeholder="공지사항 내용을 입력하세요"
-                    rows={6}
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium">우선순위</label>
-                  <select
-                    value={newNotice.priority}
-                    onChange={(e) => setNewNotice({ ...newNotice, priority: e.target.value })}
-                    className="w-full p-2 border rounded-md"
-                  >
-                    <option value="normal">일반</option>
-                    <option value="medium">보통</option>
-                    <option value="high">중요</option>
-                  </select>
-                </div>
-                <div className="flex justify-end gap-2">
-                  <Button variant="outline" onClick={() => setIsCreateModalOpen(false)}>
-                    취소
-                  </Button>
-                  <Button onClick={handleCreateNotice}>
-                    작성완료
-                  </Button>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
+          <Button onClick={handleCreateNotice}>
+            <Plus className="h-4 w-4 mr-2" />
+            새 공지사항
+          </Button>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
@@ -142,47 +137,76 @@ export default function AdminNoticeManagement() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {notices.map((notice) => (
-                <TableRow key={notice.id}>
-                  <TableCell>{notice.id}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <span>{notice.title}</span>
-                      {getPriorityBadge(notice.priority)}
-                      {getStatusBadge(notice.status)}
-                    </div>
-                  </TableCell>
-                  <TableCell>{notice.createdAt}</TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="outline">
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button size="sm" variant="outline">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button size="sm" variant="destructive">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-center py-8">
+                    데이터를 불러오는 중...
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : notices.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                    등록된 공지사항이 없습니다.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                notices.map((notice) => (
+                  <TableRow key={notice.announcementId}>
+                    <TableCell>{notice.announcementId}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <span>{notice.title}</span>
+                        <Badge className="bg-green-100 text-green-800">공개</Badge>
+                      </div>
+                    </TableCell>
+                    <TableCell>{formatDate(notice.createdAt)}</TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="outline" title="상세보기">
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleEditNotice(notice.announcementId)}
+                          title="수정"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="destructive"
+                          onClick={() => handleDeleteNotice(notice.announcementId)}
+                          title="삭제"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
 
           {/* 페이지네이션 */}
           <div className="flex justify-center mt-4">
             <div className="flex gap-1">
-              <Button variant="outline" size="sm">이전</Button>
+              <Button variant="outline" size="sm" disabled>이전</Button>
               <Button size="sm">1</Button>
-              <Button variant="outline" size="sm">2</Button>
-              <Button variant="outline" size="sm">3</Button>
-              <Button variant="outline" size="sm">다음</Button>
+              <Button variant="outline" size="sm" disabled>다음</Button>
             </div>
           </div>
         </CardContent>
       </Card>
+
+      {/* 공지사항 작성/수정 모달 */}
+      <AnnouncementEditModal 
+        open={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        announcementId={selectedNoticeId}
+        onAnnouncementUpdate={handleNoticeUpdate}
+      />
     </div>
   );
 }

@@ -1,39 +1,85 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertTriangle, CheckCircle, XCircle } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import adminApiService, { ReviewReport, CsInquiry } from "@/services/admin.api";
 
 export default function AdminReportManagement() {
-  const [selectedCategory, setSelectedCategory] = useState("all");
+  /**
+   * 신고 및 문의 관리 컴포넌트
+   * 
+   * 주요 기능:
+   * - 리뷰 신고 목록 조회 및 처리
+   * - 1:1 문의 목록 조회 및 답변
+   * - 신고/문의 상태 관리
+   * 
+   * 백엔드 API 연결:
+   * - GET /api/admin/reports/reviews - 리뷰 신고 전체 조회
+   * - DELETE /api/admin/reports/reviews/{id} - 리뷰 신고 삭제
+   * - GET /api/admin/cs - 1:1 문의 전체 조회
+   * - PUT /api/admin/cs/{id}/answer - 1:1 문의 답변
+   */
   
-  const reports = [
-    {
-      id: 1,
-      title: "이용약관 위반 부품 판매에 대한 신고",
-      reporter: "홍길동",
-      reportedUser: "복원되는 부품 아저씨",
-      category: "불법 거래",
-      reason: "신고사유",
-      date: "2025-09-08",
-      status: "처리 대기",
-      priority: "high"
-    }
-  ];
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [reports, setReports] = useState<ReviewReport[]>([]);
+  const [inquiries, setInquiries] = useState<CsInquiry[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
-  const inquiries = [
-    {
-      id: 1,
-      title: "이용약관 위반 부품 아저씨에게 문의드립니다.",
-      author: "홍길동",
-      category: "복원/취돼",
-      inquiryDate: "2025-09-08",
-      status: "처리 대기",
-      priority: "처리대기"
+  useEffect(() => {
+    fetchReports();
+    fetchInquiries();
+  }, []);
+
+  const fetchReports = async () => {
+    try {
+      // TODO: 실제 API 연결 시 사용
+      // const data = await adminApiService.getAllReviewReports();
+      // setReports(data);
+      
+      // 개발용 임시 데이터
+      const tempReports: ReviewReport[] = [
+        {
+          reportId: 1,
+          reviewId: 101,
+          reporterName: "홍길동",
+          reason: "부적절한 리뷰 내용",
+          reportDate: "2025-09-08",
+          status: 'PENDING'
+        }
+      ];
+      setReports(tempReports);
+    } catch (error) {
+      console.error("신고 목록 조회 실패:", error);
     }
-  ];
+  };
+
+  const fetchInquiries = async () => {
+    try {
+      // TODO: 실제 API 연결 시 사용
+      // const data = await adminApiService.getAllCsInquiries();
+      // setInquiries(data);
+      
+      // 개발용 임시 데이터
+      const tempInquiries: CsInquiry[] = [
+        {
+          inquiryId: 1,
+          userId: "user123",
+          title: "견적 요청 관련 문의",
+          content: "견적 요청 후 연락이 오지 않습니다.",
+          status: 'PENDING',
+          createdAt: "2025-09-08"
+        }
+      ];
+      setInquiries(tempInquiries);
+    } catch (error) {
+      console.error("문의 목록 조회 실패:", error);
+    }
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {

@@ -59,7 +59,10 @@ export interface ReviewReport {
 }
 
 class AdminApiService {
-  // 관리자 로그인
+  /**
+   * 관리자 로그인
+   * POST /api/admin/login
+   */
   async login(request: AdminLoginRequest): Promise<AdminLoginResponse> {
     const response = await fetch(`${API_BASE_URL}/login`, {
       method: 'POST',
@@ -76,7 +79,10 @@ class AdminApiService {
     return response.json();
   }
 
-  // 대시보드 통계 조회
+  /**
+   * 대시보드 통계 조회 - 백엔드 API와 동기화
+   * GET /api/admin/stats/users/count, centers/count, approvals/pending/count, reports/reviews/count
+   */
   async getStats(): Promise<AdminStats> {
     const [userCount, centerCount, pendingApprovalCount, reviewReportCount] = await Promise.all([
       fetch(`${API_BASE_URL}/stats/users/count`, { headers: this.getAuthHeaders() }),
@@ -109,7 +115,10 @@ class AdminApiService {
     return response.json();
   }
 
-  // 대기 중인 카센터 승인 목록
+  /**
+   * 대기 중인 카센터 승인 목록 조회
+   * GET /api/admin/approvals/pending
+   */
   async getPendingApprovals(): Promise<CarCenterApproval[]> {
     const response = await fetch(`${API_BASE_URL}/approvals/pending`, {
       headers: this.getAuthHeaders(),
@@ -117,7 +126,21 @@ class AdminApiService {
     return response.json();
   }
 
-  // 카센터 승인 처리
+  /**
+   * 카센터 승인 단건 조회
+   * GET /api/admin/approvals/{approvalId}
+   */
+  async getCenterApproval(approvalId: number): Promise<CarCenterApproval> {
+    const response = await fetch(`${API_BASE_URL}/approvals/${approvalId}`, {
+      headers: this.getAuthHeaders(),
+    });
+    return response.json();
+  }
+
+  /**
+   * 카센터 승인 처리
+   * POST /api/admin/approvals/{approvalId}/approve
+   */
   async approveCenter(approvalId: number): Promise<void> {
     const response = await fetch(`${API_BASE_URL}/approvals/${approvalId}/approve`, {
       method: 'POST',
@@ -129,7 +152,10 @@ class AdminApiService {
     }
   }
 
-  // 카센터 승인 반려
+  /**
+   * 카센터 승인 반려 (사유 포함)
+   * DELETE /api/admin/approvals/{approvalId}?reason={reason}
+   */
   async rejectCenter(approvalId: number, reason: string): Promise<void> {
     const response = await fetch(`${API_BASE_URL}/approvals/${approvalId}?reason=${encodeURIComponent(reason)}`, {
       method: 'DELETE',
@@ -141,7 +167,10 @@ class AdminApiService {
     }
   }
 
-  // 1:1 문의 목록 조회
+  /**
+   * 1:1 문의 전체 목록 조회
+   * GET /api/admin/cs
+   */
   async getAllCsInquiries(): Promise<CsInquiry[]> {
     const response = await fetch(`${API_BASE_URL}/cs`, {
       headers: this.getAuthHeaders(),
@@ -149,7 +178,21 @@ class AdminApiService {
     return response.json();
   }
 
-  // 1:1 문의 답변 등록/수정
+  /**
+   * 1:1 문의 단건 조회
+   * GET /api/admin/cs/{inquiryId}
+   */
+  async getCsInquiry(inquiryId: number): Promise<CsInquiry> {
+    const response = await fetch(`${API_BASE_URL}/cs/${inquiryId}`, {
+      headers: this.getAuthHeaders(),
+    });
+    return response.json();
+  }
+
+  /**
+   * 1:1 문의 답변 등록/수정
+   * PUT /api/admin/cs/{inquiryId}/answer
+   */
   async answerInquiry(inquiryId: number, inquiry: CsInquiry): Promise<void> {
     const response = await fetch(`${API_BASE_URL}/cs/${inquiryId}/answer`, {
       method: 'PUT',
@@ -165,7 +208,10 @@ class AdminApiService {
     }
   }
 
-  // 공지사항 전체 조회
+  /**
+   * 공지사항 전체 조회
+   * GET /api/admin/announcements
+   */
   async getAllAnnouncements(): Promise<Announcement[]> {
     const response = await fetch(`${API_BASE_URL}/announcements`, {
       headers: this.getAuthHeaders(),
@@ -173,7 +219,21 @@ class AdminApiService {
     return response.json();
   }
 
-  // 공지사항 등록
+  /**
+   * 공지사항 단건 조회
+   * GET /api/admin/announcements/{announcementId}
+   */
+  async getAnnouncement(announcementId: number): Promise<Announcement> {
+    const response = await fetch(`${API_BASE_URL}/announcements/${announcementId}`, {
+      headers: this.getAuthHeaders(),
+    });
+    return response.json();
+  }
+
+  /**
+   * 공지사항 등록
+   * POST /api/admin/announcements
+   */
   async createAnnouncement(announcement: Omit<Announcement, 'announcementId' | 'createdAt'>): Promise<void> {
     const response = await fetch(`${API_BASE_URL}/announcements`, {
       method: 'POST',
@@ -189,7 +249,10 @@ class AdminApiService {
     }
   }
 
-  // 공지사항 수정
+  /**
+   * 공지사항 수정
+   * PUT /api/admin/announcements/{announcementId}
+   */
   async updateAnnouncement(announcementId: number, announcement: Partial<Announcement>): Promise<void> {
     const response = await fetch(`${API_BASE_URL}/announcements/${announcementId}`, {
       method: 'PUT',
@@ -205,7 +268,10 @@ class AdminApiService {
     }
   }
 
-  // 공지사항 삭제
+  /**
+   * 공지사항 삭제
+   * DELETE /api/admin/announcements/{announcementId}
+   */
   async deleteAnnouncement(announcementId: number): Promise<void> {
     const response = await fetch(`${API_BASE_URL}/announcements/${announcementId}`, {
       method: 'DELETE',
@@ -217,7 +283,10 @@ class AdminApiService {
     }
   }
 
-  // 리뷰 신고 목록 조회
+  /**
+   * 리뷰 신고 전체 조회
+   * GET /api/admin/reports/reviews
+   */
   async getAllReviewReports(): Promise<ReviewReport[]> {
     const response = await fetch(`${API_BASE_URL}/reports/reviews`, {
       headers: this.getAuthHeaders(),
@@ -225,7 +294,21 @@ class AdminApiService {
     return response.json();
   }
 
-  // 리뷰 신고 삭제
+  /**
+   * 리뷰 신고 단건 조회
+   * GET /api/admin/reports/reviews/{reportId}
+   */
+  async getReviewReport(reportId: number): Promise<ReviewReport> {
+    const response = await fetch(`${API_BASE_URL}/reports/reviews/${reportId}`, {
+      headers: this.getAuthHeaders(),
+    });
+    return response.json();
+  }
+
+  /**
+   * 리뷰 신고 삭제
+   * DELETE /api/admin/reports/reviews/{reportId}
+   */
   async deleteReviewReport(reportId: number): Promise<void> {
     const response = await fetch(`${API_BASE_URL}/reports/reviews/${reportId}`, {
       method: 'DELETE',
