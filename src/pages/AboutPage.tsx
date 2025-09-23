@@ -1,4 +1,5 @@
 import { Building2, TrendingUp, Users, Award, Globe, Zap } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import koreanFlag from "@/assets/korean-flag.jpg";
 
 export default function AboutPage() {
@@ -172,12 +173,18 @@ export default function AboutPage() {
           </p>
           
           <div className="flex justify-center space-x-6">
-            <button className="px-8 py-4 bg-gradient-to-r from-primary to-secondary text-white rounded-xl font-semibold text-lg hover:shadow-xl transition-all transform hover:scale-105">
+            <Button 
+              className="px-8 py-4 bg-gradient-to-r from-primary to-secondary text-white rounded-xl font-semibold text-lg hover:shadow-xl transition-all transform hover:scale-105"
+              onClick={() => window.location.href = '/investment'}
+            >
               투자 문의
-            </button>
-            <button className="px-8 py-4 border-2 border-primary text-primary rounded-xl font-semibold text-lg hover:bg-primary hover:text-white transition-all">
+            </Button>
+            <Button 
+              className="px-8 py-4 border-2 border-primary text-primary rounded-xl font-semibold text-lg hover:bg-primary hover:text-white transition-all"
+              onClick={() => window.location.href = '/careers'}
+            >
               채용 정보
-            </button>
+            </Button>
           </div>
         </div>
       </section>

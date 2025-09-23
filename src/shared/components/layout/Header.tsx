@@ -40,8 +40,8 @@ export default function Header({ className }: HeaderProps) {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    // 검색 결과 페이지로 이동
-    navigate(`/search?type=${searchType}&q=${encodeURIComponent(searchQuery)}`);
+    // 부품 검색 결과 페이지로 이동
+    navigate(`/search?type=parts&q=${encodeURIComponent(searchQuery)}`);
   };
 
   return (
@@ -74,29 +74,13 @@ export default function Header({ className }: HeaderProps) {
           {/* 중앙: 검색바 */}
           <div className="flex-1 max-w-xl mx-8 hidden md:block">
             <form onSubmit={handleSearch} className="flex">
-              <Select value={searchType} onValueChange={setSearchType}>
-                <SelectTrigger className="w-32 rounded-r-none border-r-0 bg-surface-container">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="parts">부품 검색</SelectItem>
-                  <SelectItem value="centers">센터 검색</SelectItem>
-                  <SelectItem value="posts">게시글</SelectItem>
-                </SelectContent>
-              </Select>
               <div className="relative flex-1">
                 <Input
                   type="text"
-                  placeholder={
-                    searchType === "parts" 
-                      ? "찾으시는 부품을 검색하세요" 
-                      : searchType === "centers"
-                      ? "카센터를 검색하세요"
-                      : "게시글을 검색하세요"
-                  }
+                  placeholder="찾으시는 부품을 검색하세요"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="rounded-l-none border-l-0 bg-surface-container"
+                  className="bg-surface-container pr-12"
                 />
                 <Button
                   type="submit"
