@@ -23,7 +23,7 @@ interface WBPart {
     id: string;
     name: string;
     rating: number;
-    responseRate: number;
+    phone: string;
     profileImage?: string;
   };
   car: {
@@ -79,7 +79,7 @@ export default function WBDetailPage() {
           id: "seller1",
           name: "김부품",
           rating: 4.8,
-          responseRate: 95,
+          phone: "010-1234-5678",
           profileImage: "/api/placeholder/40/40"
         },
         car: {
@@ -121,11 +121,10 @@ export default function WBDetailPage() {
   };
 
   const handleContact = () => {
-    // API 연결: 채팅방 생성 또는 기존 채팅방 조회
-    // POST /api/chat/rooms
-    navigate("/chat", { 
-      state: { type: "seller", sellerId: part?.seller.id }
-    });
+    // 전화 걸기 기능
+    if (part?.seller.phone) {
+      window.location.href = `tel:${part.seller.phone}`;
+    }
   };
 
   const handleImageClick = (index: number) => {
@@ -326,7 +325,10 @@ export default function WBDetailPage() {
                         <Star className="h-4 w-4 fill-primary text-primary" />
                         <span>{part.seller.rating}</span>
                       </div>
-                      <span>응답률 {part.seller.responseRate}%</span>
+                      <div className="flex items-center gap-1">
+                        <Phone className="h-4 w-4" />
+                        <span>{part.seller.phone}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -350,8 +352,8 @@ export default function WBDetailPage() {
               </Button>
               
               <Button onClick={handleContact} className="flex-1">
-                <MessageCircle className="h-4 w-4 mr-2" />
-                판매자와 채팅
+                <Phone className="h-4 w-4 mr-2" />
+                판매자 연락
               </Button>
             </div>
           </div>

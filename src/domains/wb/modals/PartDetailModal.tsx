@@ -21,10 +21,9 @@ interface Part {
   description: string;
   seller: {
     name: string;
-    phone: string;
     address: string;
     rating: number;
-    responseRate: number;
+    phone: string;
   };
   specifications: {
     brand: string;
@@ -289,8 +288,8 @@ export default function PartDetailModal({ open, onClose, part }: PartDetailModal
                 <span className="text-on-surface">⭐ {part.seller.rating}/5.0</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-on-surface-variant">응답률</span>
-                <span className="text-on-surface">{part.seller.responseRate}%</span>
+                <span className="text-on-surface-variant">연락처</span>
+                <span className="text-on-surface">{part.seller.phone}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-on-surface-variant">위치</span>

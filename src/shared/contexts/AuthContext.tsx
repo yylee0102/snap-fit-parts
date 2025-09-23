@@ -10,7 +10,6 @@ export interface User {
   isLoggedIn: boolean;
   profileImage?: string;
   rating?: number;
-  responseRate?: number;
   location?: string;
 }
 

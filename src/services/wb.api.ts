@@ -34,7 +34,6 @@ export interface Part {
     phone: string;
     address: string;
     rating: number;
-    responseRate: number;
   };
   specifications: {
     brand: string;
@@ -75,8 +74,7 @@ export const fetchParts = async (params: PartSearchParams = {}): Promise<{ parts
         name: "김철수",
         phone: "010-1234-5678",
         address: "서울 강남구 역삼동",
-        rating: 4.8,
-        responseRate: 95
+        rating: 4.8
       },
       specifications: {
         brand: "현대",
@@ -103,8 +101,7 @@ export const fetchParts = async (params: PartSearchParams = {}): Promise<{ parts
         name: "성남자동차부품",
         phone: "031-123-4567", 
         address: "경기 성남시 분당구",
-        rating: 4.6,
-        responseRate: 88
+        rating: 4.6
       },
       specifications: {
         brand: "기아",

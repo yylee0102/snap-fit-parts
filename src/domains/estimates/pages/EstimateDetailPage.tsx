@@ -29,7 +29,7 @@ interface Estimate {
     id: string;
     name: string;
     rating: number;
-    responseRate: number;
+    phone: string;
   };
 }
 
@@ -84,7 +84,7 @@ export default function EstimateDetailPage() {
           id: "user1",
           name: "김**",
           rating: 4.8,
-          responseRate: 95
+          phone: "010-1234-5678"
         }
       };
 
@@ -268,9 +268,12 @@ export default function EstimateDetailPage() {
                   <Star className="h-4 w-4 fill-primary text-primary" />
                   <span className="text-sm text-on-surface">{estimate.requester.rating}</span>
                 </div>
-                <span className="text-sm text-on-surface-variant">
-                  응답률 {estimate.requester.responseRate}%
-                </span>
+                <div className="flex items-center gap-1">
+                  <Phone className="h-4 w-4" />
+                  <span className="text-sm text-on-surface-variant">
+                    {estimate.requester.phone}
+                  </span>
+                </div>
               </div>
             </div>
           </CardContent>

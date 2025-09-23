@@ -17,7 +17,6 @@ interface CarCenter {
   address: string;
   phone: string;
   rating?: number;
-  responseRate?: number;
   totalReviews?: number;
   isApproved: boolean;
   createdAt: string;
@@ -193,10 +192,6 @@ export default function CenterDetailPage() {
                 <span className="text-on-surface-variant">사업자등록번호:</span>
                 <span className="text-on-surface">{center.businessNumber}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-on-surface-variant">응답률:</span>
-                <span className="text-on-surface">{center.responseRate || 0}%</span>
-              </div>
             </div>
           </CardContent>
         </Card>
@@ -248,9 +243,6 @@ export default function CenterDetailPage() {
 
         {/* 액션 버튼들 */}
         <div className="flex gap-3">
-          <Button onClick={handleBooking} className="flex-1">
-            견적 요청하기
-          </Button>
           <Button onClick={handleChat} variant="outline" className="flex-1">
             <MessageCircle className="h-4 w-4 mr-2" />
             채팅 문의

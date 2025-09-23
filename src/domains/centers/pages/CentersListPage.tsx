@@ -18,7 +18,6 @@ interface CarCenter {
   address: string;
   phone: string;
   rating?: number;
-  responseRate?: number;
   totalReviews?: number;
   isApproved: boolean;
   createdAt: string;

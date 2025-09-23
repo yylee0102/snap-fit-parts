@@ -33,10 +33,9 @@ interface Part {
   description: string;
   seller: {
     name: string;
-    phone: string;
     address: string;
     rating: number;
-    responseRate: number;
+    phone: string;
   };
   specifications: {
     brand: string;
@@ -111,10 +110,9 @@ export default function WBListPage() {
             description: "2020년식 아반떼에서 분리한 헤드라이트입니다.\n사고차량이 아니며, 기능상 문제 전혀 없습니다.\n렌즈에 미세한 스크래치 있으나 야간 주행에 지장 없습니다.",
             seller: {
               name: "김철수",
-              phone: "010-1234-5678",
               address: "서울 강남구 역삼동",
               rating: 4.8,
-              responseRate: 95
+              phone: "010-1234-5678"
             },
             specifications: {
               brand: "현대",
@@ -139,10 +137,9 @@ export default function WBListPage() {
             description: "쏘렌토 후면 범퍼입니다.\n색상: 펄 화이트\n긁힘이나 찌그러짐 없는 깨끗한 상태입니다.",
             seller: {
               name: "성남자동차부품",
-              phone: "031-123-4567", 
               address: "경기 성남시 분당구",
               rating: 4.6,
-              responseRate: 88
+              phone: "031-123-4567"
             },
             specifications: {
               brand: "기아",

@@ -8,7 +8,6 @@ export interface User {
   userType: "개인" | "사장님" | "관리자";
   profileImage?: string;
   rating?: number;
-  responseRate?: number;
   location?: string;
   createdAt: string;
   updatedAt: string;

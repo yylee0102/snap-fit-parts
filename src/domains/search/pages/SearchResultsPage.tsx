@@ -23,11 +23,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
+import { useNavigate } from "react-router-dom";
+
 export default function SearchResultsPage() {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("recent");
-  // 부품검색만 남기므로 필터 제거
-  // const [filterType, setFilterType] = useState("all");
+  const [filterType, setFilterType] = useState("parts");
 
   const searchResults = [
     {
@@ -76,6 +78,32 @@ export default function SearchResultsPage() {
     }
   };
 
+  // 정렬 함수
+  const sortResults = (results: any[]) => {
+    const sorted = [...results];
+    switch (sortBy) {
+      case "price-low":
+        return sorted.sort((a, b) => (a.price || 0) - (b.price || 0));
+      case "price-high":
+        return sorted.sort((a, b) => (b.price || 0) - (a.price || 0));
+      case "rating":
+        return sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+      case "recent":
+      default:
+        return sorted; // 이미 최신순 정렬되어 있다고 가정
+    }
+  };
+
+  // 필터링된 결과
+  const filteredResults = searchResults.filter(result => {
+    if (filterType === "parts") return result.type === "part";
+    if (filterType === "centers") return result.type === "center";
+    return true;
+  });
+
+  // 정렬된 결과
+  const sortedResults = sortResults(filteredResults);
+
   return (
     <PageContainer>
       <div className="container mx-auto px-4 py-6">
@@ -101,7 +129,7 @@ export default function SearchResultsPage() {
         {/* 필터 및 정렬 */}
         <div className="flex justify-between items-center mb-6">
           <div className="flex gap-4">
-            <Select value="parts" onValueChange={() => {}}>
+            <Select value={filterType} onValueChange={setFilterType}>
               <SelectTrigger className="w-32">
                 <Filter className="h-4 w-4 mr-2" />
                 <SelectValue />
@@ -128,14 +156,18 @@ export default function SearchResultsPage() {
           </div>
 
           <p className="text-sm text-muted-foreground">
-            총 {searchResults.length}개의 결과
+            총 {sortedResults.length}개의 결과
           </p>
         </div>
 
         {/* 검색 결과 */}
         <div className="grid grid-cols-1 gap-4">
-          {searchResults.map(result => (
-            <Card key={result.id} className="hover:shadow-md transition-shadow cursor-pointer">
+          {sortedResults.map(result => (
+            <Card 
+              key={result.id} 
+              className="hover:shadow-md transition-shadow cursor-pointer"
+              onClick={() => result.type === 'part' ? navigate(`/wb/${result.id}`) : navigate(`/centers/${result.id}`)}
+            >
               <CardContent className="p-4">
                 {result.type === 'part' ? (
                   /* 부품 결과 */
@@ -195,8 +227,10 @@ export default function SearchResultsPage() {
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm">상세보기</Button>
-                      <Button size="sm">견적요청</Button>
+                      <Button variant="outline" size="sm" onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/centers/${result.id}`);
+                      }}>상세보기</Button>
                     </div>
                   </div>
                 )}
