@@ -146,8 +146,6 @@ export default function Header({ className }: HeaderProps) {
                       navigate("/mypage");
                     } else if (user?.userType === "카센터") {
                       navigate("/center/mypage");
-                    } else if (user?.userType === "관리자") {
-                      navigate("/admin/mypage");
                     }
                   }}>
                     마이페이지

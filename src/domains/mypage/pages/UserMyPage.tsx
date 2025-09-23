@@ -1,6 +1,6 @@
 // 일반 사용자 마이페이지 (임시)
 import { useState } from "react";
-import { User, Settings, Car, Heart, FileText, MessageSquare, HelpCircle } from "lucide-react";
+import { User, Settings, Car, FileText, MessageSquare, HelpCircle } from "lucide-react";
 import PageContainer from "@/shared/components/layout/PageContainer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,6 @@ export default function UserMyPage() {
     { icon: User, label: "내 정보 관리", href: "/mypage/profile" },
     { icon: Car, label: "내 차량 관리", href: "/mypage/vehicles" },
     { icon: FileText, label: "견적 요청 내역", href: "/mypage/estimates" },
-    { icon: Heart, label: "관심 상품", href: "/mypage/favorites" },
     { icon: MessageSquare, label: "리뷰 관리", href: "/mypage/reviews" },
     { icon: HelpCircle, label: "고객센터", href: "/support" },
     { icon: Settings, label: "설정", href: "/mypage/settings" },

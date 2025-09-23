@@ -1,128 +1,227 @@
-import { useState } from "react";
-import { Brain, Camera, FileText, Zap } from "lucide-react";
+// AI 견적 채팅 상담 페이지 (임시)
+import { useState, useRef, useEffect } from "react";
+import { Send, Plus, X } from "lucide-react";
 import PageContainer from "@/shared/components/layout/PageContainer";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+interface ChatMessage {
+  id: string;
+  type: "user" | "bot";
+  message: string;
+  timestamp: Date;
+}
 
 export default function EstimateAIPage() {
-  const [formData, setFormData] = useState({
-    carBrand: "", carModel: "", carYear: "", partName: "", damageDescription: "", images: []
-  });
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [result, setResult] = useState(null);
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    {
+      id: "1",
+      type: "bot",
+      message: "안녕하세요! 카봇입니다. 차가 문제가 있으신가요? 현재 차량 상황을 알려주세요~",
+      timestamp: new Date()
+    }
+  ]);
+  
+  const [inputMessage, setInputMessage] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const carBrands = ["현대", "기아", "제네시스", "BMW", "벤츠", "아우디", "토요타"];
-  const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 30 }, (_, i) => currentYear - i);
-
-  const handleAIAnalysis = async () => {
-    setIsAnalyzing(true);
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    setResult({
-      estimatedPrice: 450000,
-      confidence: 88,
-      partDetails: { name: formData.partName, condition: "수리 필요", laborCost: 200000, partCost: 250000 },
-      recommendations: ["전문 정비소에서 정확한 진단을 받으시길 권장합니다.", "부품 교체보다는 수리가 가능한 상태입니다."]
-    });
-    setIsAnalyzing(false);
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const simulateBotResponse = (userMessage: string) => {
+    setIsTyping(true);
+    
+    setTimeout(() => {
+      let botResponse = "";
+      
+      const lowerMessage = userMessage.toLowerCase();
+      
+      if (lowerMessage.includes("브레이크") || lowerMessage.includes("제동")) {
+        botResponse = "브레이크 소음 패드 마모나 디스크 이상일 수 있습니다. 🚫 이 경우 브레이크 패드 교체나 디스크에 직접 마찰되는 정도일 수 있습니다. 가까운 정비소에서 점검을 받으시나, 저희 차량 진단 서비스를 이용해 원인을 정확히 확인해보시는 것도 좋습니다.";
+      } else if (lowerMessage.includes("엔진") || lowerMessage.includes("시동")) {
+        botResponse = "엔진 관련 문제시군요. 시동이 잘 안 걸리거나 소음이 나나요? 더 자세한 증상을 알려주시면 정확한 진단을 도와드릴 수 있습니다.";
+      } else if (lowerMessage.includes("타이어") || lowerMessage.includes("바퀴")) {
+        botResponse = "타이어 관련 문제이군요. 펑크나 마모, 또는 공기압 문제일 수 있습니다. 타이어 상태와 주행 중 느끼는 증상을 자세히 알려주세요.";
+      } else if (lowerMessage.includes("범퍼") || lowerMessage.includes("외관")) {
+        botResponse = "외관 손상이군요. 범퍼 손상 정도에 따라 수리나 교체가 필요할 수 있습니다. 사진을 첨부해주시면 더 정확한 견적을 드릴 수 있어요.";
+      } else {
+        botResponse = "더 구체적인 증상을 알려주시면 정확한 진단을 도와드릴 수 있습니다. 예를 들어, 언제부터 문제가 시작되었는지, 어떤 소리가 나는지 등을 말씀해 주세요.";
+      }
+
+      setMessages(prev => [...prev, {
+        id: Date.now().toString(),
+        type: "bot",
+        message: botResponse,
+        timestamp: new Date()
+      }]);
+      
+      setIsTyping(false);
+    }, 1000 + Math.random() * 1000);
+  };
+
+  const handleSendMessage = () => {
+    if (!inputMessage.trim()) return;
+
+    const userMessage: ChatMessage = {
+      id: Date.now().toString(),
+      type: "user", 
+      message: inputMessage,
+      timestamp: new Date()
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    setInputMessage("");
+    
+    // 봇 응답 시뮬레이션
+    simulateBotResponse(inputMessage);
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
+
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString('ko-KR', { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      hour12: false 
+    });
+  };
+
+  const quickActions = [
+    "견적요청",
+    "위도가기"
+  ];
 
   return (
     <PageContainer>
       <div className="container mx-auto px-4 py-6 max-w-4xl">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Brain className="h-8 w-8 text-primary" />
-          </div>
-          <h1 className="text-3xl font-bold text-on-surface mb-2">AI 자동 견적</h1>
-          <p className="text-on-surface-variant">사진과 정보를 입력하면 AI가 즉시 수리 견적을 분석해드립니다</p>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5" />
-                차량 및 손상 정보
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>제조사</Label>
-                  <Select value={formData.carBrand} onValueChange={(value) => setFormData(prev => ({...prev, carBrand: value}))}>
-                    <SelectTrigger><SelectValue placeholder="제조사 선택" /></SelectTrigger>
-                    <SelectContent>
-                      {carBrands.map(brand => <SelectItem key={brand} value={brand}>{brand}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
+        {/* 채팅 헤더 */}
+        <Card className="mb-4">
+          <CardHeader className="pb-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+                  <span className="text-white font-bold">🚗</span>
                 </div>
-                <div className="space-y-2">
-                  <Label>연식</Label>
-                  <Select value={formData.carYear} onValueChange={(value) => setFormData(prev => ({...prev, carYear: value}))}>
-                    <SelectTrigger><SelectValue placeholder="연식 선택" /></SelectTrigger>
-                    <SelectContent>
-                      {years.map(year => <SelectItem key={year} value={year.toString()}>{year}년</SelectItem>)}
-                    </SelectContent>
-                  </Select>
+                <div>
+                  <CardTitle className="text-lg">카봇</CardTitle>
+                  <p className="text-sm text-muted-foreground">AI 자동차 진단 어시스턴트</p>
                 </div>
               </div>
-
-              <div className="space-y-2">
-                <Label>모델명</Label>
-                <Input placeholder="예: 아반떼, 쏘나타, K5 등" value={formData.carModel} 
-                  onChange={(e) => setFormData(prev => ({...prev, carModel: e.target.value}))} />
-              </div>
-
-              <div className="space-y-2">
-                <Label>손상 부위</Label>
-                <Input placeholder="예: 앞범퍼, 헤드라이트, 사이드미러 등" value={formData.partName}
-                  onChange={(e) => setFormData(prev => ({...prev, partName: e.target.value}))} />
-              </div>
-
-              <div className="space-y-2">
-                <Label>손상 상세 설명</Label>
-                <Textarea placeholder="손상 정도와 상황을 자세히 설명해주세요" value={formData.damageDescription}
-                  onChange={(e) => setFormData(prev => ({...prev, damageDescription: e.target.value}))} rows={4} />
-              </div>
-
-              <Button onClick={handleAIAnalysis} disabled={!formData.carBrand || !formData.carModel || !formData.partName || isAnalyzing}
-                className="w-full" size="lg">
-                {isAnalyzing ? <><Zap className="h-4 w-4 mr-2 animate-spin" />AI 분석 중...</> : 
-                <><Brain className="h-4 w-4 mr-2" />AI 견적 분석 시작</>}
+              <Button variant="outline" size="sm">
+                <X className="h-4 w-4" />
               </Button>
-            </CardContent>
-          </Card>
+            </div>
+          </CardHeader>
+        </Card>
 
-          <div className="space-y-6">
-            {result && (
-              <Card>
-                <CardHeader><CardTitle>AI 분석 결과</CardTitle></CardHeader>
-                <CardContent>
-                  <div className="text-center p-4 bg-primary/10 rounded-lg mb-4">
-                    <p className="text-sm text-on-surface-variant mb-1">예상 수리비용</p>
-                    <p className="text-3xl font-bold text-primary">{new Intl.NumberFormat('ko-KR').format(result.estimatedPrice)}원</p>
-                    <p className="text-sm text-on-surface-variant mt-1">신뢰도: {result.confidence}%</p>
+        {/* 채팅 영역 */}
+        <Card className="h-[500px] flex flex-col">
+          <CardContent className="flex-1 p-4 overflow-hidden">
+            {/* 메시지 목록 */}
+            <div className="h-full overflow-y-auto space-y-4 pr-2">
+              {messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`flex ${message.type === "user" ? "justify-end" : "justify-start"}`}
+                >
+                  <div className={`max-w-[70%] ${message.type === "user" ? "order-2" : "order-1"}`}>
+                    <div
+                      className={`p-3 rounded-lg ${
+                        message.type === "user"
+                          ? "bg-primary text-primary-foreground ml-auto"
+                          : "bg-muted"
+                      }`}
+                    >
+                      <p className="text-sm whitespace-pre-wrap">{message.message}</p>
+                    </div>
+                    <p className={`text-xs text-muted-foreground mt-1 ${
+                      message.type === "user" ? "text-right" : "text-left"
+                    }`}>
+                      {message.type === "bot" ? "카봇" : "나"} {formatTime(message.timestamp)}
+                    </p>
                   </div>
-                  <div className="space-y-3">
-                    {result.recommendations.map((rec, idx) => (
-                      <div key={idx} className="flex items-start gap-3">
-                        <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <span className="text-xs font-medium text-primary">{idx + 1}</span>
-                        </div>
-                        <p className="text-sm text-on-surface-variant">{rec}</p>
-                      </div>
-                    ))}
+                </div>
+              ))}
+              
+              {/* 타이핑 인디케이터 */}
+              {isTyping && (
+                <div className="flex justify-start">
+                  <div className="bg-muted p-3 rounded-lg">
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
-            )}
+                </div>
+              )}
+              
+              <div ref={messagesEndRef} />
+            </div>
+          </CardContent>
+
+          {/* 빠른 액션 버튼 */}
+          {messages.length > 1 && (
+            <div className="px-4 py-2 border-t">
+              <p className="text-sm text-muted-foreground mb-2">더 많은 옵션을 원하세요?</p>
+              <div className="flex gap-2">
+                {quickActions.map((action) => (
+                  <Button
+                    key={action}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      if (action === "견적요청") {
+                        alert("견적요청 페이지로 이동합니다.");
+                      } else if (action === "위도가기") {
+                        alert("위치 찾기 기능을 실행합니다.");
+                      }
+                    }}
+                  >
+                    {action}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 입력 영역 */}
+          <div className="p-4 border-t">
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm">
+                <Plus className="h-4 w-4" />
+              </Button>
+              <div className="flex-1 relative">
+                <Input
+                  placeholder="메시지를 입력하세요..."
+                  value={inputMessage}
+                  onChange={(e) => setInputMessage(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  disabled={isTyping}
+                />
+              </div>
+              <Button 
+                onClick={handleSendMessage}
+                disabled={!inputMessage.trim() || isTyping}
+                className="px-6"
+              >
+                <Send className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
-        </div>
+        </Card>
       </div>
     </PageContainer>
   );
