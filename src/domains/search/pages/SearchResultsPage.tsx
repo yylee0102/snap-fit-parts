@@ -26,7 +26,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 export default function SearchResultsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("recent");
-  const [filterType, setFilterType] = useState("all");
+  // 부품검색만 남기므로 필터 제거
+  // const [filterType, setFilterType] = useState("all");
 
   const searchResults = [
     {

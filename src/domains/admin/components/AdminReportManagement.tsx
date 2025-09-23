@@ -33,8 +33,8 @@ export default function AdminReportManagement() {
    * - 모달 상태들
    */
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [reports, setReports] = useState<ReviewReport[]>([]);
-  const [inquiries, setInquiries] = useState<CsInquiry[]>([]);
+  const [reports, setReports] = useState<ReviewReportResDTO[]>([]);
+  const [inquiries, setInquiries] = useState<CsInquiryResDTO[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [showInquiryModal, setShowInquiryModal] = useState(false);
@@ -61,19 +61,21 @@ export default function AdminReportManagement() {
       const tempReports: ReviewReportResDTO[] = [
         {
           reportId: 1,
-          reviewId: 101,
-          reporterName: "홍길동",
+          reportedReviewId: 101,
+          reportingCenterName: "홍길동 센터",
           reason: "부적절한 언어 사용",
-          reportDate: "2025-09-08",
-          status: 'PENDING'
+          content: "리뷰에 욕설이 포함되어 있습니다.",
+          status: 'PENDING',
+          createdAt: "2025-09-08T14:30:00"
         },
         {
           reportId: 2,
-          reviewId: 102,
-          reporterName: "김영희",
+          reportedReviewId: 102,
+          reportingCenterName: "김영희 센터", 
           reason: "허위 리뷰 의심",
-          reportDate: "2025-09-07",
-          status: 'PENDING'
+          content: "허위 정보가 포함되어 있습니다.",
+          status: 'PENDING',
+          createdAt: "2025-09-07T16:45:00"
         }
       ];
       setReports(tempReports);

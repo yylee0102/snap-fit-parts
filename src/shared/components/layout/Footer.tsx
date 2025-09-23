@@ -104,7 +104,7 @@ export default function Footer({ className }: FooterProps) {
         <div className="border-t border-outline-variant mt-8 pt-6 text-center text-xs text-on-surface-variant">
           <p>
             사업자등록번호: 000-00-00000 | 통신판매업신고번호: 2024-서울강남-0000 | 
-            대표: 홍길동 | 주소: 서울특별시 강남구 테헤란로 000
+            대표자: 박성우 | 주소: 서울특별시 강남구 테헤란로 000
           </p>
         </div>
       </div>

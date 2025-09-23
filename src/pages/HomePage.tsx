@@ -105,8 +105,8 @@ export default function HomePage() {
   return (
     <PageContainer>
       <div className="container mx-auto px-4 py-6">
-        {/* 히어로 섹션 */}
-        <div className="text-center py-16 bg-gradient-to-r from-primary/10 to-brand-primary/10 rounded-2xl mb-12">
+        {/* 히어로 섹션 - 배너 제거하고 간소화 */}
+        <div className="text-center py-12 mb-8">
           <h1 className="text-4xl md:text-5xl font-bold text-on-surface mb-4">
             <span className="bg-gradient-to-r from-primary to-brand-primary bg-clip-text text-transparent">
               CAR PARTER
@@ -130,6 +130,56 @@ export default function HomePage() {
             >
               카센터 찾기
             </Button>
+          </div>
+        </div>
+
+        {/* 서비스 소개 - 위로 이동 */}
+        <div className="relative overflow-hidden bg-gradient-to-br from-surface-container via-surface-container-high to-surface-container rounded-3xl p-12 mb-12">
+          {/* 배경 장식 */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-secondary/5 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2"></div>
+          
+          <div className="relative z-10">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold text-on-surface mb-4">
+                안전하고 편리한 중고부품 거래
+              </h2>
+              <p className="text-lg text-on-surface-variant max-w-2xl mx-auto">
+                검증된 판매자와 투명한 거래로 믿을 수 있는 중고부품을 만나보세요
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="group text-center p-8 rounded-2xl bg-surface/50 backdrop-blur-sm border border-outline-variant/20 hover:bg-surface/80 hover:shadow-elevation-2 transition-all duration-300">
+                <div className="w-20 h-20 bg-gradient-to-br from-primary to-primary/70 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                  <Search className="h-10 w-10 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold text-on-surface mb-3">정확한 검색</h3>
+                <p className="text-on-surface-variant leading-relaxed">
+                  OEM번호, 차종별로 정확한 부품을 찾을 수 있습니다
+                </p>
+              </div>
+              
+              <div className="group text-center p-8 rounded-2xl bg-surface/50 backdrop-blur-sm border border-outline-variant/20 hover:bg-surface/80 hover:shadow-elevation-2 transition-all duration-300">
+                <div className="w-20 h-20 bg-gradient-to-br from-secondary to-secondary/70 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                  <Star className="h-10 w-10 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold text-on-surface mb-3">검증된 판매자</h3>
+                <p className="text-on-surface-variant leading-relaxed">
+                  평점과 후기로 신뢰할 수 있는 판매자를 확인하세요
+                </p>
+              </div>
+              
+              <div className="group text-center p-8 rounded-2xl bg-surface/50 backdrop-blur-sm border border-outline-variant/20 hover:bg-surface/80 hover:shadow-elevation-2 transition-all duration-300">
+                <div className="w-20 h-20 bg-gradient-to-br from-tertiary to-tertiary/70 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                  <MessageCircle className="h-10 w-10 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold text-on-surface mb-3">실시간 상담</h3>
+                <p className="text-on-surface-variant leading-relaxed">
+                  채팅으로 즉시 문의하고 빠른 답변을 받아보세요
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -204,72 +254,6 @@ export default function HomePage() {
                 </CardContent>
               </Card>
             ))}
-          </div>
-        </div>
-
-        {/* 서비스 소개 - 웹스러운 디자인으로 개선 */}
-        <div className="relative overflow-hidden bg-gradient-to-br from-surface-container via-surface-container-high to-surface-container rounded-3xl p-12">
-          {/* 배경 장식 */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-secondary/5 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2"></div>
-          
-          <div className="relative z-10">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold text-on-surface mb-4">
-                안전하고 편리한 중고부품 거래
-              </h2>
-              <p className="text-lg text-on-surface-variant max-w-2xl mx-auto">
-                검증된 판매자와 투명한 거래로 믿을 수 있는 중고부품을 만나보세요
-              </p>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="group text-center p-8 rounded-2xl bg-surface/50 backdrop-blur-sm border border-outline-variant/20 hover:bg-surface/80 hover:shadow-elevation-2 transition-all duration-300">
-                <div className="w-20 h-20 bg-gradient-to-br from-primary to-primary/70 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                  <Search className="h-10 w-10 text-white" />
-                </div>
-                <h3 className="text-xl font-semibold text-on-surface mb-3">정확한 검색</h3>
-                <p className="text-on-surface-variant leading-relaxed">
-                  OEM번호, 차종별로 정확한 부품을 찾을 수 있습니다
-                </p>
-              </div>
-              
-              <div className="group text-center p-8 rounded-2xl bg-surface/50 backdrop-blur-sm border border-outline-variant/20 hover:bg-surface/80 hover:shadow-elevation-2 transition-all duration-300">
-                <div className="w-20 h-20 bg-gradient-to-br from-secondary to-secondary/70 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                  <Star className="h-10 w-10 text-white" />
-                </div>
-                <h3 className="text-xl font-semibold text-on-surface mb-3">검증된 판매자</h3>
-                <p className="text-on-surface-variant leading-relaxed">
-                  평점과 후기로 신뢰할 수 있는 판매자를 확인하세요
-                </p>
-              </div>
-              
-              <div className="group text-center p-8 rounded-2xl bg-surface/50 backdrop-blur-sm border border-outline-variant/20 hover:bg-surface/80 hover:shadow-elevation-2 transition-all duration-300">
-                <div className="w-20 h-20 bg-gradient-to-br from-tertiary to-tertiary/70 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                  <MessageCircle className="h-10 w-10 text-white" />
-                </div>
-                <h3 className="text-xl font-semibold text-on-surface mb-3">실시간 상담</h3>
-                <p className="text-on-surface-variant leading-relaxed">
-                  채팅으로 즉시 문의하고 빠른 답변을 받아보세요
-                </p>
-              </div>
-            </div>
-            
-            {/* AI 견적 특별 섹션 추가 */}
-            <div className="mt-12 text-center">
-              <div className="inline-flex items-center gap-3 bg-gradient-to-r from-primary to-brand-primary text-white px-8 py-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group" onClick={() => navigate("/estimates/ai")}>
-                <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <Wrench className="h-4 w-4" />
-                </div>
-                <span className="font-semibold">AI 자동 견적 체험하기</span>
-                <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center group-hover:translate-x-1 transition-transform">
-                  <span className="text-sm">→</span>
-                </div>
-              </div>
-              <p className="text-sm text-on-surface-variant mt-3">
-                사진 한 장으로 즉시 수리 견적을 확인하세요
-              </p>
-            </div>
           </div>
         </div>
       </div>
