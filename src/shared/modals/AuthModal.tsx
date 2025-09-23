@@ -22,6 +22,7 @@ import { useAuth } from "@/shared/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, LogIn, UserPlus, Building } from "lucide-react";
 import authApiService from "@/services/auth.api";
+import carCenterApiService from "@/services/carCenter.api";
 import { useNavigate } from "react-router-dom";
 
 interface AuthModalProps {
@@ -231,14 +232,14 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
 
     setIsLoading(true);
     try {
-      await authApiService.carCenterRegister({
+      await carCenterApiService.register({
         centerId: centerRegisterForm.username,
         password: centerRegisterForm.password,
         centerName: centerRegisterForm.centerName,
         businessRegistrationNumber: centerRegisterForm.businessNumber,
         address: centerRegisterForm.address,
         phoneNumber: centerRegisterForm.phone,
-        openingHours: '09:00-18:00', // 기본값
+        openingHours: '09:00-18:00',
         description: centerRegisterForm.description || undefined
       });
 
