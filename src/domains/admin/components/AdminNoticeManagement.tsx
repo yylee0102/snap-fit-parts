@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Plus, Edit, Trash2, Eye } from "lucide-react";
 import AnnouncementEditModal from "@/shared/modals/AnnouncementEditModal";
 import { useToast } from "@/hooks/use-toast";
-import adminApiService, { Announcement } from "@/services/admin.api";
+import adminApiService, { AnnouncementResDTO } from "@/services/admin.api";
 
 export default function AdminNoticeManagement() {
   /**

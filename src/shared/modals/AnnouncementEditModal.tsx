@@ -21,7 +21,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Save, Edit } from "lucide-react";
-import adminApiService, { Announcement } from "@/services/admin.api";
+import adminApiService, { AnnouncementResDTO, AnnouncementReqDTO } from "@/services/admin.api";
 
 interface AnnouncementEditModalProps {
   open: boolean;

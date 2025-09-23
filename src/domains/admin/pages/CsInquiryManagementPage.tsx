@@ -21,7 +21,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { MessageSquare, Send } from "lucide-react";
-import adminApiService, { CsInquiry } from "@/services/admin.api";
+import adminApiService, { CsInquiryResDTO } from "@/services/admin.api";
 import PageContainer from "@/shared/components/layout/PageContainer";
 import ProtectedRoute from "@/shared/components/ProtectedRoute";
 

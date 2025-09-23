@@ -15,59 +15,31 @@ export interface User {
 }
 
 export interface CarCenter {
-  id: string;
-  name: string;
+  centerId: string;
+  centerName: string;
   address: string;
-  phone: string;
-  rating: number;
-  reviewCount: number;
-  services: string[];
-  operatingHours: {
-    weekday: string;
-    weekend: string;
-    holiday: string;
-  };
-  images: string[];
-  description: string;
-  coordinates: {
-    lat: number;
-    lng: number;
-  };
-  ownerId: string;
+  latitude?: number;
+  longitude?: number;
+  phoneNumber: string;
+  description?: string;
+  businessRegistrationNumber: string;
+  openingHours: string;
+  status: 'PENDING' | 'ACTIVE';
 }
 
 export interface Estimate {
-  id: string;
-  title: string;
-  description: string;
-  carInfo: {
-    brand: string;
-    model: string;
-    year: string;
-    mileage: number;
-  };
-  requesterId: string;
-  centerId?: string;
-  status: "요청" | "견적발송" | "확정" | "완료" | "취소";
-  estimatedCost?: number;
-  workDays?: number;
-  images: string[];
-  location: string;
+  estimateId: number;
+  estimatedCost: number;
+  details: string;
   createdAt: string;
-  updatedAt: string;
+  status: 'PENDING' | 'ACCEPTED' | 'REJECTED';
 }
 
-export interface Notice {
-  id: string;
+export interface Announcement {
+  announcementId: number;
   title: string;
   content: string;
-  category: "공지" | "이벤트" | "업데이트" | "점검";
-  isPinned: boolean;
-  isImportant: boolean;
-  authorId: string;
-  viewCount: number;
   createdAt: string;
-  updatedAt: string;
 }
 
 export interface FAQ {
@@ -81,38 +53,50 @@ export interface FAQ {
   updatedAt: string;
 }
 
-export interface Contact {
-  id: string;
+export interface CsInquiry {
+  inquiryId: number;
+  userName: string;
   title: string;
-  content: string;
-  category: "일반문의" | "신고" | "제안" | "버그신고" | "기타";
-  status: "접수" | "처리중" | "완료";
-  userId: string;
-  adminResponse?: string;
+  questionContent: string;
+  answerContent?: string;
+  answeredAt?: string;
   createdAt: string;
-  updatedAt: string;
-  respondedAt?: string;
 }
 
 export interface ChatRoom {
-  id: string;
-  type: "part" | "center" | "general";
-  participantIds: string[];
-  relatedId?: string; // 부품 ID 또는 센터 ID
-  lastMessage?: string;
-  lastMessageAt?: string;
-  unreadCount: number;
-  createdAt: string;
+  roomId: number;
+  updatedAt: string;
+  user: {
+    userId: string;
+    name: string;
+  };
+  carCenter: {
+    centerId: string;
+    centerName: string;
+  };
 }
 
-export interface ChatMessage {
-  id: string;
-  roomId: string;
-  senderId: string;
-  content: string;
-  messageType: "text" | "image" | "file";
-  readBy: string[];
-  createdAt: string;
+export interface CompletedRepair {
+  repairId: number;
+  repairDetail: string;
+  completionDate: string;
+  userId: string;
+  userName: string;
+  centerId: string;
+  centerName: string;
+}
+
+export interface Admin {
+  adminId: string;
+  name: string;
+}
+
+export interface CarCenterApproval {
+  approvalId: number;
+  requestedAt: string;
+  centerId: string;
+  centerName: string;
+  reason?: string;
 }
 
 export interface ApiResponse<T> {

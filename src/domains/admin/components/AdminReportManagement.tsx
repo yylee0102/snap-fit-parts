@@ -22,7 +22,7 @@ import { AlertTriangle, CheckCircle, XCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ReviewReportDetailModal from "@/shared/modals/ReviewReportDetailModal";
 import CsInquiryDetailModal from "@/shared/modals/CsInquiryDetailModal";
-import adminApiService, { ReviewReport, CsInquiry } from "@/services/admin.api";
+import adminApiService, { ReviewReportResDTO, CsInquiryResDTO } from "@/services/admin.api";
 
 export default function AdminReportManagement() {
   /**

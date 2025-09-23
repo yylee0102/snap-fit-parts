@@ -20,7 +20,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { CheckCircle, XCircle, Calendar, Phone, Mail, MapPin, FileText } from "lucide-react";
-import adminApiService, { CarCenterApproval } from "@/services/admin.api";
+import adminApiService, { CarCenterApprovalResDTO } from "@/services/admin.api";
 
 interface CenterApprovalDetailModalProps {
   open: boolean;

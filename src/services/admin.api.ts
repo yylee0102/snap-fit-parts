@@ -1,156 +1,192 @@
-// 관리자 API 서비스 - 백엔드 API 명세에 맞춰 수정
+// 관리자 API 서비스 - 백엔드 엔티티에 맞춰 수정
 const API_BASE_URL = '/api';
 
-export interface AdminStats {
-  userCount: number;
-  centerCount: number;
-  pendingApprovalCount: number;
-  reviewReportCount: number;
+// ==================== 카센터 승인 관련 타입 정의 ====================
+export interface CarCenterApprovalReqDTO {
+  centerId: string;
+  reason?: string;
 }
 
-export interface AdminLoginRequest {
-  username: string;
-  password: string;
-}
-
-export interface AdminLoginResponse {
-  userId: string;
-  name: string;
-  role: string;
-  userType: string;
-}
-
-export interface CarCenterApproval {
+export interface CarCenterApprovalResDTO {
   approvalId: number;
   requestedAt: string;
   centerId: string;
   centerName: string;
-  businessNumber?: string;
-  address?: string;
-  phone?: string;
-  email?: string;
-  status: 'PENDING' | 'APPROVED' | 'REJECTED';
 }
 
-export interface CsInquiry {
+// ==================== CS 문의 관리 관련 타입 정의 ====================
+export interface CsInquiryReqDTO {
+  title: string;
+  questionContent: string;
+}
+
+export interface CsInquiryResDTO {
   inquiryId: number;
-  userId: string;
-  userName?: string;
+  userName: string;
   title: string;
   questionContent: string;
   answerContent?: string;
-  status: 'PENDING' | 'ANSWERED';
-  createdAt: string;
   answeredAt?: string;
+  createdAt: string;
 }
 
-export interface Announcement {
+// ==================== 공지사항 관리 관련 타입 정의 ====================
+export interface AnnouncementReqDTO {
+  title: string;
+  content: string;
+}
+
+export interface AnnouncementResDTO {
   announcementId: number;
   title: string;
   content: string;
   createdAt: string;
-  updatedAt?: string;
 }
 
-export interface ReviewReport {
-  reportId: number;
+// ==================== 리뷰 신고 관리 관련 타입 정의 ====================
+export interface ReviewReportReqDTO {
   reviewId: number;
-  reporterName?: string;
+  centerId: string;
   reason: string;
-  content?: string; // 신고 상세 내용
-  reviewContent?: string; // 신고된 리뷰 원본 내용
-  reportDate: string;
-  status: 'PENDING' | 'PROCESSED';
+  content: string;
 }
 
+export interface ReviewReportResDTO {
+  reportId: number;
+  reportedReviewId: number;
+  reportingCenterName: string;
+  reason: string;
+  content: string;
+  status: string;
+  createdAt: string;
+}
+
+// ==================== 관리자 API 서비스 ====================
 class AdminApiService {
+  private getAuthHeaders(): Record<string, string> {
+    const token = localStorage.getItem('authToken');
+    return {
+      'Authorization': token || '',
+      'Content-Type': 'application/json',
+    };
+  }
+
+  // ==================== 통계 조회 ====================
   /**
-   * 관리자 로그인
-   * POST /api/login
+   * 총 일반 사용자 수 조회
+   * GET /api/admin/stats/users/count
    */
-  async login(request: AdminLoginRequest): Promise<AdminLoginResponse> {
-    const response = await fetch(`${API_BASE_URL}/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(request),
+  async getUserCount(): Promise<number> {
+    const response = await fetch(`${API_BASE_URL}/admin/stats/users/count`, {
+      headers: this.getAuthHeaders(),
     });
-    
+
     if (!response.ok) {
-      throw new Error('로그인에 실패했습니다.');
+      throw new Error('사용자 수 조회에 실패했습니다.');
     }
-    
-    // Authorization 헤더에서 토큰 추출
-    const token = response.headers.get('Authorization');
-    const userData = await response.json();
-    
-    return {
-      ...userData,
-      token: token || ''
-    };
+
+    return response.json();
   }
 
   /**
-   * 대시보드 통계 조회 - 백엔드 API와 동기화
-   * GET /api/admin/stats/users/count, centers/count, approvals/pending/count, reports/reviews/count
+   * 총 카센터 수 조회
+   * GET /api/admin/stats/centers/count
    */
-  async getStats(): Promise<AdminStats> {
-    const [userResponse, centerResponse, pendingResponse, reportResponse] = await Promise.all([
-      fetch(`${API_BASE_URL}/admin/stats/users/count`, { headers: this.getAuthHeaders() }),
-      fetch(`${API_BASE_URL}/admin/stats/centers/count`, { headers: this.getAuthHeaders() }),
-      fetch(`${API_BASE_URL}/admin/stats/approvals/pending/count`, { headers: this.getAuthHeaders() }),
-      fetch(`${API_BASE_URL}/admin/stats/reports/reviews/count`, { headers: this.getAuthHeaders() })
-    ]);
+  async getCenterCount(): Promise<number> {
+    const response = await fetch(`${API_BASE_URL}/admin/stats/centers/count`, {
+      headers: this.getAuthHeaders(),
+    });
 
-    return {
-      userCount: await userResponse.json(),
-      centerCount: await centerResponse.json(),
-      pendingApprovalCount: await pendingResponse.json(),
-      reviewReportCount: await reportResponse.json(),
-    };
+    if (!response.ok) {
+      throw new Error('카센터 수 조회에 실패했습니다.');
+    }
+
+    return response.json();
   }
 
-  // 성별 분포 통계
-  async getGenderStats(): Promise<Record<string, number>> {
+  /**
+   * 가입 승인 대기 수 조회
+   * GET /api/admin/stats/approvals/pending/count
+   */
+  async getPendingApprovalsCount(): Promise<number> {
+    const response = await fetch(`${API_BASE_URL}/admin/stats/approvals/pending/count`, {
+      headers: this.getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error('승인 대기 수 조회에 실패했습니다.');
+    }
+
+    return response.json();
+  }
+
+  /**
+   * 신고된 리뷰 수 조회
+   * GET /api/admin/stats/reports/reviews/count
+   */
+  async getReviewReportsCount(): Promise<number> {
+    const response = await fetch(`${API_BASE_URL}/admin/stats/reports/reviews/count`, {
+      headers: this.getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error('신고된 리뷰 수 조회에 실패했습니다.');
+    }
+
+    return response.json();
+  }
+
+  /**
+   * 성별 분포 통계 조회
+   * GET /api/admin/stats/gender
+   */
+  async getGenderStats(): Promise<{ male: number; female: number }> {
     const response = await fetch(`${API_BASE_URL}/admin/stats/gender`, {
       headers: this.getAuthHeaders(),
     });
+
+    if (!response.ok) {
+      throw new Error('성별 통계 조회에 실패했습니다.');
+    }
+
     return response.json();
   }
 
-  // 연령대 분포 통계
-  async getAgeStats(): Promise<Record<string, number>> {
+  /**
+   * 연령대별 분포 통계 조회
+   * GET /api/admin/stats/age
+   */
+  async getAgeStats(): Promise<any[]> {
     const response = await fetch(`${API_BASE_URL}/admin/stats/age`, {
       headers: this.getAuthHeaders(),
     });
+
+    if (!response.ok) {
+      throw new Error('연령대 통계 조회에 실패했습니다.');
+    }
+
     return response.json();
   }
 
+  // ==================== 카센터 승인 관리 ====================
   /**
-   * 대기 중인 카센터 승인 목록 조회
+   * 승인 대기 중인 카센터 목록 조회
    * GET /api/admin/approvals/pending
    */
-  async getPendingApprovals(): Promise<CarCenterApproval[]> {
+  async getPendingApprovals(): Promise<CarCenterApprovalResDTO[]> {
     const response = await fetch(`${API_BASE_URL}/admin/approvals/pending`, {
       headers: this.getAuthHeaders(),
     });
+
+    if (!response.ok) {
+      throw new Error('승인 대기 목록 조회에 실패했습니다.');
+    }
+
     return response.json();
   }
 
   /**
-   * 카센터 승인 단건 조회
-   * GET /api/admin/approvals/{approvalId}
-   */
-  async getCenterApproval(approvalId: number): Promise<CarCenterApproval> {
-    const response = await fetch(`${API_BASE_URL}/admin/approvals/${approvalId}`, {
-      headers: this.getAuthHeaders(),
-    });
-    return response.json();
-  }
-
-  /**
-   * 카센터 승인 처리
+   * 카센터 승인
    * POST /api/admin/approvals/{approvalId}/approve
    */
   async approveCenter(approvalId: number): Promise<void> {
@@ -165,7 +201,7 @@ class AdminApiService {
   }
 
   /**
-   * 카센터 승인 반려 (사유 포함)
+   * 카센터 반려
    * DELETE /api/admin/approvals/{approvalId}?reason={reason}
    */
   async rejectCenter(approvalId: number, reason: string): Promise<void> {
@@ -179,30 +215,25 @@ class AdminApiService {
     }
   }
 
+  // ==================== CS 문의 관리 ====================
   /**
-   * 1:1 문의 전체 목록 조회
+   * CS 문의 목록 조회
    * GET /api/admin/cs
    */
-  async getAllCsInquiries(): Promise<CsInquiry[]> {
+  async getCsInquiries(): Promise<CsInquiryResDTO[]> {
     const response = await fetch(`${API_BASE_URL}/admin/cs`, {
       headers: this.getAuthHeaders(),
     });
+
+    if (!response.ok) {
+      throw new Error('CS 문의 목록 조회에 실패했습니다.');
+    }
+
     return response.json();
   }
 
   /**
-   * 1:1 문의 단건 조회
-   * GET /api/admin/cs/{inquiryId}
-   */
-  async getCsInquiry(inquiryId: number): Promise<CsInquiry> {
-    const response = await fetch(`${API_BASE_URL}/admin/cs/${inquiryId}`, {
-      headers: this.getAuthHeaders(),
-    });
-    return response.json();
-  }
-
-  /**
-   * 1:1 문의 답변 등록/수정
+   * CS 문의 답변 등록/수정
    * PUT /api/admin/cs/{inquiryId}/answer
    */
   async answerInquiry(inquiryId: number, answerContent: string): Promise<void> {
@@ -220,58 +251,47 @@ class AdminApiService {
     }
   }
 
+  // ==================== 공지사항 관리 ====================
   /**
-   * 공지사항 전체 조회
+   * 공지사항 목록 조회
    * GET /api/admin/announcements
    */
-  async getAllAnnouncements(): Promise<Announcement[]> {
+  async getAnnouncements(): Promise<AnnouncementResDTO[]> {
     const response = await fetch(`${API_BASE_URL}/admin/announcements`, {
       headers: this.getAuthHeaders(),
     });
+
+    if (!response.ok) {
+      throw new Error('공지사항 목록 조회에 실패했습니다.');
+    }
+
     return response.json();
   }
 
   /**
-   * 공지사항 단건 조회
-   * GET /api/admin/announcements/{announcementId}
-   */
-  async getAnnouncement(announcementId: number): Promise<Announcement> {
-    const response = await fetch(`${API_BASE_URL}/admin/announcements/${announcementId}`, {
-      headers: this.getAuthHeaders(),
-    });
-    return response.json();
-  }
-
-  /**
-   * 공지사항 등록
+   * 공지사항 작성
    * POST /api/admin/announcements
    */
-  async createAnnouncement(announcement: Omit<Announcement, 'announcementId' | 'createdAt'>): Promise<void> {
+  async createAnnouncement(announcement: AnnouncementReqDTO): Promise<void> {
     const response = await fetch(`${API_BASE_URL}/admin/announcements`, {
       method: 'POST',
-      headers: {
-        ...this.getAuthHeaders(),
-        'Content-Type': 'application/json',
-      },
+      headers: this.getAuthHeaders(),
       body: JSON.stringify(announcement),
     });
 
     if (!response.ok) {
-      throw new Error('공지사항 등록에 실패했습니다.');
+      throw new Error('공지사항 작성에 실패했습니다.');
     }
   }
 
   /**
    * 공지사항 수정
-   * PUT /api/admin/announcements/{announcementId}
+   * PUT /api/admin/announcements/{id}
    */
-  async updateAnnouncement(announcementId: number, announcement: Partial<Announcement>): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/admin/announcements/${announcementId}`, {
+  async updateAnnouncement(id: number, announcement: AnnouncementReqDTO): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/admin/announcements/${id}`, {
       method: 'PUT',
-      headers: {
-        ...this.getAuthHeaders(),
-        'Content-Type': 'application/json',
-      },
+      headers: this.getAuthHeaders(),
       body: JSON.stringify(announcement),
     });
 
@@ -282,10 +302,10 @@ class AdminApiService {
 
   /**
    * 공지사항 삭제
-   * DELETE /api/admin/announcements/{announcementId}
+   * DELETE /api/admin/announcements/{id}
    */
-  async deleteAnnouncement(announcementId: number): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/admin/announcements/${announcementId}`, {
+  async deleteAnnouncement(id: number): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/admin/announcements/${id}`, {
       method: 'DELETE',
       headers: this.getAuthHeaders(),
     });
@@ -295,30 +315,41 @@ class AdminApiService {
     }
   }
 
+  // ==================== 리뷰 신고 관리 ====================
   /**
-   * 리뷰 신고 전체 조회
+   * 신고된 리뷰 목록 조회
    * GET /api/admin/reports/reviews
    */
-  async getAllReviewReports(): Promise<ReviewReport[]> {
+  async getReviewReports(): Promise<ReviewReportResDTO[]> {
     const response = await fetch(`${API_BASE_URL}/admin/reports/reviews`, {
       headers: this.getAuthHeaders(),
     });
+
+    if (!response.ok) {
+      throw new Error('신고된 리뷰 목록 조회에 실패했습니다.');
+    }
+
     return response.json();
   }
 
   /**
-   * 리뷰 신고 단건 조회
+   * 신고된 리뷰 상세 조회
    * GET /api/admin/reports/reviews/{reportId}
    */
-  async getReviewReport(reportId: number): Promise<ReviewReport> {
+  async getReviewReportDetail(reportId: number): Promise<ReviewReportResDTO> {
     const response = await fetch(`${API_BASE_URL}/admin/reports/reviews/${reportId}`, {
       headers: this.getAuthHeaders(),
     });
+
+    if (!response.ok) {
+      throw new Error('신고된 리뷰 상세 조회에 실패했습니다.');
+    }
+
     return response.json();
   }
 
   /**
-   * 리뷰 신고 삭제
+   * 신고 처리 완료 (삭제)
    * DELETE /api/admin/reports/reviews/{reportId}
    */
   async deleteReviewReport(reportId: number): Promise<void> {
@@ -328,16 +359,8 @@ class AdminApiService {
     });
 
     if (!response.ok) {
-      throw new Error('신고 삭제에 실패했습니다.');
+      throw new Error('신고 처리에 실패했습니다.');
     }
-  }
-
-  private getAuthHeaders(): Record<string, string> {
-    const token = localStorage.getItem('authToken');
-    return {
-      'Authorization': `${token}`,
-      'Content-Type': 'application/json',
-    };
   }
 }
 

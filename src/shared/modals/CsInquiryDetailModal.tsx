@@ -20,7 +20,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { MessageCircle, Send, Calendar, User } from "lucide-react";
-import adminApiService, { CsInquiry } from "@/services/admin.api";
+import adminApiService, { CsInquiryResDTO } from "@/services/admin.api";
 
 interface CsInquiryDetailModalProps {
   open: boolean;

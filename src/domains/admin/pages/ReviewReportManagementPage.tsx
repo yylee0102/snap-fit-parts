@@ -21,7 +21,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { AlertTriangle, Eye, Trash2, Calendar, MessageSquare, Filter } from "lucide-react";
 import ReviewReportDetailModal from "@/shared/modals/ReviewReportDetailModal";
-import adminApiService, { ReviewReport } from "@/services/admin.api";
+import adminApiService, { ReviewReportResDTO } from "@/services/admin.api";
 import PageContainer from "@/shared/components/layout/PageContainer";
 import ProtectedRoute from "@/shared/components/ProtectedRoute";
 

@@ -20,7 +20,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Eye } from "lucide-react";
 import CenterApprovalDetailModal from "@/shared/modals/CenterApprovalDetailModal";
 import { useToast } from "@/hooks/use-toast";
-import adminApiService, { CarCenterApproval } from "@/services/admin.api";
+import adminApiService, { CarCenterApprovalResDTO } from "@/services/admin.api";
 
 export default function AdminCenterApproval() {
   /**
