@@ -60,7 +60,7 @@ export default function CenterApprovalDetailModal({
       const tempData: CarCenterApproval = {
         approvalId: approvalId,
         requestedAt: "2025-09-08",
-        centerId: 1,
+        centerId: "center1",
         centerName: "스피드카센터",
         businessNumber: "123-45-67890",
         address: "서울시 강남구 테헤란로 123",

@@ -36,6 +36,17 @@ export interface CarCenterRegisterRequest {
   description?: string;
 }
 
+export interface CarCenterReqDTO {
+  username: string;
+  password: string;
+  centerName: string;
+  businessNumber: string;
+  address: string;
+  phone: string;
+  email: string;
+  description?: string;
+}
+
 // ==================== 통합 인증 서비스 ====================
 class AuthApiService {
   private getAuthHeaders(): Record<string, string> {
@@ -94,7 +105,7 @@ class AuthApiService {
    * 카센터 회원가입
    * POST /api/car-centers/register
    */
-  async carCenterRegister(request: CarCenterRegisterRequest): Promise<void> {
+  async carCenterRegister(request: CarCenterReqDTO): Promise<void> {
     const response = await fetch(`${API_BASE_URL}/car-centers/register`, {
       method: 'POST',
       headers: {

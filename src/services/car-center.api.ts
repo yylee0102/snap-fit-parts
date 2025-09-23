@@ -1,16 +1,24 @@
-// 카센터 API 서비스
+// 카센터 API 서비스 - 최신 백엔드 API 명세에 맞춰 수정
 const API_BASE_URL = '/api';
 
 // ==================== 카센터 관련 타입 정의 ====================
-export interface Reservation {
-  reservationId?: number;
+export interface ReservationReqDTO {
   customerName: string;
   customerPhone: string;
   carInfo: string;
   reservationDate: string; // ISO 8601 format
   requestDetails: string;
-  status?: 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED';
-  createdAt?: string;
+}
+
+export interface ReservationResDTO {
+  reservationId: number;
+  customerName: string;
+  customerPhone: string;
+  carInfo: string;
+  reservationDate: string;
+  requestDetails: string;
+  status: 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED';
+  createdAt: string;
 }
 
 export interface EstimateRequest {
@@ -39,25 +47,25 @@ export interface EstimateReqDTO {
   estimateItems: EstimateItem[];
 }
 
-export interface UsedPart {
-  partId?: number;
+export interface UsedPartReqDTO {
   partName: string;
   description: string;
   price: number;
   category: string;
   compatibleCarModel: string;
   condition?: 'EXCELLENT' | 'GOOD' | 'FAIR';
-  createdAt?: string;
-  images?: string[];
 }
 
-export interface UsedPartCreateRequest {
+export interface UsedPartResDTO {
+  partId: number;
   partName: string;
   description: string;
   price: number;
   category: string;
   compatibleCarModel: string;
-  condition?: 'EXCELLENT' | 'GOOD' | 'FAIR';
+  condition: 'EXCELLENT' | 'GOOD' | 'FAIR';
+  createdAt: string;
+  images?: string[];
 }
 
 // ==================== 카센터 API 서비스 ====================
@@ -83,7 +91,7 @@ class CarCenterApiService {
    * 내 예약 목록 조회
    * GET /api/car-centers/reservations/my
    */
-  async getMyReservations(): Promise<Reservation[]> {
+  async getMyReservations(): Promise<ReservationResDTO[]> {
     const response = await fetch(`${API_BASE_URL}/car-centers/reservations/my`, {
       headers: this.getAuthHeaders(),
     });
@@ -99,7 +107,7 @@ class CarCenterApiService {
    * 새 예약 등록
    * POST /api/car-centers/reservations
    */
-  async createReservation(reservation: Reservation): Promise<void> {
+  async createReservation(reservation: ReservationReqDTO): Promise<void> {
     const response = await fetch(`${API_BASE_URL}/car-centers/reservations`, {
       method: 'POST',
       headers: this.getAuthHeaders(),
@@ -149,7 +157,7 @@ class CarCenterApiService {
    * 내가 등록한 중고부품 목록 조회
    * GET /api/car-centers/me/used-parts
    */
-  async getMyUsedParts(): Promise<UsedPart[]> {
+  async getMyUsedParts(): Promise<UsedPartResDTO[]> {
     const response = await fetch(`${API_BASE_URL}/car-centers/me/used-parts`, {
       headers: this.getAuthHeaders(),
     });
@@ -165,7 +173,7 @@ class CarCenterApiService {
    * 중고부품 등록 (이미지 포함)
    * POST /api/car-centers/used-parts
    */
-  async createUsedPart(partData: UsedPartCreateRequest, images: File[]): Promise<void> {
+  async createUsedPart(partData: UsedPartReqDTO, images: File[]): Promise<void> {
     const formData = new FormData();
     
     // JSON 데이터를 request 파트로 추가
@@ -191,7 +199,7 @@ class CarCenterApiService {
    * 중고부품 수정
    * PUT /api/car-centers/used-parts/{partId}
    */
-  async updateUsedPart(partId: number, partData: Partial<UsedPartCreateRequest>): Promise<void> {
+  async updateUsedPart(partId: number, partData: Partial<UsedPartReqDTO>): Promise<void> {
     const response = await fetch(`${API_BASE_URL}/car-centers/used-parts/${partId}`, {
       method: 'PUT',
       headers: this.getAuthHeaders(),

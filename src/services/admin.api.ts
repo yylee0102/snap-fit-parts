@@ -23,7 +23,7 @@ export interface AdminLoginResponse {
 export interface CarCenterApproval {
   approvalId: number;
   requestedAt: string;
-  centerId: number;
+  centerId: string;
   centerName: string;
   businessNumber?: string;
   address?: string;
@@ -35,7 +35,7 @@ export interface CarCenterApproval {
 export interface CsInquiry {
   inquiryId: number;
   userId: string;
-  userName: string;
+  userName?: string;
   title: string;
   questionContent: string;
   answerContent?: string;
@@ -55,7 +55,7 @@ export interface Announcement {
 export interface ReviewReport {
   reportId: number;
   reviewId: number;
-  reporterName: string;
+  reporterName?: string;
   reason: string;
   content?: string; // 신고 상세 내용
   reviewContent?: string; // 신고된 리뷰 원본 내용
