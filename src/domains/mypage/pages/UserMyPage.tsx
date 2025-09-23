@@ -40,6 +40,55 @@ export default function UserMyPage() {
     <ProtectedRoute allowedUserTypes={["개인"]} fallbackMessage="일반 사용자만 접근할 수 있는 페이지입니다.">
       <PageContainer>
       <div className="container mx-auto px-4 py-6">
+        {/* 통계 요약 카드 */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center">
+                <Car className="h-4 w-4 text-blue-500" />
+                <div className="ml-2">
+                  <p className="text-sm font-medium text-muted-foreground">등록 차량</p>
+                  <p className="text-2xl font-bold text-blue-600">2대</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center">
+                <FileText className="h-4 w-4 text-green-500" />
+                <div className="ml-2">
+                  <p className="text-sm font-medium text-muted-foreground">견적 요청</p>
+                  <p className="text-2xl font-bold text-green-600">3건</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center">
+                <MessageSquare className="h-4 w-4 text-yellow-500" />
+                <div className="ml-2">
+                  <p className="text-sm font-medium text-muted-foreground">작성 리뷰</p>
+                  <p className="text-2xl font-bold text-yellow-600">5개</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center">
+                <HelpCircle className="h-4 w-4 text-purple-500" />
+                <div className="ml-2">
+                  <p className="text-sm font-medium text-muted-foreground">문의 건수</p>
+                  <p className="text-2xl font-bold text-purple-600">1건</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* 사용자 정보 카드 */}
         {/* 사용자 정보 카드 */}
         <Card className="mb-6">
           <CardContent className="p-6">

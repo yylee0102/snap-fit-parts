@@ -23,9 +23,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import ProtectedRoute from "@/shared/components/ProtectedRoute";
+import { CenterInfoEditModal } from "@/domains/centers/modals/CenterInfoEditModal";
+import { ReservationManageModal } from "@/domains/centers/modals/ReservationManageModal";
 
 export default function CenterMyPage() {
   const [selectedReservations, setSelectedReservations] = useState<string[]>([]);
+  const [centerInfoModalOpen, setCenterInfoModalOpen] = useState(false);
+  const [reservationModalOpen, setReservationModalOpen] = useState(false);
+  const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
 
   // 예약 관련 타입 정의 (엔티티에 맞춤)
   interface Reservation {
@@ -34,8 +39,14 @@ export default function CenterMyPage() {
     customerName: string;
     customerPhone: string;
     carInfo: string;
+    carModel: string;
+    carNumber: string;
     reservationDate: string;
+    reservationTime: string;
     requestDetails: string;
+    serviceType: string;
+    status: 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED';
+    notes?: string;
   }
 
   // 임시 예약 데이터 (실제 엔티티 구조)
@@ -46,8 +57,13 @@ export default function CenterMyPage() {
       customerName: "이영진",
       customerPhone: "010-1234-1111",
       carInfo: "GV80",
-      reservationDate: "2024-08-10T14:00:00Z",
-      requestDetails: "엔진오일 교체"
+      carModel: "GV80",
+      carNumber: "12가3456",
+      reservationDate: "2024-08-10",
+      reservationTime: "14:00",
+      requestDetails: "엔진오일 교체",
+      serviceType: "엔진오일 교체",
+      status: 'CONFIRMED' as const
     },
     {
       reservationId: 2,
@@ -55,8 +71,13 @@ export default function CenterMyPage() {
       customerName: "김철수",
       customerPhone: "010-5678-2222",
       carInfo: "K5",
-      reservationDate: "2024-08-10T16:00:00Z",
-      requestDetails: "타이어 4개 교체"
+      carModel: "K5",
+      carNumber: "34나5678",
+      reservationDate: "2024-08-10",
+      reservationTime: "16:00",
+      requestDetails: "타이어 4개 교체",
+      serviceType: "타이어 교체",
+      status: 'PENDING' as const
     },
     {
       reservationId: 3,
@@ -64,8 +85,13 @@ export default function CenterMyPage() {
       customerName: "김태진",
       customerPhone: "010-3333-4444", 
       carInfo: "Tesla Model 3",
-      reservationDate: "2024-08-11T10:00:00Z",
-      requestDetails: "전기 점검"
+      carModel: "Tesla Model 3",
+      carNumber: "56다7890",
+      reservationDate: "2024-08-11",
+      reservationTime: "10:00",
+      requestDetails: "전기 점검",
+      serviceType: "전기 점검",
+      status: 'CONFIRMED' as const
     }
   ];
 
@@ -143,6 +169,59 @@ export default function CenterMyPage() {
           </div>
         </div>
 
+        {/* 통계 요약 카드 */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center">
+                <Calendar className="h-4 w-4 text-blue-500" />
+                <div className="ml-2">
+                  <p className="text-sm font-medium text-muted-foreground">오늘 예약</p>
+                  <p className="text-2xl font-bold text-blue-600">3건</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center">
+                <User className="h-4 w-4 text-green-500" />
+                <div className="ml-2">
+                  <p className="text-sm font-medium text-muted-foreground">총 예약</p>
+                  <p className="text-2xl font-bold text-green-600">{reservations.length}건</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center">
+                <Star className="h-4 w-4 text-yellow-500" />
+                <div className="ml-2">
+                  <p className="text-sm font-medium text-muted-foreground">평균 평점</p>
+                  <p className="text-2xl font-bold text-yellow-600">
+                    {reviews.length > 0 
+                      ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
+                      : '0.0'
+                    }
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center">
+                <Settings className="h-4 w-4 text-purple-500" />
+                <div className="ml-2">
+                  <p className="text-sm font-medium text-muted-foreground">후기 수</p>
+                  <p className="text-2xl font-bold text-purple-600">{reviews.length}개</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* 신규 예약 관리 */}
         <Card className="mb-6">
           <CardHeader>
@@ -180,7 +259,16 @@ export default function CenterMyPage() {
                 <div>{new Date(reservation.reservationDate).toLocaleDateString()}</div>
                 <div>{reservation.requestDetails}</div>
                 <div>
-                  <Button variant="outline" size="sm">관리</Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => {
+                      setSelectedReservation(reservation);
+                      setReservationModalOpen(true);
+                    }}
+                  >
+                    관리
+                  </Button>
                 </div>
               </div>
             ))}
@@ -199,7 +287,7 @@ export default function CenterMyPage() {
           <CardHeader>
             <div className="flex justify-between items-center">
               <CardTitle className="text-lg">내 카센터 관리</CardTitle>
-              <Button size="sm" className="bg-teal-600 hover:bg-teal-700 text-white">정보 수정</Button>
+              <Button size="sm" className="bg-teal-600 hover:bg-teal-700 text-white" onClick={() => setCenterInfoModalOpen(true)}>정보 수정</Button>
             </div>
           </CardHeader>
           <CardContent>
@@ -248,6 +336,29 @@ export default function CenterMyPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* 모달들 */}
+        <CenterInfoEditModal
+          open={centerInfoModalOpen}
+          onClose={() => setCenterInfoModalOpen(false)}
+          onUpdate={(updatedInfo) => {
+            console.log('Center info updated:', updatedInfo);
+            // 실제로는 상태 업데이트 또는 API 호출
+          }}
+        />
+
+        <ReservationManageModal
+          open={reservationModalOpen}
+          onClose={() => {
+            setReservationModalOpen(false);
+            setSelectedReservation(null);
+          }}
+          reservation={selectedReservation}
+          onUpdate={(updatedReservation) => {
+            console.log('Reservation updated:', updatedReservation);
+            // 실제로는 상태 업데이트 또는 API 호출
+          }}
+        />
       </div>
       </PageContainer>
     </ProtectedRoute>
