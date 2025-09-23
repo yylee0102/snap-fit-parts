@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { MapPin, Phone, Clock, Star, Heart, Flag, MessageCircle } from "lucide-react";
+import { MapPin, Phone, Clock, Star, MessageCircle } from "lucide-react";
 import { useModal } from "@/shared/hooks/useModal";
 import ReviewReportModal from "../modals/ReviewReportModal";
 import { formatKRW } from "@/shared/utils/format";
@@ -156,10 +156,6 @@ export default function CenterDetailPage() {
                   <span className="text-on-surface-variant">({center.totalReviews || 0}개 리뷰)</span>
                 </div>
               </div>
-              <Button variant="outline" size="sm">
-                <Heart className="h-4 w-4 mr-2" />
-                찜하기
-              </Button>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -214,13 +210,6 @@ export default function CenterDetailPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-on-surface-variant">{review.date}</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleReportReview(review.id)}
-                    >
-                      <Flag className="h-4 w-4" />
-                    </Button>
                   </div>
                 </div>
                 <p className="text-on-surface mb-2">{review.content}</p>

@@ -238,7 +238,7 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
     } catch (error) {
       console.error("로그인 실패:", error);
       
-      // 개발용 임시 로그인
+      // 개발용 임시 로그인 추가
       if (loginForm.username === "admin" && loginForm.password === "admin") {
         const tempUser = {
           id: "admin1",
@@ -259,6 +259,46 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
         onClose();
         resetForms();
         navigate("/admin");
+      } else if (loginForm.username === "user01" && loginForm.password === "user01") {
+        const tempUser = {
+          id: "user01",
+          name: "일반사용자",
+          userType: "개인" as const,
+          role: "ROLE_USER",
+          isLoggedIn: true
+        };
+        
+        login(tempUser);
+        localStorage.setItem('authToken', 'Bearer temp-user-token');
+        
+        toast({
+          title: "테스트 사용자 로그인",
+          description: "테스트용 일반 사용자 계정으로 로그인되었습니다."
+        });
+        
+        onClose();
+        resetForms();
+        navigate("/");
+      } else if (loginForm.username === "carcenter01" && loginForm.password === "carcenter01") {
+        const tempUser = {
+          id: "carcenter01",
+          name: "테스트카센터",
+          userType: "카센터" as const,
+          role: "ROLE_CARCENTER",
+          isLoggedIn: true
+        };
+        
+        login(tempUser);
+        localStorage.setItem('authToken', 'Bearer temp-center-token');
+        
+        toast({
+          title: "테스트 카센터 로그인",
+          description: "테스트용 카센터 계정으로 로그인되었습니다."
+        });
+        
+        onClose();
+        resetForms();
+        navigate("/center/mypage");
       } else {
         toast({
           title: "로그인 실패",
@@ -490,7 +530,10 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
               </div>
 
               <div className="text-xs text-muted-foreground bg-muted p-3 rounded-md">
-                <strong>개발용 계정:</strong> admin / admin (관리자)
+                <strong>개발용 계정:</strong><br/>
+                관리자: admin / admin<br/>
+                일반사용자: user01 / user01<br/>
+                카센터: carcenter01 / carcenter01
               </div>
               
               <Button type="submit" className="w-full" disabled={isLoading}>

@@ -5,10 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MapPin, Phone, Star, Heart, MessageCircle, Flag, Calendar, Eye } from "lucide-react";
+import { MapPin, Phone, Star, Calendar, Eye } from "lucide-react";
 import { useModal } from "@/shared/hooks/useModal";
 import ImageViewerModal from "@/shared/modals/ImageViewerModal";
-import ReportModal from "@/shared/modals/ReportModal";
 import { formatKRW, formatTimeAgo } from "@/shared/utils/format";
 
 interface WBPart {
@@ -50,7 +49,6 @@ export default function WBDetailPage() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   
   const imageViewerModal = useModal();
-  const reportModal = useModal();
 
   useEffect(() => {
     // API 연결: 중고부품 상세 정보 조회
@@ -103,20 +101,6 @@ export default function WBDetailPage() {
       console.error("부품 상세 정보 조회 실패:", error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleLike = async () => {
-    if (!part) return;
-    
-    try {
-      // API 연결: 찜하기/찜 해제
-      // POST /api/wb/parts/{partId}/like
-      console.log("찜하기 토글:", partId);
-      
-      setPart(prev => prev ? { ...prev, isLiked: !prev.isLiked } : null);
-    } catch (error) {
-      console.error("찜하기 실패:", error);
     }
   };
 
@@ -337,20 +321,6 @@ export default function WBDetailPage() {
 
             {/* 액션 버튼들 */}
             <div className="flex gap-2">
-              <Button 
-                variant="outline" 
-                size="icon"
-                onClick={handleLike}
-                className={part.isLiked ? "text-red-500 border-red-500" : ""}
-              >
-                <Heart className={`h-4 w-4 ${part.isLiked ? "fill-red-500" : ""}`} />
-              </Button>
-              
-              <Button variant="outline" onClick={reportModal.open}>
-                <Flag className="h-4 w-4 mr-2" />
-                신고
-              </Button>
-              
               <Button onClick={handleContact} className="flex-1">
                 <Phone className="h-4 w-4 mr-2" />
                 판매자 연락
@@ -367,14 +337,6 @@ export default function WBDetailPage() {
         images={part.images}
         currentIndex={selectedImageIndex}
         onIndexChange={setSelectedImageIndex}
-      />
-
-      {/* 신고 모달 */}
-      <ReportModal
-        isOpen={reportModal.isOpen}
-        onClose={reportModal.close}
-        targetType="part"
-        targetId={part.id}
       />
     </PageContainer>
   );
