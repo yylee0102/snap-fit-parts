@@ -102,18 +102,20 @@ export default function AdminReportManagement() {
         {
           inquiryId: 1,
           userId: "user123",
+          userName: "홍길동",
           title: "견적 요청 관련 문의",
-          content: "견적 요청 후 연락이 오지 않습니다.",
+          questionContent: "견적 요청 후 연락이 오지 않습니다.",
           status: 'PENDING',
-          createdAt: "2025-09-08 14:30:00"
+          createdAt: "2025-09-08T14:30:00"
         },
         {
           inquiryId: 2,
           userId: "user456",
+          userName: "김영희",
           title: "결제 관련 문의",
-          content: "결제 후 서비스 이용에 문제가 있습니다.",
+          questionContent: "결제 후 서비스 이용에 문제가 있습니다.",
           status: 'PENDING',
-          createdAt: "2025-09-07 10:15:00"
+          createdAt: "2025-09-07T10:15:00"
         }
       ];
       setInquiries(tempInquiries);
@@ -327,7 +329,7 @@ export default function AdminReportManagement() {
               ) : (
                 inquiries.map((inquiry) => (
                   <TableRow key={inquiry.inquiryId}>
-                    <TableCell>{inquiry.userId}</TableCell>
+                    <TableCell>{inquiry.userName}</TableCell>
                     <TableCell className="max-w-xs truncate">{inquiry.title}</TableCell>
                     <TableCell>{new Date(inquiry.createdAt).toLocaleDateString('ko-KR')}</TableCell>
                     <TableCell>{getStatusBadge(inquiry.status)}</TableCell>

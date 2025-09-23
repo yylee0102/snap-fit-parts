@@ -59,22 +59,43 @@ export default function AdminLoginModal({ open, onClose }: AdminLoginModalProps)
     setIsLoading(true);
 
     try {
-      // TODO: 실제 API 연결 시 adminApiService.login 사용
+      // 개발 단계에서는 임시 관리자 로그인 허용
+      if (formData.username === "admin" && formData.password === "admin") {
+        const tempAdminUser = {
+          id: "admin1",
+          name: "관리자",
+          userType: "관리자" as const,
+          isLoggedIn: true
+        };
+        
+        login(tempAdminUser);
+        localStorage.setItem('authToken', 'Bearer temp-admin-token');
+        
+        toast({
+          title: "임시 관리자 로그인",
+          description: "개발용 관리자 계정으로 로그인되었습니다."
+        });
+        
+        onClose();
+        setFormData({ username: "", password: "" });
+        return;
+      }
+
+      // 실제 API 호출
       const response = await adminApiService.login({
         username: formData.username,
         password: formData.password
       });
 
-      // 관리자 토큰 저장
-      localStorage.setItem('adminToken', response.token);
+      // Authorization 헤더에서 토큰 저장 (임시로 백엔드 API 구조에 맞춤)
+      localStorage.setItem('authToken', 'Bearer temp-admin-token');
 
       // 관리자 사용자 정보 생성
       const adminUser = {
-        id: response.adminId,
-        name: formData.username,
+        id: response.userId,
+        name: response.name,
         userType: "관리자" as const,
-        isLoggedIn: true,
-        role: response.role
+        isLoggedIn: true
       };
 
       login(adminUser);
@@ -89,33 +110,11 @@ export default function AdminLoginModal({ open, onClose }: AdminLoginModalProps)
 
     } catch (error) {
       console.error("관리자 로그인 실패:", error);
-      
-      // 개발 단계에서는 임시 관리자 로그인 허용
-      if (formData.username === "admin" && formData.password === "admin") {
-        const tempAdminUser = {
-          id: "admin1",
-          name: "관리자",
-          userType: "관리자" as const,
-          isLoggedIn: true
-        };
-        
-        login(tempAdminUser);
-        localStorage.setItem('adminToken', 'temp-admin-token');
-        
-        toast({
-          title: "임시 관리자 로그인",
-          description: "개발용 관리자 계정으로 로그인되었습니다."
-        });
-        
-        onClose();
-        setFormData({ username: "", password: "" });
-      } else {
-        toast({
-          title: "로그인 실패",
-          description: "사용자명 또는 비밀번호가 올바르지 않습니다.",
-          variant: "destructive"
-        });
-      }
+      toast({
+        title: "로그인 실패",
+        description: "사용자명 또는 비밀번호가 올바르지 않습니다.",
+        variant: "destructive"
+      });
     } finally {
       setIsLoading(false);
     }

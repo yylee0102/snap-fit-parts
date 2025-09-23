@@ -56,22 +56,24 @@ export default function AdminCenterApproval() {
       const tempData: CarCenterApproval[] = [
         {
           approvalId: 1,
+          requestedAt: "2025-09-08",
+          centerId: 1,
           centerName: "토탈 카센터",
           businessNumber: "267-37-01331",
           address: "경기도 안양시 동안구 홍리대로56번길45동",
           phone: "031-445-6585",
           email: "total@center.com",
-          requestDate: "2025-09-08",
           status: 'PENDING'
         },
         {
           approvalId: 2,
+          requestedAt: "2025-09-07",
+          centerId: 2,
           centerName: "패스 카센터",
           businessNumber: "123-45-67890",
           address: "서울특별시 강남구 테헤란로 123",
           phone: "02-123-4567",
           email: "pass@center.com",
-          requestDate: "2025-09-07",
           status: 'PENDING'
         }
       ];
@@ -165,7 +167,7 @@ export default function AdminCenterApproval() {
                     <TableCell>{center.phone}</TableCell>
                     <TableCell>{center.email}</TableCell>
                     <TableCell className="max-w-xs truncate">{center.address}</TableCell>
-                    <TableCell>{center.requestDate}</TableCell>
+                    <TableCell>{center.requestedAt}</TableCell>
                     <TableCell>{getStatusBadge(center.status)}</TableCell>
                     <TableCell>
                       <div className="flex gap-2">

@@ -48,8 +48,8 @@ export default function CsInquiryDetailModal({
   }, [open, inquiryId]);
 
   useEffect(() => {
-    if (inquiryData?.answer) {
-      setAnswer(inquiryData.answer);
+    if (inquiryData?.answerContent) {
+      setAnswer(inquiryData.answerContent);
     }
   }, [inquiryData]);
 
@@ -66,11 +66,12 @@ export default function CsInquiryDetailModal({
       const tempData: CsInquiry = {
         inquiryId: inquiryId,
         userId: "user123",
+        userName: "홍길동",
         title: "견적 요청 관련 문의",
-        content: "안녕하세요. 견적 요청을 했는데 응답이 없어서 문의드립니다. 언제쯤 답변을 받을 수 있을까요?",
-        answer: inquiryData?.answer || "",
+        questionContent: "안녕하세요. 견적 요청을 했는데 응답이 없어서 문의드립니다. 언제쯤 답변을 받을 수 있을까요?",
+        answerContent: inquiryData?.answerContent || "",
         status: 'PENDING',
-        createdAt: "2025-09-08 14:30:00",
+        createdAt: "2025-09-08T14:30:00",
         answeredAt: undefined
       };
       setInquiryData(tempData);
@@ -102,7 +103,7 @@ export default function CsInquiryDetailModal({
     try {
       const updatedInquiry: CsInquiry = {
         ...inquiryData,
-        answer: answer,
+        answerContent: answer,
         status: 'ANSWERED',
         answeredAt: new Date().toISOString()
       };
@@ -192,7 +193,7 @@ export default function CsInquiryDetailModal({
           <div className="space-y-2">
             <Label className="text-sm font-medium text-muted-foreground">문의 내용</Label>
             <div className="p-4 bg-muted rounded-lg">
-              <p className="whitespace-pre-wrap">{inquiryData.content}</p>
+              <p className="whitespace-pre-wrap">{inquiryData.questionContent}</p>
             </div>
           </div>
 

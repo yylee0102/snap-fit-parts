@@ -25,7 +25,8 @@ import AdminCenterApproval from "@/domains/admin/components/AdminCenterApproval"
 import AdminNoticeManagement from "@/domains/admin/components/AdminNoticeManagement";
 import AdminReportManagement from "@/domains/admin/components/AdminReportManagement";
 import ProtectedRoute from "@/shared/components/ProtectedRoute";
-import { BarChart3, Users, MessageSquare, AlertTriangle, Settings } from "lucide-react";
+import { BarChart3, Users, MessageSquare, AlertTriangle, Settings, HelpCircle } from "lucide-react";
+import CsInquiryManagementPage from "@/domains/admin/pages/CsInquiryManagementPage";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -73,7 +74,7 @@ export default function AdminDashboard() {
 
         {/* 탭 네비게이션 */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="dashboard" className="gap-2">
               <BarChart3 className="h-4 w-4" />
               대시보드
@@ -90,9 +91,9 @@ export default function AdminDashboard() {
               <AlertTriangle className="h-4 w-4" />
               신고관리
             </TabsTrigger>
-            <TabsTrigger value="system" className="gap-2">
-              <Settings className="h-4 w-4" />
-              시스템
+            <TabsTrigger value="cs" className="gap-2">
+              <MessageSquare className="h-4 w-4" />
+              1:1 문의
             </TabsTrigger>
           </TabsList>
 
@@ -116,15 +117,9 @@ export default function AdminDashboard() {
             <AdminReportManagement />
           </TabsContent>
 
-          {/* 시스템 관리 탭 */}
-          <TabsContent value="system">
-            <div className="text-center py-12">
-              <Settings className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-on-surface mb-2">시스템 관리</h3>
-              <p className="text-on-surface-variant">
-                시스템 설정 및 백업 기능이 준비 중입니다
-              </p>
-            </div>
+          {/* 1:1 문의 관리 탭 */}
+          <TabsContent value="cs">
+            <CsInquiryManagementPage />
           </TabsContent>
         </Tabs>
       </div>

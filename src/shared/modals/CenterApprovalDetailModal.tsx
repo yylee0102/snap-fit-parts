@@ -59,12 +59,13 @@ export default function CenterApprovalDetailModal({
       // 개발용 임시 데이터
       const tempData: CarCenterApproval = {
         approvalId: approvalId,
+        requestedAt: "2025-09-08",
+        centerId: 1,
         centerName: "스피드카센터",
         businessNumber: "123-45-67890",
         address: "서울시 강남구 테헤란로 123",
         phone: "02-1234-5678",
         email: "speed@center.com",
-        requestDate: "2025-09-08",
         status: 'PENDING'
       };
       setApprovalData(tempData);
@@ -196,7 +197,7 @@ export default function CenterApprovalDetailModal({
                 <Calendar className="h-4 w-4" />
                 신청일
               </Label>
-              <p>{approvalData.requestDate}</p>
+              <p>{approvalData.requestedAt}</p>
             </div>
           </div>
 

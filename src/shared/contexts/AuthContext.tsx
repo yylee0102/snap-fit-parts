@@ -75,6 +75,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const logout = () => {
     setUser(null);
     localStorage.removeItem("user");
+    localStorage.removeItem("authToken"); // JWT 토큰도 삭제
   };
 
   const updateUser = (userData: Partial<User>) => {
