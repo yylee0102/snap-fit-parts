@@ -50,6 +50,45 @@ class AuthApiService {
   }
 
   /**
+   * 전화번호 인증 코드 발송
+   * POST /api/auth/send-verification-code
+   */
+  async sendVerificationCode(phoneNumber: string): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/auth/send-verification-code`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ phoneNumber }),
+    });
+
+    if (!response.ok) {
+      throw new Error('인증 코드 발송에 실패했습니다.');
+    }
+  }
+
+  /**
+   * 전화번호 인증 코드 확인
+   * POST /api/auth/verify-phone
+   */
+  async verifyPhoneCode(phoneNumber: string, verificationCode: string): Promise<boolean> {
+    const response = await fetch(`${API_BASE_URL}/auth/verify-phone`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ phoneNumber, verificationCode }),
+    });
+
+    if (!response.ok) {
+      throw new Error('인증 코드 확인에 실패했습니다.');
+    }
+
+    const result = await response.json();
+    return result.verified;
+  }
+
+  /**
    * 통합 로그인 (모든 사용자 타입)
    * POST /api/login
    */

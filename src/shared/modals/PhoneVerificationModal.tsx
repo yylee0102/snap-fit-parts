@@ -1,9 +1,11 @@
 // 휴대폰 번호 인증 모달 (임시)
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import authApiService from "@/services/auth.api";
 
 interface PhoneVerificationModalProps {
   open: boolean;
@@ -20,28 +22,102 @@ export default function PhoneVerificationModal({
 }: PhoneVerificationModalProps) {
   const [verificationCode, setVerificationCode] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(180); // 3분
+  const [isSending, setIsSending] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [codeSent, setCodeSent] = useState(false);
+  const { toast } = useToast();
 
-  const handleSendCode = () => {
-    // TODO: 실제 인증코드 발송 API 호출
-    console.log("인증코드 발송:", phoneNumber);
-    alert("인증코드가 발송되었습니다. (임시: 123456)");
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (timeLeft > 0) {
+      interval = setInterval(() => {
+        setTimeLeft(time => time - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [timeLeft]);
+
+  const handleSendCode = async () => {
+    if (!phoneNumber) {
+      toast({
+        title: "오류",
+        description: "전화번호를 입력해주세요.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsSending(true);
+    try {
+      await authApiService.sendVerificationCode(phoneNumber);
+      setCodeSent(true);
+      setTimeLeft(180); // 3분
+      toast({
+        title: "인증코드 발송",
+        description: "인증코드가 발송되었습니다."
+      });
+    } catch (error) {
+      console.error("인증코드 발송 실패:", error);
+      // 개발용 임시 처리
+      setCodeSent(true);
+      setTimeLeft(180);
+      toast({
+        title: "인증코드 발송 (개발용)",
+        description: "임시 인증코드: 123456"
+      });
+    } finally {
+      setIsSending(false);
+    }
   };
 
-  const handleVerify = () => {
+  const handleVerify = async () => {
+    if (!verificationCode || verificationCode.length !== 6) {
+      toast({
+        title: "입력 오류",
+        description: "6자리 인증코드를 입력해주세요.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsVerifying(true);
-    
-    // TODO: 실제 인증 API 호출
-    setTimeout(() => {
-      if (verificationCode === "123456") {
-        alert("인증이 완료되었습니다!");
+    try {
+      const isVerified = await authApiService.verifyPhoneCode(phoneNumber, verificationCode);
+      
+      if (isVerified) {
+        toast({
+          title: "인증 완료",
+          description: "전화번호 인증이 완료되었습니다."
+        });
         onVerified();
         onClose();
       } else {
-        alert("인증코드가 올바르지 않습니다.");
+        toast({
+          title: "인증 실패",
+          description: "인증코드가 올바르지 않습니다.",
+          variant: "destructive"
+        });
       }
+    } catch (error) {
+      console.error("인증 실패:", error);
+      // 개발용 임시 처리
+      if (verificationCode === "123456") {
+        toast({
+          title: "인증 완료 (개발용)",
+          description: "전화번호 인증이 완료되었습니다."
+        });
+        onVerified();
+        onClose();
+      } else {
+        toast({
+          title: "인증 실패",
+          description: "인증코드가 올바르지 않습니다.",
+          variant: "destructive"
+        });
+      }
+    } finally {
       setIsVerifying(false);
-    }, 1000);
+    }
   };
 
   const formatTime = (seconds: number) => {
@@ -69,9 +145,10 @@ export default function PhoneVerificationModal({
               <Button 
                 variant="outline" 
                 onClick={handleSendCode}
+                disabled={isSending || timeLeft > 0}
                 className="shrink-0"
               >
-                인증코드 발송
+                {isSending ? "발송중..." : timeLeft > 0 ? `${Math.floor(timeLeft/60)}:${(timeLeft%60).toString().padStart(2, '0')}` : "인증코드 발송"}
               </Button>
             </div>
           </div>
@@ -88,19 +165,18 @@ export default function PhoneVerificationModal({
                 maxLength={6}
                 className="flex-1"
               />
-              <div className="text-sm text-muted-foreground self-center">
-                {formatTime(timeLeft)}
-              </div>
             </div>
-            <p className="text-xs text-muted-foreground">
-              임시 인증코드: 123456
-            </p>
+            {codeSent && (
+              <p className="text-xs text-muted-foreground">
+                개발용 임시 인증코드: 123456
+              </p>
+            )}
           </div>
 
           <div className="flex gap-2 pt-4">
             <Button 
               onClick={handleVerify}
-              disabled={verificationCode.length !== 6 || isVerifying}
+              disabled={verificationCode.length !== 6 || isVerifying || !codeSent}
               className="flex-1"
             >
               {isVerifying ? "인증 중..." : "인증 확인"}

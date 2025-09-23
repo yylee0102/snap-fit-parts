@@ -20,10 +20,11 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/shared/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, LogIn, UserPlus, Building } from "lucide-react";
+import { Loader2, LogIn, UserPlus, Building, Phone, Check } from "lucide-react";
 import authApiService from "@/services/auth.api";
 import carCenterApiService from "@/services/carCenter.api";
 import { useNavigate } from "react-router-dom";
+import PhoneVerificationModal from "@/shared/modals/PhoneVerificationModal";
 
 interface AuthModalProps {
   open: boolean;
@@ -37,6 +38,18 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  // 전화번호 인증 상태
+  const [phoneVerificationOpen, setPhoneVerificationOpen] = useState(false);
+  const [phoneVerified, setPhoneVerified] = useState(false);
+  
+  // 중복검사 상태
+  const [duplicateChecks, setDuplicateChecks] = useState({
+    idChecked: false,
+    businessNumberChecked: false,
+    idAvailable: false,
+    businessNumberAvailable: false
+  });
+
   // 로그인 폼 상태
   const [loginForm, setLoginForm] = useState({
     username: "",
@@ -49,7 +62,9 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
     password: "",
     confirmPassword: "",
     name: "",
-    phone: ""
+    phone: "",
+    ssn: "",
+    marketingAgreed: false
   });
 
   // 카센터 등록 폼 상태
@@ -64,13 +79,94 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
     description: ""
   });
 
-  const handleInputChange = (form: string, field: string, value: string) => {
+  const handleInputChange = (form: string, field: string, value: string | boolean) => {
     if (form === "login") {
       setLoginForm(prev => ({ ...prev, [field]: value }));
     } else if (form === "userJoin") {
       setUserJoinForm(prev => ({ ...prev, [field]: value }));
+      // 아이디가 변경되면 중복검사 상태 초기화
+      if (field === "username") {
+        setDuplicateChecks(prev => ({ ...prev, idChecked: false, idAvailable: false }));
+      }
     } else if (form === "centerRegister") {
       setCenterRegisterForm(prev => ({ ...prev, [field]: value }));
+      // 아이디나 사업자번호가 변경되면 중복검사 상태 초기화
+      if (field === "username") {
+        setDuplicateChecks(prev => ({ ...prev, idChecked: false, idAvailable: false }));
+      } else if (field === "businessNumber") {
+        setDuplicateChecks(prev => ({ ...prev, businessNumberChecked: false, businessNumberAvailable: false }));
+      }
+    }
+  };
+
+  // 중복검사 함수들
+  const checkIdDuplicate = async (username: string, isCenter: boolean = false) => {
+    if (!username.trim()) {
+      toast({
+        title: "입력 오류",
+        description: "아이디를 입력해주세요.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const result = await carCenterApiService.checkDuplicate('id', username);
+      
+      if (isCenter) {
+        setDuplicateChecks(prev => ({
+          ...prev,
+          idChecked: true,
+          idAvailable: !result.isDuplicate
+        }));
+      }
+
+      toast({
+        title: result.isDuplicate ? "중복된 아이디" : "사용 가능한 아이디",
+        description: result.message,
+        variant: result.isDuplicate ? "destructive" : "default"
+      });
+    } catch (error) {
+      console.error("중복검사 실패:", error);
+      toast({
+        title: "검사 실패",
+        description: "중복검사 중 오류가 발생했습니다.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const checkBusinessNumberDuplicate = async (businessNumber: string) => {
+    if (!businessNumber.trim()) {
+      toast({
+        title: "입력 오류",
+        description: "사업자등록번호를 입력해주세요.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const result = await carCenterApiService.checkDuplicate('businessNumber', businessNumber);
+      
+      setDuplicateChecks(prev => ({
+        ...prev,
+        businessNumberChecked: true,
+        businessNumberAvailable: !result.isDuplicate
+      }));
+
+      toast({
+        title: result.isDuplicate ? "중복된 사업자번호" : "사용 가능한 사업자번호",
+        description: result.message,
+        variant: result.isDuplicate ? "destructive" : "default"
+      });
+    } catch (error) {
+      console.error("중복검사 실패:", error);
+      toast({
+        title: "검사 실패",
+        description: "중복검사 중 오류가 발생했습니다.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -184,6 +280,15 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
       return;
     }
 
+    if (!phoneVerified) {
+      toast({
+        title: "전화번호 인증 필요",
+        description: "전화번호 인증을 완료해주세요.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
       await authApiService.userJoin({
@@ -191,8 +296,8 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
         password: userJoinForm.password,
         name: userJoinForm.name,
         phoneNumber: userJoinForm.phone,
-        ssn: '', // SSN은 별도 처리 필요
-        marketingAgreed: false, // 기본값
+        ssn: userJoinForm.ssn,
+        marketingAgreed: userJoinForm.marketingAgreed,
       });
 
       toast({
@@ -225,6 +330,24 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
       toast({
         title: "비밀번호 불일치",
         description: "비밀번호와 비밀번호 확인이 일치하지 않습니다.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!duplicateChecks.idChecked || !duplicateChecks.idAvailable) {
+      toast({
+        title: "아이디 중복검사 필요",
+        description: "아이디 중복검사를 완료해주세요.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!duplicateChecks.businessNumberChecked || !duplicateChecks.businessNumberAvailable) {
+      toast({
+        title: "사업자번호 중복검사 필요",
+        description: "사업자등록번호 중복검사를 완료해주세요.",
         variant: "destructive"
       });
       return;
@@ -270,7 +393,9 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
       password: "",
       confirmPassword: "",
       name: "",
-      phone: ""
+      phone: "",
+      ssn: "",
+      marketingAgreed: false
     });
     setCenterRegisterForm({
       username: "",
@@ -281,6 +406,13 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
       address: "",
       phone: "",
       description: ""
+    });
+    setPhoneVerified(false);
+    setDuplicateChecks({
+      idChecked: false,
+      businessNumberChecked: false,
+      idAvailable: false,
+      businessNumberAvailable: false
     });
   };
 
@@ -409,20 +541,56 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
                 </div>
               </div>
 
-              <div>
-                <div className="space-y-2">
-                  <Label htmlFor="userJoin-phone">전화번호</Label>
+              <div className="space-y-2">
+                <Label htmlFor="userJoin-phone">전화번호 {phoneVerified && <Check className="inline h-4 w-4 text-green-500 ml-1" />}</Label>
+                <div className="flex gap-2">
                   <Input
                     id="userJoin-phone"
                     value={userJoinForm.phone}
                     onChange={(e) => handleInputChange("userJoin", "phone", e.target.value)}
                     placeholder="전화번호"
                     disabled={isLoading}
+                    className="flex-1"
                   />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setPhoneVerificationOpen(true)}
+                    disabled={!userJoinForm.phone || phoneVerified}
+                    className="shrink-0"
+                  >
+                    <Phone className="h-4 w-4 mr-1" />
+                    {phoneVerified ? "인증완료" : "인증"}
+                  </Button>
                 </div>
               </div>
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="userJoin-ssn">주민등록번호 앞자리</Label>
+                  <Input
+                    id="userJoin-ssn"
+                    value={userJoinForm.ssn}
+                    onChange={(e) => handleInputChange("userJoin", "ssn", e.target.value)}
+                    placeholder="예: 950101"
+                    disabled={isLoading}
+                    maxLength={6}
+                  />
+                </div>
+                <div className="space-y-2 flex items-end">
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={userJoinForm.marketingAgreed}
+                      onChange={(e) => handleInputChange("userJoin", "marketingAgreed", e.target.checked)}
+                      className="rounded"
+                    />
+                    <span className="text-sm">마케팅 수신 동의</span>
+                  </label>
+                </div>
+              </div>
+
+              <Button type="submit" className="w-full" disabled={isLoading || !phoneVerified}>
                 {isLoading ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -440,14 +608,32 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
             <form onSubmit={handleCenterRegister} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="center-username">아이디</Label>
-                  <Input
-                    id="center-username"
-                    value={centerRegisterForm.username}
-                    onChange={(e) => handleInputChange("centerRegister", "username", e.target.value)}
-                    placeholder="아이디"
-                    disabled={isLoading}
-                  />
+                  <Label htmlFor="center-username">
+                    아이디 {duplicateChecks.idChecked && (
+                      duplicateChecks.idAvailable ? 
+                      <Check className="inline h-4 w-4 text-green-500 ml-1" /> : 
+                      <span className="text-red-500 text-xs ml-1">사용불가</span>
+                    )}
+                  </Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="center-username"
+                      value={centerRegisterForm.username}
+                      onChange={(e) => handleInputChange("centerRegister", "username", e.target.value)}
+                      placeholder="아이디"
+                      disabled={isLoading}
+                      className="flex-1"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => checkIdDuplicate(centerRegisterForm.username, true)}
+                      disabled={!centerRegisterForm.username || isLoading}
+                      className="shrink-0"
+                    >
+                      중복검사
+                    </Button>
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="center-centerName">카센터명</Label>
@@ -487,14 +673,32 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="center-businessNumber">사업자등록번호</Label>
-                <Input
-                  id="center-businessNumber"
-                  value={centerRegisterForm.businessNumber}
-                  onChange={(e) => handleInputChange("centerRegister", "businessNumber", e.target.value)}
-                  placeholder="사업자등록번호"
-                  disabled={isLoading}
-                />
+                <Label htmlFor="center-businessNumber">
+                  사업자등록번호 {duplicateChecks.businessNumberChecked && (
+                    duplicateChecks.businessNumberAvailable ? 
+                    <Check className="inline h-4 w-4 text-green-500 ml-1" /> : 
+                    <span className="text-red-500 text-xs ml-1">사용불가</span>
+                  )}
+                </Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="center-businessNumber"
+                    value={centerRegisterForm.businessNumber}
+                    onChange={(e) => handleInputChange("centerRegister", "businessNumber", e.target.value)}
+                    placeholder="000-00-00000"
+                    disabled={isLoading}
+                    className="flex-1"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => checkBusinessNumberDuplicate(centerRegisterForm.businessNumber)}
+                    disabled={!centerRegisterForm.businessNumber || isLoading}
+                    className="shrink-0"
+                  >
+                    중복검사
+                  </Button>
+                </div>
               </div>
 
               <div>
@@ -521,7 +725,11 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
                 />
               </div>
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button 
+                type="submit" 
+                className="w-full" 
+                disabled={isLoading || !duplicateChecks.idAvailable || !duplicateChecks.businessNumberAvailable}
+              >
                 {isLoading ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -538,6 +746,14 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
             </form>
           </TabsContent>
         </Tabs>
+
+        {/* 전화번호 인증 모달 */}
+        <PhoneVerificationModal
+          open={phoneVerificationOpen}
+          onClose={() => setPhoneVerificationOpen(false)}
+          onVerified={() => setPhoneVerified(true)}
+          phoneNumber={userJoinForm.phone}
+        />
       </DialogContent>
     </Dialog>
   );
