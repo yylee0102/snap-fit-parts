@@ -1,3 +1,19 @@
+/**
+ * 카센터 마이페이지 (사장님 페이지)
+ * 
+ * 이 페이지의 역할:
+ * - 카센터 운영자의 예약 관리
+ * - 고객 리뷰 확인 및 관리
+ * - 카센터 정보 수정
+ * - 실시간 예약 현황 파악
+ * 
+ * 왜 필요한가:
+ * - 카센터 사장이 효율적으로 예약을 관리할 수 있는 대시보드
+ * - 고객 피드백(리뷰)을 즉시 확인하고 대응 가능
+ * - 일일 예약 현황을 한눈에 파악하여 운영 계획 수립
+ * - 카센터 정보를 최신 상태로 유지하여 고객 만족도 향상
+ */
+
 // 카센터 마이페이지 (간소화 버전)
 import { useState } from "react";
 import { X, Calendar, Phone, User, Star, Settings } from "lucide-react";
@@ -6,6 +22,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import ProtectedRoute from "@/shared/components/ProtectedRoute";
 
 export default function CenterMyPage() {
   const [selectedReservations, setSelectedReservations] = useState<string[]>([]);
@@ -98,7 +115,8 @@ export default function CenterMyPage() {
   };
 
   return (
-    <PageContainer>
+    <ProtectedRoute allowedUserTypes={["카센터"]} fallbackMessage="카센터 운영자만 접근할 수 있는 페이지입니다.">
+      <PageContainer>
       <div className="container mx-auto px-4 py-6 max-w-4xl">
         {/* 헤더 */}
         <div className="flex justify-between items-center mb-6">
@@ -223,6 +241,7 @@ export default function CenterMyPage() {
           </CardContent>
         </Card>
       </div>
-    </PageContainer>
+      </PageContainer>
+    </ProtectedRoute>
   );
 }

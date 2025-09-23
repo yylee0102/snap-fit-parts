@@ -1,3 +1,19 @@
+/**
+ * 검색 결과 페이지
+ * 
+ * 이 페이지의 역할:
+ * - 중고부품 및 카센터 통합 검색 결과 표시
+ * - 필터링 및 정렬 기능으로 원하는 결과 빠르게 찾기
+ * - 부품과 카센터 정보를 카드 형태로 직관적 표시
+ * - 페이지네이션으로 대량 검색 결과 효율적 탐색
+ * 
+ * 왜 필요한가:
+ * - 사용자가 원하는 부품이나 카센터를 쉽게 찾을 수 있는 중앙 검색 허브
+ * - 다양한 조건으로 필터링하여 최적의 선택지 제공
+ * - 검색부터 구매/예약까지 seamless한 사용자 경험
+ */
+
+// 검색 결과 페이지 - 중고부품 및 카센터 검색 결과 표시 (임시 데이터 사용)
 import { useState } from "react";
 import { Search, Filter, SortDesc } from "lucide-react";
 import PageContainer from "@/shared/components/layout/PageContainer";
@@ -7,7 +23,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-// 검색 결과 페이지 - 중고부품 및 카센터 검색 결과 표시 (임시 데이터 사용)
 export default function SearchResultsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("recent");

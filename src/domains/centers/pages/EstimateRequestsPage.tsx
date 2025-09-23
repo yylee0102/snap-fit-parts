@@ -1,3 +1,19 @@
+/**
+ * 견적 요청 관리 페이지 (카센터용)
+ * 
+ * 이 페이지의 역할:
+ * - 고객들로부터 접수된 견적 요청 확인
+ * - 요청 상태별 분류 및 관리 (대기중/견적완료/수리완료)
+ * - 고객 정보 및 차량 정보 상세 확인
+ * - 견적서 작성 페이지로 연결
+ * 
+ * 왜 필요한가:
+ * - 카센터가 고객 요청을 체계적으로 관리할 수 있는 업무 도구
+ * - 요청부터 완료까지의 전체 프로세스를 한 곳에서 추적
+ * - 고객 대응 시간 단축으로 서비스 품질 향상
+ * - 데이터 기반의 효율적인 카센터 운영 지원
+ */
+
 // 견적 요청 관리 페이지 (임시)
 import { useState } from "react";
 import { FileText, Clock, User, Phone, Calendar, Filter, Eye, Edit } from "lucide-react";
@@ -7,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import ProtectedRoute from "@/shared/components/ProtectedRoute";
 
 export default function EstimateRequestsPage() {
   const [filterStatus, setFilterStatus] = useState("all");
@@ -87,7 +104,8 @@ export default function EstimateRequestsPage() {
   });
 
   return (
-    <PageContainer>
+    <ProtectedRoute allowedUserTypes={["카센터"]} fallbackMessage="카센터 운영자만 접근할 수 있는 페이지입니다.">
+      <PageContainer>
       <div className="container mx-auto px-4 py-6">
         {/* 페이지 헤더 */}
         <div className="flex justify-between items-center mb-6">
@@ -256,6 +274,7 @@ export default function EstimateRequestsPage() {
           </div>
         </div>
       </div>
-    </PageContainer>
+      </PageContainer>
+    </ProtectedRoute>
   );
 }

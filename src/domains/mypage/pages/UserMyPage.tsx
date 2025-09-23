@@ -1,3 +1,19 @@
+/**
+ * 일반 사용자 마이페이지
+ * 
+ * 이 페이지의 역할:
+ * - 일반 사용자(개인)의 개인정보 관리
+ * - 차량 정보 관리
+ * - 견적 요청 내역 확인
+ * - 작성한 리뷰 관리
+ * - 고객센터 문의 및 설정
+ * 
+ * 왜 필요한가:
+ * - 사용자가 자신의 정보를 직접 관리할 수 있는 중앙 허브
+ * - 견적 요청부터 리뷰 작성까지의 전체 이용 내역을 한 곳에서 확인
+ * - 개인정보 수정, 차량 등록 등 필수 기능 제공
+ */
+
 // 일반 사용자 마이페이지 (임시)
 import { useState } from "react";
 import { User, Settings, Car, FileText, MessageSquare, HelpCircle } from "lucide-react";
@@ -6,6 +22,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/shared/contexts/AuthContext";
+import ProtectedRoute from "@/shared/components/ProtectedRoute";
 
 export default function UserMyPage() {
   const { user } = useAuth();
@@ -20,7 +37,8 @@ export default function UserMyPage() {
   ];
 
   return (
-    <PageContainer>
+    <ProtectedRoute allowedUserTypes={["개인"]} fallbackMessage="일반 사용자만 접근할 수 있는 페이지입니다.">
+      <PageContainer>
       <div className="container mx-auto px-4 py-6">
         {/* 사용자 정보 카드 */}
         <Card className="mb-6">
@@ -82,6 +100,7 @@ export default function UserMyPage() {
           </CardContent>
         </Card>
       </div>
-    </PageContainer>
+      </PageContainer>
+    </ProtectedRoute>
   );
 }

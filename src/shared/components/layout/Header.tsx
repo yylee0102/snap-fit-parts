@@ -177,43 +177,6 @@ export default function Header({ className }: HeaderProps) {
               </Button>
             )}
 
-            {/* 임시 로그인 버튼들 */}
-            <div className="flex gap-1 ml-2">
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => {
-                  const tempUser = { id: "user", name: "일반사용자", userType: "개인" as const, isLoggedIn: true };
-                  updateUser(tempUser);
-                }}
-                className="text-xs px-2 py-1 h-6"
-              >
-                일반
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => {
-                  const tempCenter = { id: "center", name: "카센터", userType: "카센터" as const, isLoggedIn: true };
-                  updateUser(tempCenter);
-                }}
-                className="text-xs px-2 py-1 h-6"
-              >
-                카센터
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => {
-                  const tempAdmin = { id: "admin", name: "관리자", userType: "관리자" as const, isLoggedIn: true };
-                  updateUser(tempAdmin);
-                }}
-                className="text-xs px-2 py-1 h-6"
-              >
-                관리자
-              </Button>
-            </div>
-
             {/* 햄버거 메뉴 */}
             <Button variant="ghost" size="sm" className="lg:hidden">
               <Menu className="h-5 w-5" />

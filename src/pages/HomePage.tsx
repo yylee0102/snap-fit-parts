@@ -1,3 +1,19 @@
+/**
+ * 홈페이지 (메인 랜딩 페이지)
+ * 
+ * 이 페이지의 역할:
+ * - 서비스 소개 및 주요 기능 안내
+ * - 빠른 액션 버튼으로 핵심 서비스 접근
+ * - 최신 등록 부품 미리보기
+ * - 신규 방문자를 위한 서비스 가이드
+ * 
+ * 왜 필요한가:
+ * - 첫 방문자에게 서비스 가치를 명확히 전달
+ * - 주요 기능에 빠르게 접근할 수 있는 허브 역할
+ * - 사용자 유입과 전환율 향상을 위한 랜딩 포인트
+ * - 브랜드 인지도 구축 및 신뢰성 제공
+ */
+
 import { Search, MapPin, FileText, MessageCircle, Wrench, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import PageContainer from "@/shared/components/layout/PageContainer";

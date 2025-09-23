@@ -1,3 +1,20 @@
+/**
+ * 관리자 대시보드
+ * 
+ * 이 페이지의 역할:
+ * - 시스템 전체 통계 및 현황 모니터링
+ * - 카센터 가입 승인 관리
+ * - 공지사항 작성 및 관리
+ * - 신고 접수 내역 처리
+ * - 전체 서비스 운영 관리
+ * 
+ * 왜 필요한가:
+ * - 플랫폼 전체의 건전한 운영을 위한 관리 도구
+ * - 카센터 품질 관리를 통한 서비스 신뢰도 향상
+ * - 사용자 안전과 만족을 위한 신고 처리 시스템
+ * - 효율적인 공지사항 전달로 사용자 소통 강화
+ */
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import PageContainer from "@/shared/components/layout/PageContainer";
@@ -7,6 +24,7 @@ import AdminStats from "@/domains/admin/components/AdminStats";
 import AdminCenterApproval from "@/domains/admin/components/AdminCenterApproval";
 import AdminNoticeManagement from "@/domains/admin/components/AdminNoticeManagement";
 import AdminReportManagement from "@/domains/admin/components/AdminReportManagement";
+import ProtectedRoute from "@/shared/components/ProtectedRoute";
 import { BarChart3, Users, MessageSquare, AlertTriangle, Settings } from "lucide-react";
 
 export default function AdminDashboard() {
@@ -36,7 +54,8 @@ export default function AdminDashboard() {
   };
 
   return (
-    <PageContainer>
+    <ProtectedRoute allowedUserTypes={["관리자"]} fallbackMessage="관리자만 접근할 수 있는 페이지입니다.">
+      <PageContainer>
       <div className="container mx-auto px-4 py-6">
         {/* 헤더 */}
         <div className="flex items-center justify-between mb-8">
@@ -109,6 +128,7 @@ export default function AdminDashboard() {
           </TabsContent>
         </Tabs>
       </div>
-    </PageContainer>
+      </PageContainer>
+    </ProtectedRoute>
   );
 }

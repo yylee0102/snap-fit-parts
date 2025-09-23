@@ -33,7 +33,7 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
 
-  // 임시 관리자 사용자로 초기화
+  // 컴포넌트 마운트 시 localStorage에서 사용자 정보 복원
   useEffect(() => {
     const savedUser = localStorage.getItem("user");
     if (savedUser) {
@@ -45,21 +45,25 @@ export function AuthProvider({ children }: AuthProviderProps) {
         localStorage.removeItem("user");
       }
     } else {
-      // 임시로 일반 사용자 설정 (기본값)
-      const tempUser = {
-        id: "user123",
-        name: "일반사용자",
-        email: "user@example.com",
-        phone: "010-1234-5678",
-        userType: "개인" as const,
-        isLoggedIn: true,
-        profileImage: "",
-        rating: 4.5,
-        responseRate: 85,
-        location: "서울시 강남구"
-      };
-      setUser(tempUser);
-      localStorage.setItem("user", JSON.stringify(tempUser));
+      // 실제 서비스에서는 여기서 localStorage나 토큰을 확인하여 로그인 상태를 결정
+      // 개발 단계에서는 임시로 로그인하지 않은 상태로 시작
+      // TODO: 실제 인증 시스템 연동 시 이 부분을 수정해야 함
+      
+      // 임시 개발용 - 자동 로그인 (실제 서비스에서는 제거 필요)
+      // const tempUser = {
+      //   id: "user123",
+      //   name: "일반사용자",
+      //   email: "user@example.com", 
+      //   phone: "010-1234-5678",
+      //   userType: "개인" as const,
+      //   isLoggedIn: true,
+      //   profileImage: "",
+      //   rating: 4.5,
+      //   responseRate: 85,
+      //   location: "서울시 강남구"
+      // };
+      // setUser(tempUser);
+      // localStorage.setItem('user', JSON.stringify(tempUser));
     }
   }, []);
 
