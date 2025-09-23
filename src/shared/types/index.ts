@@ -251,3 +251,47 @@ export interface AnnouncementUpdateReqDTO {
   title?: string;
   content?: string;
 }
+
+// ===== 새로운 엔티티 타입 추가 =====
+export interface UsedPartResDTO {
+  partId: number;
+  centerId: string;
+  centerName: string;
+  partName: string;
+  description: string;
+  price: number;
+  category: string;
+  compatibleCarModel: string;
+  createdAt: string;
+  images: UsedPartImageResDTO[];
+}
+
+export interface UsedPartImageResDTO {
+  imageId: number;
+  imageUrl: string;
+}
+
+export interface UsedPartCreateReqDTO {
+  partName: string;
+  description: string;
+  price: number;
+  category: string;
+  compatibleCarModel: string;
+}
+
+export interface UserResDTO {
+  userId: string;
+  name: string;
+  phoneNumber: string;
+  ssn: string;
+  marketingAgreed: boolean;
+  userCars: UserCarResDTO[];
+}
+
+export interface UserCarResDTO {
+  userCarId: number;
+  carModel: string;
+  carNumber: string;
+  modelYear: number;
+  createdAt: string;
+}

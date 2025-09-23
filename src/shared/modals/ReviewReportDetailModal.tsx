@@ -156,7 +156,7 @@ export default function ReviewReportDetailModal({
                 <User className="h-4 w-4" />
                 신고자
               </Label>
-              <p className="font-semibold">{reportData.reporterName}</p>
+              <p className="font-semibold">{reportData.centerName}</p>
             </div>
             <div className="space-y-2">
               <Label className="text-sm font-medium text-muted-foreground">상태</Label>
@@ -177,7 +177,7 @@ export default function ReviewReportDetailModal({
                 <Calendar className="h-4 w-4" />
                 신고일
               </Label>
-              <p>{reportData.reportDate}</p>
+              <p>{new Date(reportData.createdAt).toLocaleDateString()}</p>
             </div>
           </div>
 
@@ -200,15 +200,15 @@ export default function ReviewReportDetailModal({
           )}
 
           {/* 신고된 리뷰 내용 */}
-          {reportData.reviewContent && (
+          {reportData.content && (
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-muted-foreground">신고된 리뷰 내용</Label>
+              <Label className="text-sm font-medium text-muted-foreground">신고 상세 내용</Label>
               <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
                 <p className="text-sm text-red-800 whitespace-pre-wrap">
-                  {reportData.reviewContent}
+                  {reportData.content}
                 </p>
                 <div className="mt-2 text-xs text-red-600">
-                  ⭐ 1점 | 리뷰 ID: #{reportData.reviewId} | 신고일: {reportData.reportDate}
+                  리뷰 ID: #{reportData.reviewId} | 신고일: {new Date(reportData.createdAt).toLocaleDateString()}
                 </div>
               </div>
             </div>

@@ -61,17 +61,13 @@ export interface ReviewReportReqDTO {
 
 export interface ReviewReportResDTO {
   reportId: number;
-  reportedReviewId: number;
-  reportingCenterName: string;
+  reviewId: number;
+  centerId: number;
+  centerName: string;
   reason: string;
   content: string;
-  status: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
   createdAt: string;
-  // 기존 컴포넌트 호환성을 위한 필드들
-  reviewId?: number;
-  reportDate?: string;
-  reporterName?: string;
-  reviewContent?: string;
 }
 
 // ==================== 관리자 API 서비스 ====================

@@ -61,21 +61,23 @@ export default function AdminReportManagement() {
       const tempReports: ReviewReportResDTO[] = [
         {
           reportId: 1,
-          reportedReviewId: 101,
-          reportingCenterName: "홍길동 센터",
+          reviewId: 101,
+          centerId: 1,
+          centerName: "홍길동 카센터",
           reason: "부적절한 언어 사용",
           content: "리뷰에 욕설이 포함되어 있습니다.",
           status: 'PENDING',
-          createdAt: "2025-09-08T14:30:00"
+          createdAt: "2025-09-08T14:30:00Z"
         },
         {
           reportId: 2,
-          reportedReviewId: 102,
-          reportingCenterName: "김영희 센터", 
+          reviewId: 102,
+          centerId: 2,
+          centerName: "김영희 카센터",
           reason: "허위 리뷰 의심",
           content: "허위 정보가 포함되어 있습니다.",
           status: 'PENDING',
-          createdAt: "2025-09-07T16:45:00"
+          createdAt: "2025-09-07T16:45:00Z"
         }
       ];
       setReports(tempReports);
@@ -252,7 +254,7 @@ export default function AdminReportManagement() {
               ) : (
                 reports.map((report) => (
                   <TableRow key={report.reportId}>
-                    <TableCell>{report.reporterName}</TableCell>
+                    <TableCell>{report.centerName}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <span className="max-w-xs truncate">{report.reason}</span>
@@ -260,7 +262,7 @@ export default function AdminReportManagement() {
                       </div>
                     </TableCell>
                     <TableCell>#{report.reviewId}</TableCell>
-                    <TableCell>{report.reportDate}</TableCell>
+                    <TableCell>{new Date(report.createdAt).toLocaleDateString()}</TableCell>
                     <TableCell>{getStatusBadge(report.status)}</TableCell>
                     <TableCell>
                       <div className="flex gap-2">

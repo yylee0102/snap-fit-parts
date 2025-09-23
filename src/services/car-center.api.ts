@@ -63,11 +63,12 @@ export interface ReviewReportReqDTO {
 
 export interface ReviewReportResDTO {
   reportId: number;
-  reportedReviewId: number;
-  reportingCenterName: string;
+  reviewId: number;
+  centerId: number;
+  centerName: string;
   reason: string;
   content: string;
-  status: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
   createdAt: string;
 }
 

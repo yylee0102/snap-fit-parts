@@ -157,7 +157,7 @@ export default function ReviewReportManagementPage() {
     switch (status) {
       case "PENDING":
         return <Badge className="bg-yellow-100 text-yellow-800">처리 대기</Badge>;
-      case "PROCESSED":
+      case "APPROVED":
         return <Badge className="bg-green-100 text-green-800">처리 완료</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
@@ -217,7 +217,7 @@ export default function ReviewReportManagementPage() {
                   <div className="ml-2">
                     <p className="text-sm font-medium text-muted-foreground">처리 완료</p>
                     <p className="text-2xl font-bold text-green-600">
-                      {reports.filter(r => r.status === 'PROCESSED').length}
+                      {reports.filter(r => r.status === 'APPROVED').length}
                     </p>
                   </div>
                 </div>
@@ -231,7 +231,7 @@ export default function ReviewReportManagementPage() {
                   <div className="ml-2">
                     <p className="text-sm font-medium text-muted-foreground">오늘 신고</p>
                     <p className="text-2xl font-bold text-blue-600">
-                      {reports.filter(r => r.reportDate === "2025-09-08").length}
+                      {reports.filter(r => new Date(r.createdAt).toDateString() === new Date().toDateString()).length}
                     </p>
                   </div>
                 </div>
@@ -251,7 +251,7 @@ export default function ReviewReportManagementPage() {
                       <SelectContent>
                         <SelectItem value="all">전체</SelectItem>
                         <SelectItem value="PENDING">처리 대기</SelectItem>
-                        <SelectItem value="PROCESSED">처리 완료</SelectItem>
+                        <SelectItem value="APPROVED">처리 완료</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -299,7 +299,7 @@ export default function ReviewReportManagementPage() {
                     filteredReports.map((report) => (
                       <TableRow key={report.reportId}>
                         <TableCell className="font-mono">#{report.reportId}</TableCell>
-                        <TableCell>{report.reporterName}</TableCell>
+                        <TableCell>{report.centerName}</TableCell>
                         <TableCell>
                           <div className="max-w-xs">
                             <p className="truncate">{report.reason}</p>
@@ -309,11 +309,11 @@ export default function ReviewReportManagementPage() {
                         <TableCell>
                           <div className="max-w-xs">
                             <p className="text-sm text-muted-foreground truncate">
-                              {report.reviewContent?.substring(0, 50)}...
+                              {report.content?.substring(0, 50)}...
                             </p>
                           </div>
                         </TableCell>
-                        <TableCell>{formatDate(report.reportDate)}</TableCell>
+                        <TableCell>{formatDate(report.createdAt)}</TableCell>
                         <TableCell>{getStatusBadge(report.status)}</TableCell>
                         <TableCell>
                           <div className="flex gap-2">
