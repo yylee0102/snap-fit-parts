@@ -9,28 +9,14 @@ import { User, Heart, ShoppingBag, Car, FileText, Star, Settings, LogOut, Messag
 import { formatKRW, formatTimeAgo } from "@/shared/utils/format";
 
 interface UserProfile {
-  id: string;
+  userId: string;
   name: string;
-  email: string;
-  phone: string;
-  userType: "개인" | "사장님" | "관리자";
-  profileImage?: string;
-  rating?: number;
-  responseRate?: number;
-  location?: string;
-  joinDate: string;
-}
-
-interface MyActivity {
-  estimates: number;
-  purchases: number;
-  reviews: number;
-  favorites: number;
+  phoneNumber: string;
+  marketingAgreed: boolean;
 }
 
 export default function MyPage() {
   const [user, setUser] = useState<UserProfile | null>(null);
-  const [activity, setActivity] = useState<MyActivity | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -45,26 +31,13 @@ export default function MyPage() {
 
       // 임시 데이터 (실제로는 API 호출)
       const mockUser: UserProfile = {
-        id: "user1",
+        userId: "user1",
         name: "김현대",
-        email: "kim@example.com",
-        phone: "010-1234-5678",
-        userType: "개인",
-        profileImage: "/placeholder.svg",
-        rating: 4.8,
-        location: "서울시 강남구",
-        joinDate: "2023-06-15T00:00:00Z"
-      };
-
-      const mockActivity: MyActivity = {
-        estimates: 12,
-        purchases: 8,
-        reviews: 15,
-        favorites: 23
+        phoneNumber: "010-1234-5678",
+        marketingAgreed: true
       };
 
       setUser(mockUser);
-      setActivity(mockActivity);
     } catch (error) {
       console.error("프로필 조회 실패:", error);
     } finally {
@@ -104,7 +77,6 @@ export default function MyPage() {
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
               <Avatar className="h-20 w-20">
-                <AvatarImage src={user.profileImage} />
                 <AvatarFallback className="text-xl">
                   <User className="h-8 w-8" />
                 </AvatarFallback>
@@ -113,15 +85,11 @@ export default function MyPage() {
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
                   <h1 className="text-2xl font-bold text-on-surface">{user.name}</h1>
-                  <Badge variant="secondary">{user.userType}</Badge>
+                  <Badge variant="secondary">개인 사용자</Badge>
                 </div>
-                <p className="text-on-surface-variant">{user.email}</p>
-                <p className="text-on-surface-variant">{user.phone}</p>
-                {user.location && (
-                  <p className="text-sm text-on-surface-variant">{user.location}</p>
-                )}
+                <p className="text-on-surface-variant">{user.phoneNumber}</p>
                 <p className="text-sm text-on-surface-variant">
-                  가입일: {formatTimeAgo(user.joinDate)}
+                  마케팅 수신 동의: {user.marketingAgreed ? '동의' : '거부'}
                 </p>
               </div>
 
@@ -130,52 +98,35 @@ export default function MyPage() {
                 프로필 수정
               </Button>
             </div>
-
-            {user.rating && (
-              <div className="mt-4 flex items-center gap-4">
-                <div className="flex items-center gap-1">
-                  <Star className="h-4 w-4 fill-primary text-primary" />
-                  <span className="font-medium">{user.rating}</span>
-                  <span className="text-sm text-on-surface-variant">평점</span>
-                </div>
-                {user.responseRate && (
-                  <div className="text-sm text-on-surface-variant">
-                    응답률 {user.responseRate}%
-                  </div>
-                )}
-              </div>
-            )}
           </CardContent>
         </Card>
 
-        {/* 활동 통계 */}
-        {activity && (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            <Card>
-              <CardContent className="p-4 text-center">
-                <FileText className="h-8 w-8 text-primary mx-auto mb-2" />
-                <div className="text-2xl font-bold text-on-surface">{activity.estimates}</div>
-                <div className="text-sm text-on-surface-variant">견적 요청</div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="p-4 text-center">
-                <MessageSquare className="h-8 w-8 text-primary mx-auto mb-2" />
-                <div className="text-2xl font-bold text-on-surface">{activity.reviews}</div>
-                <div className="text-sm text-on-surface-variant">작성한 리뷰</div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="p-4 text-center">
-                <Heart className="h-8 w-8 text-primary mx-auto mb-2" />
-                <div className="text-2xl font-bold text-on-surface">{activity.favorites}</div>
-                <div className="text-sm text-on-surface-variant">찜한 항목</div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
+        {/* 활동 통계 - 기본 카드 */}
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <Card>
+            <CardContent className="p-4 text-center">
+              <FileText className="h-8 w-8 text-primary mx-auto mb-2" />
+              <div className="text-2xl font-bold text-on-surface">0</div>
+              <div className="text-sm text-on-surface-variant">견적 요청</div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-4 text-center">
+              <MessageSquare className="h-8 w-8 text-primary mx-auto mb-2" />
+              <div className="text-2xl font-bold text-on-surface">0</div>
+              <div className="text-sm text-on-surface-variant">작성한 리뷰</div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-4 text-center">
+              <Heart className="h-8 w-8 text-primary mx-auto mb-2" />
+              <div className="text-2xl font-bold text-on-surface">0</div>
+              <div className="text-sm text-on-surface-variant">문의 내역</div>
+            </CardContent>
+          </Card>
+        </div>
 
         {/* 메뉴 탭 */}
         <Tabs defaultValue="estimates" className="w-full">

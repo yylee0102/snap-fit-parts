@@ -27,73 +27,81 @@ import ProtectedRoute from "@/shared/components/ProtectedRoute";
 export default function CenterMyPage() {
   const [selectedReservations, setSelectedReservations] = useState<string[]>([]);
 
-  // 임시 예약 데이터
-  const reservations = [
+  // 예약 관련 타입 정의 (엔티티에 맞춤)
+  interface Reservation {
+    reservationId: number;
+    centerId: string;
+    customerName: string;
+    customerPhone: string;
+    carInfo: string;
+    reservationDate: string;
+    requestDetails: string;
+  }
+
+  // 임시 예약 데이터 (실제 엔티티 구조)
+  const reservations: Reservation[] = [
     {
-      id: "1",
+      reservationId: 1,
+      centerId: "center1",
       customerName: "이영진",
-      phone: "010-1234-1111",
-      vehicle: "GV80",
-      datetime: "08/10 14:00",
-      service: "엔진오일 교체"
+      customerPhone: "010-1234-1111",
+      carInfo: "GV80",
+      reservationDate: "2024-08-10T14:00:00Z",
+      requestDetails: "엔진오일 교체"
     },
     {
-      id: "2", 
+      reservationId: 2,
+      centerId: "center1", 
       customerName: "김철수",
-      phone: "010-5678-2222",
-      vehicle: "K5",
-      datetime: "08/10 16:00",
-      service: "타이어 4개 교체"
+      customerPhone: "010-5678-2222",
+      carInfo: "K5",
+      reservationDate: "2024-08-10T16:00:00Z",
+      requestDetails: "타이어 4개 교체"
     },
     {
-      id: "3",
+      reservationId: 3,
+      centerId: "center1",
       customerName: "김태진",
-      phone: "010-3333-4444", 
-      vehicle: "Tesla Model 3",
-      datetime: "08/11 10:00",
-      service: "전기 점검"
-    },
-    {
-      id: "4",
-      customerName: "박영민",
-      phone: "010-5555-6666",
-      vehicle: "Porsche 911",
-      datetime: "08/11 11:30",
-      service: "종합점검"
-    },
-    {
-      id: "5",
-      customerName: "한소희",
-      phone: "010-7777-8888",
-      vehicle: "Audi A6",
-      datetime: "08/12 09:00",
-      service: "브레이크 패드 교체"
+      customerPhone: "010-3333-4444", 
+      carInfo: "Tesla Model 3",
+      reservationDate: "2024-08-11T10:00:00Z",
+      requestDetails: "전기 점검"
     }
   ];
 
-  // 임시 후기 데이터
-  const reviews = [
+  // 리뷰 관련 타입 정의 (엔티티에 맞춤)
+  interface Review {
+    reviewId: number;
+    centerName: string;
+    writerName: string;
+    rating: number;
+    content: string;
+    createdAt: string;
+  }
+
+  // 임시 후기 데이터 (실제 엔티티 구조)
+  const reviews: Review[] = [
     {
-      id: "1",
+      reviewId: 1,
+      centerName: "우리카센터",
+      writerName: "김민수",
       content: "친절하고 꼼꼼하게 카센터 정비를 수행해 주셨습니다",
-      author: "김민수",
       rating: 5,
-      date: "2022-09-06",
-      status: "completed"
+      createdAt: "2022-09-06T00:00:00Z"
     },
     {
-      id: "2",
+      reviewId: 2,
+      centerName: "우리카센터",
+      writerName: "최영민",
       content: "정말이지 친절하게 응대하고.",
-      author: "최영민",
       rating: 5,
-      date: "2022-09-07", 
-      status: "pending"
+      createdAt: "2022-09-07T00:00:00Z"
     }
   ];
 
-  const handleReservationSelect = (id: string) => {
+  const handleReservationSelect = (id: number) => {
     setSelectedReservations(prev => 
-      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+      prev.includes(id.toString()) ? prev.filter(item => item !== id.toString()) : [...prev, id.toString()]
     );
   };
 
@@ -101,7 +109,7 @@ export default function CenterMyPage() {
     if (selectedReservations.length === reservations.length) {
       setSelectedReservations([]);
     } else {
-      setSelectedReservations(reservations.map(r => r.id));
+      setSelectedReservations(reservations.map(r => r.reservationId.toString()));
     }
   };
 
@@ -159,18 +167,18 @@ export default function CenterMyPage() {
 
             {/* 예약 목록 */}
             {reservations.map((reservation) => (
-              <div key={reservation.id} className="grid grid-cols-7 gap-4 p-3 border-b items-center">
+              <div key={reservation.reservationId} className="grid grid-cols-7 gap-4 p-3 border-b items-center">
                 <div className="flex items-center">
                   <Checkbox 
-                    checked={selectedReservations.includes(reservation.id)}
-                    onCheckedChange={() => handleReservationSelect(reservation.id)}
+                    checked={selectedReservations.includes(reservation.reservationId.toString())}
+                    onCheckedChange={() => handleReservationSelect(reservation.reservationId)}
                   />
                 </div>
                 <div>{reservation.customerName}</div>
-                <div>{reservation.phone}</div>
-                <div>{reservation.vehicle}</div>
-                <div>{reservation.datetime}</div>
-                <div>{reservation.service}</div>
+                <div>{reservation.customerPhone}</div>
+                <div>{reservation.carInfo}</div>
+                <div>{new Date(reservation.reservationDate).toLocaleDateString()}</div>
+                <div>{reservation.requestDetails}</div>
                 <div>
                   <Button variant="outline" size="sm">관리</Button>
                 </div>
@@ -218,13 +226,13 @@ export default function CenterMyPage() {
 
             {/* 후기 목록 */}
             {reviews.map((review) => (
-              <div key={review.id} className="grid grid-cols-5 gap-4 p-3 border-b items-center">
+              <div key={review.reviewId} className="grid grid-cols-5 gap-4 p-3 border-b items-center">
                 <div className="text-sm">{review.content}</div>
-                <div>{review.author}</div>
+                <div>{review.writerName}</div>
                 <div className="flex">
                   {renderStars(review.rating)}
                 </div>
-                <div>{review.date}</div>
+                <div>{new Date(review.createdAt).toLocaleDateString()}</div>
                 <div className="flex gap-1">
                   <Button variant="outline" size="sm" className="bg-teal-600 hover:bg-teal-700 text-white">답글</Button>
                   <Button variant="outline" size="sm" className="bg-red-500 hover:bg-red-600 text-white">신고</Button>

@@ -12,14 +12,11 @@ import { useModal } from "@/shared/hooks/useModal";
 import ContactModal from "../modals/ContactModal";
 
 interface Notice {
-  id: string;
+  announcementId: number;
   title: string;
   content: string;
-  category: "공지" | "이벤트" | "업데이트" | "점검";
-  isPinned: boolean;
-  isImportant: boolean;
-  viewCount: number;
   createdAt: string;
+  updatedAt?: string;
 }
 
 interface FAQ {
@@ -56,33 +53,21 @@ export default function SupportPage() {
   // 임시 데이터
   const mockNotices: Notice[] = [
     {
-      id: "1",
+      announcementId: 1,
       title: "서비스 점검 안내",
       content: "2024년 1월 20일 새벽 2시~4시까지 서비스 점검이 있을 예정입니다.",
-      category: "점검",
-      isPinned: true,
-      isImportant: true,
-      viewCount: 1234,
       createdAt: "2024-01-15T09:00:00Z"
     },
     {
-      id: "2",
+      announcementId: 2,
       title: "새로운 카센터 등록 기능 출시",
       content: "이제 더 많은 카센터들이 서비스에 등록할 수 있습니다.",
-      category: "업데이트",
-      isPinned: false,
-      isImportant: false,
-      viewCount: 892,
       createdAt: "2024-01-14T14:30:00Z"
     },
     {
-      id: "3",
+      announcementId: 3,
       title: "신년 이벤트 - 견적 요청 시 할인 쿠폰 지급",
       content: "1월 한 달간 견적 요청 시 5,000원 할인 쿠폰을 드립니다.",
-      category: "이벤트",
-      isPinned: false,
-      isImportant: true,
-      viewCount: 2156,
       createdAt: "2024-01-10T10:00:00Z"
     }
   ];
@@ -122,9 +107,9 @@ export default function SupportPage() {
     }
   ];
 
-  const handleNoticeClick = (noticeId: string) => {
-    // API 연결: 공지사항 상세 조회 및 조회수 증가
-    // GET /api/notices/:noticeId
+  const handleNoticeClick = (noticeId: number) => {
+    // API 연결: 공지사항 상세 조회
+    // GET /api/announcements/:noticeId
     console.log("공지사항 상세:", noticeId);
   };
 
@@ -146,15 +131,6 @@ export default function SupportPage() {
     return matchesCategory && matchesKeyword;
   });
 
-  const getCategoryBadgeVariant = (category: string) => {
-    switch (category) {
-      case "점검": return "destructive";
-      case "이벤트": return "default";
-      case "업데이트": return "secondary";
-      case "공지": return "outline";
-      default: return "outline";
-    }
-  };
 
   return (
     <PageContainer>
@@ -236,24 +212,13 @@ export default function SupportPage() {
               <div className="space-y-3">
                 {mockNotices.map((notice) => (
                   <Card 
-                    key={notice.id}
+                    key={notice.announcementId}
                     className="cursor-pointer hover:shadow-md transition-shadow"
-                    onClick={() => handleNoticeClick(notice.id)}
+                    onClick={() => handleNoticeClick(notice.announcementId)}
                   >
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            {notice.isPinned && (
-                              <Badge variant="destructive" className="text-xs">📌 고정</Badge>
-                            )}
-                            {notice.isImportant && (
-                              <Badge variant="default" className="text-xs">중요</Badge>
-                            )}
-                            <Badge variant={getCategoryBadgeVariant(notice.category)} className="text-xs">
-                              {notice.category}
-                            </Badge>
-                          </div>
                           <h3 className="font-medium text-on-surface mb-1">
                             {notice.title}
                           </h3>
@@ -262,7 +227,6 @@ export default function SupportPage() {
                           </p>
                           <div className="flex items-center gap-4 mt-2 text-xs text-on-surface-variant">
                             <span>{formatTimeAgo(notice.createdAt)}</span>
-                            <span>조회 {notice.viewCount.toLocaleString()}</span>
                           </div>
                         </div>
                         <ChevronRight className="h-5 w-5 text-on-surface-variant" />
