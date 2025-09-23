@@ -23,7 +23,7 @@ export default function CenterMyPage() {
   const stats = [
     { label: "오늘 예약", value: "5건", color: "text-blue-600" },
     { label: "대기중 견적", value: "12건", color: "text-orange-600" },
-    { label: "이번달 매출", value: "2,450만원", color: "text-green-600" },
+    { label: "완료된 수리", value: "8건", color: "text-green-600" },
     { label: "평균 평점", value: "4.8", color: "text-purple-600" },
   ];
 

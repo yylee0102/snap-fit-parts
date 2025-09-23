@@ -141,12 +141,20 @@ export default function Header({ className }: HeaderProps) {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48 bg-surface border-outline-variant">
-                  <DropdownMenuItem onClick={() => navigate("/mypage")}>
+                  <DropdownMenuItem onClick={() => {
+                    if (user?.userType === "개인") {
+                      navigate("/mypage");
+                    } else if (user?.userType === "카센터") {
+                      navigate("/center/mypage");
+                    } else if (user?.userType === "관리자") {
+                      navigate("/admin/mypage");
+                    }
+                  }}>
                     마이페이지
                   </DropdownMenuItem>
                   {user?.userType === "카센터" && (
-                    <DropdownMenuItem onClick={() => navigate("/center/mypage")}>
-                      카센터 관리
+                    <DropdownMenuItem onClick={() => navigate("/center/estimates/requests")}>
+                      견적 관리
                     </DropdownMenuItem>
                   )}
                   {user?.userType === "관리자" && (
