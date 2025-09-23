@@ -29,6 +29,11 @@ import MyPage from "./domains/mypage/pages/MyPage";
 import UserMyPage from "./domains/mypage/pages/UserMyPage";
 import CenterMyPage from "./domains/centers/pages/CenterMyPage";
 import AdminDashboard from "./domains/admin/pages/AdminDashboard";
+import { ReservationManagementPage } from "./domains/centers/pages/ReservationManagementPage";
+import { ReviewReplyManagementPage } from "./domains/centers/pages/ReviewReplyManagementPage";
+import { MyQuoteRequestsPage } from "./domains/users/pages/MyQuoteRequestsPage";
+import { MyReviewsPage } from "./domains/users/pages/MyReviewsPage";
+import { MyCompletedRepairsPage } from "./domains/users/pages/MyCompletedRepairsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -66,8 +71,15 @@ const App = () => (
           <Route path="/center/estimates/create/:requestId?" element={<CenterEstimateCreatePage />} />
           <Route path="/center/estimates/sent" element={<SentEstimatesPage />} />
           
+          {/* 카센터 추가 관리 페이지 */}
+          <Route path="/center/reservations" element={<ReservationManagementPage />} />
+          <Route path="/center/review-replies" element={<ReviewReplyManagementPage />} />
+
           {/* 사용자별 마이페이지 */}
           <Route path="/user/mypage" element={<UserMyPage />} />
+          <Route path="/user/quote-requests" element={<MyQuoteRequestsPage />} />
+          <Route path="/user/reviews" element={<MyReviewsPage />} />
+          <Route path="/user/completed-repairs" element={<MyCompletedRepairsPage />} />
           
           {/* 고객센터 관련 */}
           <Route path="/support" element={<SupportPage />} />

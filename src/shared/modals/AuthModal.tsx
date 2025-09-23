@@ -238,7 +238,7 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
     } catch (error) {
       console.error("로그인 실패:", error);
       
-      // 개발용 임시 로그인 추가
+      // 테스트 계정들 - 프론트엔드 개발용
       if (loginForm.username === "admin" && loginForm.password === "admin") {
         const tempUser = {
           id: "admin1",
