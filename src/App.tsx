@@ -7,6 +7,7 @@ import { AuthProvider } from "@/shared/contexts/AuthContext";
 
 // Pages
 import HomePage from "./pages/HomePage";
+import AboutPage from "./pages/AboutPage";
 import WBListPage from "./domains/wb/pages/WBListPage";
 import WBDetailPage from "./domains/wb/pages/WBDetailPage";
 import CentersListPage from "./domains/centers/pages/CentersListPage";
@@ -84,7 +85,7 @@ const App = () => (
           <Route path="/admin/reports" element={<AdminDashboard />} />
           
           {/* 기타 페이지들 */}
-          <Route path="/about" element={<MyPage />} />
+          <Route path="/about" element={<AboutPage />} />
           <Route path="/terms" element={<MyPage />} />
           <Route path="/privacy" element={<MyPage />} />
           
