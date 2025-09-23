@@ -102,7 +102,7 @@ export default function HomePage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
             <Button 
               size="lg"
-              onClick={() => navigate("/wb")}
+              onClick={() => navigate("/search")}
               className="bg-primary hover:bg-primary/90"
             >
               부품 찾기
@@ -148,7 +148,7 @@ export default function HomePage() {
             <h2 className="text-2xl font-bold text-on-surface">최신 등록 부품</h2>
             <Button 
               variant="outline"
-              onClick={() => navigate("/wb")}
+              onClick={() => navigate("/search")}
             >
               더보기
             </Button>
@@ -159,7 +159,7 @@ export default function HomePage() {
               <Card 
                 key={part.id}
                 className="cursor-pointer hover:shadow-elevation-2 transition-all"
-                onClick={() => navigate(`/wb/${part.id}`)}
+                onClick={() => navigate(`/search`)}
               >
                 <CardContent className="p-4">
                   <div className="flex gap-4">

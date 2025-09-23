@@ -1,49 +1,45 @@
-// 카센터 마이페이지 (임시)
+// 관리자 마이페이지 (임시)
 import { useState } from "react";
-import { Store, Users, Calendar, FileText, Star, Settings, BarChart3 } from "lucide-react";
+import { Shield, Users, Building, FileText, BarChart3, Settings } from "lucide-react";
 import PageContainer from "@/shared/components/layout/PageContainer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/shared/contexts/AuthContext";
 
-export default function CenterMyPage() {
+export default function AdminMyPage() {
   const { user } = useAuth();
 
   const menuItems = [
-    { icon: Store, label: "카센터 정보 관리", href: "/center/profile" },
-    { icon: Calendar, label: "예약 관리", href: "/center/reservations" },
-    { icon: FileText, label: "견적 관리", href: "/center/estimates" },
-    { icon: Users, label: "고객 관리", href: "/center/customers" },
-    { icon: Star, label: "리뷰 관리", href: "/center/reviews" },
-    { icon: BarChart3, label: "매출 통계", href: "/center/statistics" },
-    { icon: Settings, label: "설정", href: "/center/settings" },
+    { icon: Users, label: "사용자 관리", href: "/admin/users" },
+    { icon: Building, label: "카센터 승인 관리", href: "/admin/centers" },
+    { icon: FileText, label: "공지사항 관리", href: "/admin/notices" },
+    { icon: BarChart3, label: "신고 관리", href: "/admin/reports" },
+    { icon: BarChart3, label: "통계 관리", href: "/admin/statistics" },
+    { icon: Settings, label: "시스템 설정", href: "/admin/settings" },
   ];
 
   const stats = [
-    { label: "오늘 예약", value: "5건", color: "text-blue-600" },
-    { label: "대기중 견적", value: "12건", color: "text-orange-600" },
-    { label: "이번달 매출", value: "2,450만원", color: "text-green-600" },
-    { label: "평균 평점", value: "4.8", color: "text-purple-600" },
+    { label: "전체 사용자", value: "1,234명", color: "text-blue-600" },
+    { label: "승인 대기 카센터", value: "8개", color: "text-orange-600" },
+    { label: "신규 공지사항", value: "3건", color: "text-green-600" },
+    { label: "처리 대기 신고", value: "2건", color: "text-red-600" },
   ];
 
   return (
     <PageContainer>
       <div className="container mx-auto px-4 py-6">
-        {/* 카센터 정보 카드 */}
+        {/* 관리자 정보 카드 */}
         <Card className="mb-6">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
-                <Store className="w-8 h-8 text-primary" />
+                <Shield className="w-8 h-8 text-primary" />
               </div>
               <div className="flex-1">
-                <h2 className="text-xl font-semibold">{user?.name} 카센터</h2>
-                <p className="text-muted-foreground">{user?.location}</p>
-                <div className="flex gap-2 mt-2">
-                  <Badge variant="outline">카센터</Badge>
-                  <Badge className="bg-green-100 text-green-800">승인완료</Badge>
-                </div>
+                <h2 className="text-xl font-semibold">{user?.name}</h2>
+                <p className="text-muted-foreground">시스템 관리자</p>
+                <Badge className="mt-2 bg-red-100 text-red-800">관리자</Badge>
               </div>
               <Button variant="outline">
                 <Settings className="w-4 h-4 mr-2" />
@@ -87,19 +83,19 @@ export default function CenterMyPage() {
         {/* 최근 활동 */}
         <Card>
           <CardContent className="p-6">
-            <h3 className="text-lg font-semibold mb-4">최근 활동</h3>
+            <h3 className="text-lg font-semibold mb-4">최근 관리 활동</h3>
             <div className="space-y-3">
               <div className="flex justify-between items-center py-2 border-b">
-                <span>김○○님 범퍼 수리 견적 완료</span>
-                <span className="text-sm text-muted-foreground">오늘 14:30</span>
+                <span>○○카센터 승인 완료</span>
+                <span className="text-sm text-muted-foreground">오늘 15:20</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b">
-                <span>이○○님 엔진오일 교체 예약</span>
-                <span className="text-sm text-muted-foreground">오늘 11:20</span>
+                <span>부적절한 리뷰 신고 처리 완료</span>
+                <span className="text-sm text-muted-foreground">오늘 12:30</span>
               </div>
               <div className="flex justify-between items-center py-2">
-                <span>박○○님 헤드라이트 수리 완료</span>
-                <span className="text-sm text-muted-foreground">어제 16:45</span>
+                <span>신규 공지사항 게시</span>
+                <span className="text-sm text-muted-foreground">어제 17:00</span>
               </div>
             </div>
           </CardContent>

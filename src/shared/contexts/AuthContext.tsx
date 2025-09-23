@@ -45,17 +45,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
         localStorage.removeItem("user");
       }
     } else {
-      // 임시로 관리자 사용자 설정
+      // 임시로 일반 사용자 설정 (기본값)
       const tempUser = {
-        id: "admin123",
-        name: "관리자",
-        email: "admin@carparter.com",
-        phone: "02-1234-5678",
-        userType: "관리자" as const,
+        id: "user123",
+        name: "일반사용자",
+        email: "user@example.com",
+        phone: "010-1234-5678",
+        userType: "개인" as const,
         isLoggedIn: true,
         profileImage: "",
-        rating: 5.0,
-        responseRate: 100,
+        rating: 4.5,
+        responseRate: 85,
         location: "서울시 강남구"
       };
       setUser(tempUser);

@@ -64,9 +64,10 @@ const App = () => (
           <Route path="/chat" element={<ChatPage />} />
           <Route path="/chat/:roomId" element={<ChatPage />} />
           
-          {/* 마이페이지 관련 */}
+          {/* 마이페이지 관련 - 사용자 유형별 분리 */}
           <Route path="/mypage" element={<MyPage />} />
           <Route path="/center/mypage" element={<CenterMyPage />} />
+          <Route path="/admin/mypage" element={<MyPage />} />
           <Route path="/owner" element={<MyPage />} />
           
           {/* 관리자 관련 */}

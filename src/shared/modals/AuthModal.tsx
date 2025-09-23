@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Eye, EyeOff } from "lucide-react";
 import VehicleRegisterModal from "./VehicleRegisterModal";
+import PhoneVerificationModal from "./PhoneVerificationModal";
 
 interface AuthModalProps {
   open: boolean;
@@ -21,6 +22,7 @@ export default function AuthModal({ open, onClose, onLogin }: AuthModalProps) {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [showVehicleModal, setShowVehicleModal] = useState(false);
+  const [showPhoneVerification, setShowPhoneVerification] = useState(false);
   
   // 로그인 폼 데이터
   const [loginData, setLoginData] = useState({
@@ -347,14 +349,27 @@ export default function AuthModal({ open, onClose, onLogin }: AuthModalProps) {
 
                 <div className="space-y-2">
                   <Label htmlFor="phone">휴대폰번호</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    placeholder="휴대폰번호를 입력하세요"
-                    value={signupData.phone}
-                    onChange={(e) => setSignupData(prev => ({ ...prev, phone: e.target.value }))}
-                    required
-                  />
+                  <div className="flex gap-2">
+                    <Input
+                      id="phone"
+                      type="tel"
+                      placeholder="휴대폰번호를 입력하세요"
+                      value={signupData.phone}
+                      onChange={(e) => setSignupData(prev => ({ ...prev, phone: e.target.value }))}
+                      required
+                      className="flex-1"
+                    />
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      size="sm" 
+                      className="bg-teal-600 text-white hover:bg-teal-700 shrink-0"
+                      onClick={() => setShowPhoneVerification(true)}
+                      disabled={!signupData.phone}
+                    >
+                      인증
+                    </Button>
+                  </div>
                 </div>
 
                 {/* 약관 동의 */}
@@ -440,6 +455,14 @@ export default function AuthModal({ open, onClose, onLogin }: AuthModalProps) {
         open={showVehicleModal} 
         onClose={() => setShowVehicleModal(false)}
         onComplete={() => setShowVehicleModal(false)}
+      />
+      
+      {/* 휴대폰 인증 모달 */}
+      <PhoneVerificationModal
+        open={showPhoneVerification}
+        onClose={() => setShowPhoneVerification(false)}
+        onVerified={() => alert("휴대폰 인증이 완료되었습니다!")}
+        phoneNumber={signupData.phone}
       />
     </>
   );

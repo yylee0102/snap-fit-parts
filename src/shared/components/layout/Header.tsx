@@ -26,7 +26,7 @@ interface HeaderProps {
 export default function Header({ className }: HeaderProps) {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, isLoggedIn, logout } = useAuth();
+  const { user, isLoggedIn, logout, updateUser } = useAuth();
   const [searchType, setSearchType] = useState("parts");
   const [searchQuery, setSearchQuery] = useState("");
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -40,8 +40,8 @@ export default function Header({ className }: HeaderProps) {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: API 연결 시 검색 로직 구현
-    console.log("검색:", { type: searchType, query: searchQuery });
+    // 검색 결과 페이지로 이동
+    navigate(`/search?type=${searchType}&q=${encodeURIComponent(searchQuery)}`);
   };
 
   return (
@@ -170,6 +170,43 @@ export default function Header({ className }: HeaderProps) {
                 <span className="hidden md:inline">로그인</span>
               </Button>
             )}
+
+            {/* 임시 로그인 버튼들 */}
+            <div className="flex gap-1 ml-2">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => {
+                  const tempUser = { id: "user", name: "일반사용자", userType: "개인" as const, isLoggedIn: true };
+                  updateUser(tempUser);
+                }}
+                className="text-xs px-2 py-1 h-6"
+              >
+                일반
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => {
+                  const tempCenter = { id: "center", name: "카센터", userType: "카센터" as const, isLoggedIn: true };
+                  updateUser(tempCenter);
+                }}
+                className="text-xs px-2 py-1 h-6"
+              >
+                카센터
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => {
+                  const tempAdmin = { id: "admin", name: "관리자", userType: "관리자" as const, isLoggedIn: true };
+                  updateUser(tempAdmin);
+                }}
+                className="text-xs px-2 py-1 h-6"
+              >
+                관리자
+              </Button>
+            </div>
 
             {/* 햄버거 메뉴 */}
             <Button variant="ghost" size="sm" className="lg:hidden">
