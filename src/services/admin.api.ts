@@ -57,6 +57,8 @@ export interface ReviewReport {
   reviewId: number;
   reporterName: string;
   reason: string;
+  content?: string; // 신고 상세 내용
+  reviewContent?: string; // 신고된 리뷰 원본 내용
   reportDate: string;
   status: 'PENDING' | 'PROCESSED';
 }

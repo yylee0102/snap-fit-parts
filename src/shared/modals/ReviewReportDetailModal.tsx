@@ -61,7 +61,9 @@ export default function ReviewReportDetailModal({
         reportId: reportId,
         reviewId: 101,
         reporterName: "홍길동",
-        reason: "부적절한 언어 사용 및 허위 리뷰 의심",
+        reason: "부적절한 언어 사용",
+        content: "리뷰에 욕설과 비방이 포함되어 있습니다. 해당 내용은 다른 사용자들에게 불쾌감을 줄 수 있어 신고합니다.",
+        reviewContent: "서비스가 정말 최악이었습니다. 기사님도 불친절하고 가격도 터무니없이 비쌉니다. 절대 이용하지 마세요.",
         reportDate: "2025-09-08",
         status: 'PENDING'
       };
@@ -187,19 +189,30 @@ export default function ReviewReportDetailModal({
             </div>
           </div>
 
-          {/* 신고된 리뷰 내용 (실제로는 API에서 가져와야 함) */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium text-muted-foreground">신고된 리뷰 내용</Label>
-            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-sm text-red-800">
-                "서비스가 너무 별로였습니다. 기사님도 불친절하고 가격도 비쌉니다. 
-                절대 추천하지 않아요. 다른 곳 이용하세요."
-              </p>
-              <div className="mt-2 text-xs text-red-600">
-                ⭐ 1점 | 작성자: user456 | 작성일: 2025-09-07
+          {/* 신고 상세 내용 */}
+          {reportData.content && (
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-muted-foreground">신고 상세 내용</Label>
+              <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <p className="whitespace-pre-wrap text-sm">{reportData.content}</p>
               </div>
             </div>
-          </div>
+          )}
+
+          {/* 신고된 리뷰 내용 */}
+          {reportData.reviewContent && (
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-muted-foreground">신고된 리뷰 내용</Label>
+              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-sm text-red-800 whitespace-pre-wrap">
+                  {reportData.reviewContent}
+                </p>
+                <div className="mt-2 text-xs text-red-600">
+                  ⭐ 1점 | 리뷰 ID: #{reportData.reviewId} | 신고일: {reportData.reportDate}
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* 처리 사유 입력 (승인/반려 시) */}
           {processingAction && (

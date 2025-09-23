@@ -27,6 +27,7 @@ import AdminReportManagement from "@/domains/admin/components/AdminReportManagem
 import ProtectedRoute from "@/shared/components/ProtectedRoute";
 import { BarChart3, Users, MessageSquare, AlertTriangle, Settings, HelpCircle } from "lucide-react";
 import CsInquiryManagementPage from "@/domains/admin/pages/CsInquiryManagementPage";
+import ReviewReportManagementPage from "@/domains/admin/pages/ReviewReportManagementPage";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -74,7 +75,7 @@ export default function AdminDashboard() {
 
         {/* 탭 네비게이션 */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="dashboard" className="gap-2">
               <BarChart3 className="h-4 w-4" />
               대시보드
@@ -92,8 +93,12 @@ export default function AdminDashboard() {
               신고관리
             </TabsTrigger>
             <TabsTrigger value="cs" className="gap-2">
-              <MessageSquare className="h-4 w-4" />
+              <HelpCircle className="h-4 w-4" />
               1:1 문의
+            </TabsTrigger>
+            <TabsTrigger value="reviews" className="gap-2">
+              <MessageSquare className="h-4 w-4" />
+              리뷰 신고
             </TabsTrigger>
           </TabsList>
 
@@ -120,6 +125,11 @@ export default function AdminDashboard() {
           {/* 1:1 문의 관리 탭 */}
           <TabsContent value="cs">
             <CsInquiryManagementPage />
+          </TabsContent>
+
+          {/* 리뷰 신고 관리 탭 */}
+          <TabsContent value="reviews">
+            <ReviewReportManagementPage />
           </TabsContent>
         </Tabs>
       </div>
