@@ -33,7 +33,7 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
 
-  // 임시 카센터 사용자로 초기화
+  // 임시 관리자 사용자로 초기화
   useEffect(() => {
     const savedUser = localStorage.getItem("user");
     if (savedUser) {
@@ -45,17 +45,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
         localStorage.removeItem("user");
       }
     } else {
-      // 임시로 카센터 사용자 설정
+      // 임시로 관리자 사용자 설정
       const tempUser = {
-        id: "center123",
-        name: "우리카센터",
-        email: "center@example.com",
+        id: "admin123",
+        name: "관리자",
+        email: "admin@carparter.com",
         phone: "02-1234-5678",
-        userType: "카센터" as const,
+        userType: "관리자" as const,
         isLoggedIn: true,
         profileImage: "",
-        rating: 4.7,
-        responseRate: 95,
+        rating: 5.0,
+        responseRate: 100,
         location: "서울시 강남구"
       };
       setUser(tempUser);

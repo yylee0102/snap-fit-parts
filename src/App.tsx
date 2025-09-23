@@ -11,7 +11,7 @@ import WBListPage from "./domains/wb/pages/WBListPage";
 import WBDetailPage from "./domains/wb/pages/WBDetailPage";
 import CentersListPage from "./domains/centers/pages/CentersListPage";
 import CenterDetailPage from "./domains/centers/pages/CenterDetailPage";
-import EstimateListPage from "./domains/estimates/pages/EstimateListPage";
+import SearchResultsPage from "./domains/search/pages/SearchResultsPage";
 import EstimateCreatePage from "./domains/estimates/pages/EstimateCreatePage";
 import EstimateDetailPage from "./domains/estimates/pages/EstimateDetailPage";
 import EstimateAIPage from "./domains/estimates/pages/EstimateAIPage";
@@ -39,14 +39,14 @@ const App = () => (
           
           {/* WB (중고부품) 관련 라우트 */}
           <Route path="/wb" element={<WBListPage />} />
-          <Route path="/wb/:partId" element={<WBDetailPage />} />
+          <Route path="/search" element={<SearchResultsPage />} />
           
           {/* 카센터 관련 */}
           <Route path="/centers" element={<CentersListPage />} />
           <Route path="/centers/:centerId" element={<CenterDetailPage />} />
           
           {/* 견적서 관련 */}
-          <Route path="/estimates" element={<EstimateListPage />} />
+          <Route path="/estimates" element={<SearchResultsPage />} />
           <Route path="/estimates/create" element={<EstimateCreatePage />} />
           <Route path="/estimates/ai" element={<EstimateAIPage />} />
           <Route path="/estimates/requests" element={<EstimateRequestPage />} />
