@@ -86,25 +86,7 @@ class AdminApiService {
     };
   }
 
-  /**
-   * 관리자 로그인 (별도 엔드포인트가 있다면)
-   * POST /api/admin/login
-   */
-  async login(adminId: string, password: string): Promise<any> {
-    const response = await fetch(`${API_BASE_URL}/admin/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ adminId, password }),
-    });
-
-    if (!response.ok) {
-      throw new Error('관리자 로그인에 실패했습니다.');
-    }
-
-    return response.json();
-  }
+  // 관리자 로그인은 통합 auth.api.ts의 login을 사용하므로 제거
 
   // ==================== 통계 조회 ====================
   /**

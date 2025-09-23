@@ -20,7 +20,7 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/shared/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Shield } from "lucide-react";
-import adminApiService from "@/services/admin.api";
+import authApiService from "@/services/auth.api";
 
 interface AdminLoginModalProps {
   open: boolean;
@@ -81,20 +81,25 @@ export default function AdminLoginModal({ open, onClose }: AdminLoginModalProps)
         return;
       }
 
-      // 실제 API 호출
-      const response = await adminApiService.login(
-        formData.username,
-        formData.password
-      );
+      // 실제 API 호출 - 통합 로그인 사용
+      const response = await authApiService.login({
+        username: formData.username,
+        password: formData.password
+      });
 
-      // Authorization 헤더에서 토큰 저장 (임시로 백엔드 API 구조에 맞춤)
-      localStorage.setItem('authToken', 'Bearer temp-admin-token');
+      // JWT 토큰은 이미 authApiService.login에서 localStorage에 저장됨
 
-      // 관리자 사용자 정보 생성
+      // 백엔드에서 받은 역할(role)을 기반으로 사용자 타입 결정
+      let userType: "개인" | "카센터" | "관리자" = "관리자";
+      if (response.role === "ROLE_ADMIN") {
+        userType = "관리자";
+      }
+
       const adminUser = {
         id: response.userId,
         name: response.name,
-        userType: "관리자" as const,
+        userType,
+        role: response.role,
         isLoggedIn: true
       };
 
@@ -104,6 +109,9 @@ export default function AdminLoginModal({ open, onClose }: AdminLoginModalProps)
         title: "로그인 성공",
         description: "관리자 페이지에 오신 것을 환영합니다."
       });
+
+      // 관리자 페이지로 리디렉션
+      window.location.href = '/admin';
 
       onClose();
       setFormData({ username: "", password: "" });
