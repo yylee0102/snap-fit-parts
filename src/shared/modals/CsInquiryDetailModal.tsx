@@ -108,7 +108,7 @@ export default function CsInquiryDetailModal({
         answeredAt: new Date().toISOString()
       };
 
-      await adminApiService.answerInquiry(inquiryId, updatedInquiry);
+      await adminApiService.answerInquiry(inquiryId, answer);
       
       toast({
         title: "답변 저장 완료",

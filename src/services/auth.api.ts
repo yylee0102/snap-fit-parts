@@ -14,37 +14,29 @@ export interface LoginResponse {
   userType: string;
 }
 
-export interface UserJoinRequest {
-  username: string;
+export interface UserReqDTO {
+  userId: string;
   password: string;
   name: string;
-  email: string;
-  phone: string;
-  address?: string;
-  birthDate?: string;
-  gender?: 'MALE' | 'FEMALE';
-}
-
-export interface CarCenterRegisterRequest {
-  username: string;
-  password: string;
-  centerName: string;
-  businessNumber: string;
-  address: string;
-  phone: string;
-  email: string;
-  description?: string;
+  phoneNumber: string;
+  ssn: string;
+  marketingAgreed: boolean;
 }
 
 export interface CarCenterReqDTO {
-  username: string;
+  centerId: string;
   password: string;
   centerName: string;
-  businessNumber: string;
   address: string;
-  phone: string;
-  email: string;
+  phoneNumber: string;
+  businessRegistrationNumber: string;
+  openingHours: string;
   description?: string;
+}
+
+export interface AdminReqDTO {
+  adminId: string;
+  password: string;
 }
 
 // ==================== 통합 인증 서비스 ====================
@@ -87,7 +79,7 @@ class AuthApiService {
    * 일반 사용자 회원가입
    * POST /api/users/join
    */
-  async userJoin(request: UserJoinRequest): Promise<void> {
+  async userJoin(request: UserReqDTO): Promise<void> {
     const response = await fetch(`${API_BASE_URL}/users/join`, {
       method: 'POST',
       headers: {

@@ -12,13 +12,12 @@ export interface ReservationReqDTO {
 
 export interface ReservationResDTO {
   reservationId: number;
+  centerId: string;
   customerName: string;
   customerPhone: string;
   carInfo: string;
   reservationDate: string;
   requestDetails: string;
-  status: 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED';
-  createdAt: string;
 }
 
 export interface EstimateRequest {
@@ -53,19 +52,49 @@ export interface UsedPartReqDTO {
   price: number;
   category: string;
   compatibleCarModel: string;
-  condition?: 'EXCELLENT' | 'GOOD' | 'FAIR';
 }
 
 export interface UsedPartResDTO {
   partId: number;
+  centerId: string;
   partName: string;
   description: string;
   price: number;
   category: string;
   compatibleCarModel: string;
-  condition: 'EXCELLENT' | 'GOOD' | 'FAIR';
   createdAt: string;
-  images?: string[];
+  imageUrls: string[];
+}
+
+export interface ReviewReplyReqDTO {
+  reviewId: number;
+  centerId: string;
+  content: string;
+}
+
+export interface ReviewReplyResDTO {
+  replyId: number;
+  reviewId: number;
+  centerName: string;
+  content: string;
+  createdAt: string;
+}
+
+export interface ReviewReportReqDTO {
+  reviewId: number;
+  centerId: string;
+  reason: string;
+  content: string;
+}
+
+export interface ReviewReportResDTO {
+  reportId: number;
+  reportedReviewId: number;
+  reportingCenterName: string;
+  reason: string;
+  content: string;
+  status: string;
+  createdAt: string;
 }
 
 // ==================== 카센터 API 서비스 ====================
@@ -223,6 +252,56 @@ class CarCenterApiService {
 
     if (!response.ok) {
       throw new Error('중고부품 삭제에 실패했습니다.');
+    }
+  }
+
+  // ==================== 리뷰 답변 관리 ====================
+  /**
+   * 리뷰에 답변 등록
+   * POST /api/car-centers/reviews/reply
+   */
+  async createReviewReply(reply: ReviewReplyReqDTO): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/car-centers/reviews/reply`, {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(reply),
+    });
+
+    if (!response.ok) {
+      throw new Error('리뷰 답변 등록에 실패했습니다.');
+    }
+  }
+
+  /**
+   * 내가 작성한 리뷰 답변 목록 조회
+   * GET /api/car-centers/reviews/my-replies
+   */
+  async getMyReviewReplies(): Promise<ReviewReplyResDTO[]> {
+    const response = await fetch(`${API_BASE_URL}/car-centers/reviews/my-replies`, {
+      headers: this.getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error('리뷰 답변 목록 조회에 실패했습니다.');
+    }
+
+    return response.json();
+  }
+
+  // ==================== 리뷰 신고 관리 ====================
+  /**
+   * 리뷰 신고하기
+   * POST /api/car-centers/reviews/report
+   */
+  async reportReview(report: ReviewReportReqDTO): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/car-centers/reviews/report`, {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(report),
+    });
+
+    if (!response.ok) {
+      throw new Error('리뷰 신고에 실패했습니다.');
     }
   }
 }

@@ -205,14 +205,14 @@ class AdminApiService {
    * 1:1 문의 답변 등록/수정
    * PUT /api/admin/cs/{inquiryId}/answer
    */
-  async answerInquiry(inquiryId: number, inquiry: CsInquiry): Promise<void> {
+  async answerInquiry(inquiryId: number, answerContent: string): Promise<void> {
     const response = await fetch(`${API_BASE_URL}/admin/cs/${inquiryId}/answer`, {
       method: 'PUT',
       headers: {
         ...this.getAuthHeaders(),
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(inquiry),
+      body: JSON.stringify({ answerContent: answerContent }),
     });
 
     if (!response.ok) {

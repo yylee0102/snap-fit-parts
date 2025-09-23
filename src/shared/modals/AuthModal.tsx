@@ -191,14 +191,12 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
     setIsLoading(true);
     try {
       await authApiService.userJoin({
-        username: userJoinForm.username,
+        userId: userJoinForm.username,
         password: userJoinForm.password,
         name: userJoinForm.name,
-        email: userJoinForm.email,
-        phone: userJoinForm.phone,
-        address: userJoinForm.address || undefined,
-        birthDate: userJoinForm.birthDate || undefined,
-        gender: userJoinForm.gender as 'MALE' | 'FEMALE' | undefined
+        phoneNumber: userJoinForm.phone,
+        ssn: '', // SSN은 별도 처리 필요
+        marketingAgreed: false, // 기본값
       });
 
       toast({
@@ -239,13 +237,13 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
     setIsLoading(true);
     try {
       await authApiService.carCenterRegister({
-        username: centerRegisterForm.username,
+        centerId: centerRegisterForm.username,
         password: centerRegisterForm.password,
         centerName: centerRegisterForm.centerName,
-        businessNumber: centerRegisterForm.businessNumber,
+        businessRegistrationNumber: centerRegisterForm.businessNumber,
         address: centerRegisterForm.address,
-        phone: centerRegisterForm.phone,
-        email: centerRegisterForm.email,
+        phoneNumber: centerRegisterForm.phone,
+        openingHours: '09:00-18:00', // 기본값
         description: centerRegisterForm.description || undefined
       });
 

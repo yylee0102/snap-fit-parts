@@ -2,30 +2,35 @@
 const API_BASE_URL = '/api';
 
 // ==================== 견적 관련 타입 정의 ====================
-export interface EstimateItem {
+export interface EstimateItemReqDTO {
   itemName: string;
   price: number;
   requiredHours: number;
-  partType: 'NEW' | 'USED' | 'RECYCLED';
+  partType: string;
+}
+
+export interface EstimateItemResDTO {
+  itemId: number;
+  itemName: string;
+  price: number;
+  requiredHours: number;
+  partType: string;
 }
 
 export interface EstimateReqDTO {
   requestId: number;
   estimatedCost: number;
   details: string;
-  estimateItems: EstimateItem[];
+  estimateItems: EstimateItemReqDTO[];
 }
 
 export interface EstimateResDTO {
   estimateId: number;
   requestId: number;
-  centerId: string;
-  centerName?: string;
   estimatedCost: number;
   details: string;
-  estimateItems: EstimateItem[];
   createdAt: string;
-  status: 'PENDING' | 'ACCEPTED' | 'REJECTED';
+  estimateItems: EstimateItemResDTO[];
 }
 
 // ==================== 견적서 API 서비스 ====================
