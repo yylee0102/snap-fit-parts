@@ -127,7 +127,7 @@ export default function HomePage() {
               </h1>
               <p className="text-xl md:text-2xl text-on-surface-variant max-w-3xl mx-auto leading-relaxed">
                 사진 한 장으로 즉시 정확한 수리 견적을 받아보세요.<br/>
-                <span className="text-primary font-semibold">3초 만에 AI가 분석</span>해드립니다.
+                <span className="text-primary font-semibold">확실하게</span> AI가 분석해드립니다.
               </p>
             </div>
             
@@ -235,7 +235,7 @@ export default function HomePage() {
               <Card 
                 key={part.id}
                 className="group cursor-pointer hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300 border-0 bg-gradient-to-br from-surface to-surface-container animate-fade-in"
-                onClick={() => navigate(`/search`)}
+                onClick={() => navigate(`/wb/${part.id}`)}
                 style={{animationDelay: `${index * 0.1}s`}}
               >
                 <CardContent className="p-6">

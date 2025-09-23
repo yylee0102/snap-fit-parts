@@ -79,6 +79,10 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
     description: ""
   });
 
+  // 카센터용 전화번호 인증 상태
+  const [centerPhoneVerified, setCenterPhoneVerified] = useState(false);
+  const [centerPhoneVerificationOpen, setCenterPhoneVerificationOpen] = useState(false);
+
   const handleInputChange = (form: string, field: string, value: string | boolean) => {
     if (form === "login") {
       setLoginForm(prev => ({ ...prev, [field]: value }));
@@ -95,6 +99,8 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
         setDuplicateChecks(prev => ({ ...prev, idChecked: false, idAvailable: false }));
       } else if (field === "businessNumber") {
         setDuplicateChecks(prev => ({ ...prev, businessNumberChecked: false, businessNumberAvailable: false }));
+      } else if (field === "phone") {
+        setCenterPhoneVerified(false);
       }
     }
   };
@@ -280,6 +286,15 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
       return;
     }
 
+    if (!centerPhoneVerified) {
+      toast({
+        title: "전화번호 인증 필요",
+        description: "전화번호 인증을 완료해주세요.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (!phoneVerified) {
       toast({
         title: "전화번호 인증 필요",
@@ -408,6 +423,7 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
       description: ""
     });
     setPhoneVerified(false);
+    setCenterPhoneVerified(false);
     setDuplicateChecks({
       idChecked: false,
       businessNumberChecked: false,
@@ -728,7 +744,7 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
               <Button 
                 type="submit" 
                 className="w-full" 
-                disabled={isLoading || !duplicateChecks.idAvailable || !duplicateChecks.businessNumberAvailable}
+                disabled={isLoading || !duplicateChecks.idAvailable || !duplicateChecks.businessNumberAvailable || !centerPhoneVerified}
               >
                 {isLoading ? (
                   <>
@@ -747,12 +763,20 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
           </TabsContent>
         </Tabs>
 
-        {/* 전화번호 인증 모달 */}
+        {/* 전화번호 인증 모달 - 일반회원용 */}
         <PhoneVerificationModal
           open={phoneVerificationOpen}
           onClose={() => setPhoneVerificationOpen(false)}
           onVerified={() => setPhoneVerified(true)}
           phoneNumber={userJoinForm.phone}
+        />
+
+        {/* 전화번호 인증 모달 - 카센터용 */}
+        <PhoneVerificationModal
+          open={centerPhoneVerificationOpen}
+          onClose={() => setCenterPhoneVerificationOpen(false)}
+          onVerified={() => setCenterPhoneVerified(true)}
+          phoneNumber={centerRegisterForm.phone}
         />
       </DialogContent>
     </Dialog>

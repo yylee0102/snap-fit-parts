@@ -45,6 +45,7 @@ const App = () => (
           
           {/* WB (중고부품) 관련 라우트 */}
           <Route path="/wb" element={<WBListPage />} />
+          <Route path="/wb/:partId" element={<WBDetailPage />} />
           <Route path="/search" element={<SearchResultsPage />} />
           
           {/* 카센터 관련 */}
