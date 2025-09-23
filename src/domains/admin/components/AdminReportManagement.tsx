@@ -62,8 +62,11 @@ export default function AdminReportManagement() {
         {
           reportId: 1,
           reviewId: 101,
-          centerId: 1,
-          centerName: "홍길동 카센터",
+          reviewContent: "서비스가 정말 최악이었습니다. 기사님도 불친절하고 가격도 터무니없이 비쌉니다.",
+          reviewRating: 1,
+          reviewCreatedAt: "2025-09-08T09:00:00Z",
+          reportingCenterId: "center001",
+          reportingCenterName: "홍길동 카센터",
           reason: "부적절한 언어 사용",
           content: "리뷰에 욕설이 포함되어 있습니다.",
           status: 'PENDING',
@@ -72,8 +75,11 @@ export default function AdminReportManagement() {
         {
           reportId: 2,
           reviewId: 102,
-          centerId: 2,
-          centerName: "김영희 카센터",
+          reviewContent: "여기 정말 별로예요. 다른 곳 이용하세요. 시간만 낭비했네요.",
+          reviewRating: 1,
+          reviewCreatedAt: "2025-09-07T08:00:00Z",
+          reportingCenterId: "center002",
+          reportingCenterName: "김영희 카센터",
           reason: "허위 리뷰 의심",
           content: "허위 정보가 포함되어 있습니다.",
           status: 'PENDING',
@@ -254,7 +260,7 @@ export default function AdminReportManagement() {
               ) : (
                 reports.map((report) => (
                   <TableRow key={report.reportId}>
-                    <TableCell>{report.centerName}</TableCell>
+                    <TableCell>{report.reportingCenterName}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <span className="max-w-xs truncate">{report.reason}</span>

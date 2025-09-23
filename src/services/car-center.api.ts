@@ -63,9 +63,15 @@ export interface ReviewReportReqDTO {
 
 export interface ReviewReportResDTO {
   reportId: number;
+  // 신고 대상 리뷰 정보 (JOIN 결과)
   reviewId: number;
-  centerId: number;
-  centerName: string;
+  reviewContent: string;
+  reviewRating: number;
+  reviewCreatedAt: string;
+  // 신고한 카센터 정보 (JOIN 결과)  
+  reportingCenterId: string;
+  reportingCenterName: string;
+  // 신고 정보
   reason: string;
   content: string;
   status: 'PENDING' | 'APPROVED' | 'REJECTED';

@@ -63,8 +63,11 @@ export default function ReviewReportManagementPage() {
         {
           reportId: 1,
           reviewId: 101,
-          centerId: 1,
-          centerName: "홍길동 카센터",
+          reviewContent: "서비스가 정말 최악이었습니다. 기사님도 불친절하고 가격도 터무니없이 비쌉니다.",
+          reviewRating: 1,
+          reviewCreatedAt: "2025-09-08T09:00:00Z",
+          reportingCenterId: "center001",
+          reportingCenterName: "홍길동 카센터",
           reason: "부적절한 언어 사용",
           content: "리뷰에 욕설과 비방이 포함되어 있습니다. 해당 내용은 다른 사용자들에게 불쾌감을 줄 수 있어 신고합니다.",
           status: 'PENDING',
@@ -73,8 +76,11 @@ export default function ReviewReportManagementPage() {
         {
           reportId: 2,
           reviewId: 102,
-          centerId: 2,
-          centerName: "김영희 카센터",
+          reviewContent: "여기 정말 별로예요. 다른 곳 이용하세요. 시간만 낭비했네요.",
+          reviewRating: 1,
+          reviewCreatedAt: "2025-09-07T08:00:00Z",
+          reportingCenterId: "center002",
+          reportingCenterName: "김영희 카센터",
           reason: "허위 리뷰 의심",
           content: "해당 리뷰는 실제 서비스를 이용하지 않고 작성된 것으로 보입니다. 경쟁업체의 악의적 리뷰로 판단됩니다.",
           status: 'PENDING',
@@ -83,8 +89,11 @@ export default function ReviewReportManagementPage() {
         {
           reportId: 3,
           reviewId: 103,
-          centerId: 3,
-          centerName: "이민수 카센터",
+          reviewContent: "좋은 서비스였습니다. 추천합니다. 다음에도 이용할게요.",
+          reviewRating: 5,
+          reviewCreatedAt: "2025-09-06T07:00:00Z",
+          reportingCenterId: "center003",
+          reportingCenterName: "이민수 카센터",
           reason: "스팸성 리뷰",
           content: "동일한 내용의 리뷰를 여러 카센터에 반복적으로 작성하고 있습니다.",
           status: 'PENDING',
@@ -299,7 +308,7 @@ export default function ReviewReportManagementPage() {
                     filteredReports.map((report) => (
                       <TableRow key={report.reportId}>
                         <TableCell className="font-mono">#{report.reportId}</TableCell>
-                        <TableCell>{report.centerName}</TableCell>
+                        <TableCell>{report.reportingCenterName}</TableCell>
                         <TableCell>
                           <div className="max-w-xs">
                             <p className="truncate">{report.reason}</p>
@@ -309,7 +318,7 @@ export default function ReviewReportManagementPage() {
                         <TableCell>
                           <div className="max-w-xs">
                             <p className="text-sm text-muted-foreground truncate">
-                              {report.content?.substring(0, 50)}...
+                              {report.reviewContent?.substring(0, 50)}...
                             </p>
                           </div>
                         </TableCell>

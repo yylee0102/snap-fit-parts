@@ -106,10 +106,10 @@ export default function HomePage() {
     <PageContainer>
       <div className="container mx-auto px-4 py-6">
         {/* 서비스 소개 - 위로 이동 */}
-        <div className="relative overflow-hidden bg-gradient-to-br from-surface-container via-surface-container-high to-surface-container rounded-3xl p-12 mb-12">
+        <div className="relative overflow-hidden bg-gradient-to-br from-surface via-surface-container to-surface-container-high rounded-3xl p-12 mb-12">
           {/* 배경 장식 */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-secondary/5 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2"></div>
+          <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-primary/10 via-primary/5 to-transparent rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-secondary/10 via-secondary/5 to-transparent rounded-full blur-2xl"></div>
           
           <div className="relative z-10">
             <div className="text-center mb-12">

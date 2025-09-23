@@ -60,8 +60,11 @@ export default function ReviewReportDetailModal({
       const tempData: ReviewReportResDTO = {
         reportId: reportId,
         reviewId: 101,
-        centerId: 1,
-        centerName: "홍길동 카센터",
+        reviewContent: "서비스가 정말 최악이었습니다. 기사님도 불친절하고 가격도 터무니없이 비쌉니다. 절대 이용하지 마세요.",
+        reviewRating: 1,
+        reviewCreatedAt: "2025-09-08T09:00:00Z",
+        reportingCenterId: "center001",
+        reportingCenterName: "홍길동 카센터",
         reason: "부적절한 언어 사용",
         content: "리뷰에 욕설과 비방이 포함되어 있습니다. 해당 내용은 다른 사용자들에게 불쾌감을 줄 수 있어 신고합니다.",
         status: 'PENDING',
@@ -156,7 +159,7 @@ export default function ReviewReportDetailModal({
                 <User className="h-4 w-4" />
                 신고자
               </Label>
-              <p className="font-semibold">{reportData.centerName}</p>
+              <p className="font-semibold">{reportData.reportingCenterName}</p>
             </div>
             <div className="space-y-2">
               <Label className="text-sm font-medium text-muted-foreground">상태</Label>
@@ -200,15 +203,15 @@ export default function ReviewReportDetailModal({
           )}
 
           {/* 신고된 리뷰 내용 */}
-          {reportData.content && (
+          {reportData.reviewContent && (
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-muted-foreground">신고 상세 내용</Label>
+              <Label className="text-sm font-medium text-muted-foreground">신고된 리뷰 내용</Label>
               <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
                 <p className="text-sm text-red-800 whitespace-pre-wrap">
-                  {reportData.content}
+                  {reportData.reviewContent}
                 </p>
                 <div className="mt-2 text-xs text-red-600">
-                  리뷰 ID: #{reportData.reviewId} | 신고일: {new Date(reportData.createdAt).toLocaleDateString()}
+                  ⭐ {reportData.reviewRating}점 | 리뷰 ID: #{reportData.reviewId} | 작성일: {new Date(reportData.reviewCreatedAt).toLocaleDateString()}
                 </div>
               </div>
             </div>
