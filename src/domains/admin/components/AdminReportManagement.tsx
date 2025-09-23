@@ -1,3 +1,17 @@
+/**
+ * 신고 및 문의 관리 컴포넌트
+ * 
+ * 이 컴포넌트의 역할:
+ * - 리뷰 신고 목록 조회 및 처리
+ * - 1:1 문의 목록 조회 및 답변
+ * - 신고/문의 상태 관리
+ * 
+ * 왜 필요한가:
+ * - 부적절한 콘텐츠 관리를 통한 플랫폼 건전성 유지
+ * - 사용자 지원 서비스를 통한 만족도 향상
+ * - 체계적인 신고 처리 시스템 구축
+ */
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,28 +20,26 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertTriangle, CheckCircle, XCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import ReviewReportDetailModal from "@/shared/modals/ReviewReportDetailModal";
+import CsInquiryDetailModal from "@/shared/modals/CsInquiryDetailModal";
 import adminApiService, { ReviewReport, CsInquiry } from "@/services/admin.api";
 
 export default function AdminReportManagement() {
   /**
-   * 신고 및 문의 관리 컴포넌트
-   * 
-   * 주요 기능:
-   * - 리뷰 신고 목록 조회 및 처리
-   * - 1:1 문의 목록 조회 및 답변
-   * - 신고/문의 상태 관리
-   * 
-   * 백엔드 API 연결:
-   * - GET /api/admin/reports/reviews - 리뷰 신고 전체 조회
-   * - DELETE /api/admin/reports/reviews/{id} - 리뷰 신고 삭제
-   * - GET /api/admin/cs - 1:1 문의 전체 조회
-   * - PUT /api/admin/cs/{id}/answer - 1:1 문의 답변
+   * 상태 관리
+   * - selectedCategory: 선택된 신고 카테고리 필터
+   * - reports: 리뷰 신고 목록
+   * - inquiries: 1:1 문의 목록
+   * - 모달 상태들
    */
-  
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [reports, setReports] = useState<ReviewReport[]>([]);
   const [inquiries, setInquiries] = useState<CsInquiry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [showInquiryModal, setShowInquiryModal] = useState(false);
+  const [selectedReportId, setSelectedReportId] = useState<number | null>(null);
+  const [selectedInquiryId, setSelectedInquiryId] = useState<number | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -35,6 +47,10 @@ export default function AdminReportManagement() {
     fetchInquiries();
   }, []);
 
+  /**
+   * 리뷰 신고 목록 조회
+   * API: GET /api/admin/reports/reviews
+   */
   const fetchReports = async () => {
     try {
       // TODO: 실제 API 연결 시 사용
@@ -47,17 +63,34 @@ export default function AdminReportManagement() {
           reportId: 1,
           reviewId: 101,
           reporterName: "홍길동",
-          reason: "부적절한 리뷰 내용",
+          reason: "부적절한 언어 사용",
           reportDate: "2025-09-08",
+          status: 'PENDING'
+        },
+        {
+          reportId: 2,
+          reviewId: 102,
+          reporterName: "김영희",
+          reason: "허위 리뷰 의심",
+          reportDate: "2025-09-07",
           status: 'PENDING'
         }
       ];
       setReports(tempReports);
     } catch (error) {
       console.error("신고 목록 조회 실패:", error);
+      toast({
+        title: "조회 실패",
+        description: "신고 목록을 불러오는데 실패했습니다.",
+        variant: "destructive"
+      });
     }
   };
 
+  /**
+   * 1:1 문의 목록 조회
+   * API: GET /api/admin/cs
+   */
   const fetchInquiries = async () => {
     try {
       // TODO: 실제 API 연결 시 사용
@@ -72,20 +105,37 @@ export default function AdminReportManagement() {
           title: "견적 요청 관련 문의",
           content: "견적 요청 후 연락이 오지 않습니다.",
           status: 'PENDING',
-          createdAt: "2025-09-08"
+          createdAt: "2025-09-08 14:30:00"
+        },
+        {
+          inquiryId: 2,
+          userId: "user456",
+          title: "결제 관련 문의",
+          content: "결제 후 서비스 이용에 문제가 있습니다.",
+          status: 'PENDING',
+          createdAt: "2025-09-07 10:15:00"
         }
       ];
       setInquiries(tempInquiries);
     } catch (error) {
       console.error("문의 목록 조회 실패:", error);
+      toast({
+        title: "조회 실패",
+        description: "문의 목록을 불러오는데 실패했습니다.",
+        variant: "destructive"
+      });
     }
   };
 
+  /**
+   * 상태에 따른 뱃지 스타일 반환
+   */
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "처리 대기":
+      case "PENDING":
         return <Badge className="bg-yellow-100 text-yellow-800">처리 대기</Badge>;
-      case "처리 완료":
+      case "ANSWERED":
+      case "PROCESSED":
         return <Badge className="bg-green-100 text-green-800">처리 완료</Badge>;
       case "반려":
         return <Badge className="bg-red-100 text-red-800">반려</Badge>;
@@ -94,14 +144,58 @@ export default function AdminReportManagement() {
     }
   };
 
-  const getPriorityBadge = (priority: string) => {
-    switch (priority) {
-      case "high":
-        return <Badge className="bg-red-100 text-red-800">긴급</Badge>;
-      case "처리대기":
-        return <Badge className="bg-red-100 text-red-800">처리대기</Badge>;
-      default:
-        return <Badge className="bg-blue-100 text-blue-800">일반</Badge>;
+  /**
+   * 신고 상세 보기
+   */
+  const handleViewReport = (reportId: number) => {
+    setSelectedReportId(reportId);
+    setShowReportModal(true);
+  };
+
+  /**
+   * 문의 상세 보기
+   */
+  const handleViewInquiry = (inquiryId: number) => {
+    setSelectedInquiryId(inquiryId);
+    setShowInquiryModal(true);
+  };
+
+  /**
+   * 신고 처리 후 목록 새로고침
+   */
+  const handleReportUpdate = () => {
+    fetchReports();
+  };
+
+  /**
+   * 문의 처리 후 목록 새로고침
+   */
+  const handleInquiryUpdate = () => {
+    fetchInquiries();
+  };
+
+  /**
+   * 신고 삭제 처리
+   */
+  const handleDeleteReport = async (reportId: number) => {
+    if (!confirm("정말로 이 신고를 삭제하시겠습니까?")) {
+      return;
+    }
+
+    try {
+      await adminApiService.deleteReviewReport(reportId);
+      toast({
+        title: "삭제 완료",
+        description: "신고가 성공적으로 삭제되었습니다."
+      });
+      fetchReports();
+    } catch (error) {
+      console.error("신고 삭제 실패:", error);
+      toast({
+        title: "삭제 실패",
+        description: "신고 삭제 중 오류가 발생했습니다.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -118,9 +212,9 @@ export default function AdminReportManagement() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">전체</SelectItem>
-                <SelectItem value="illegal">불법 거래</SelectItem>
+                <SelectItem value="inappropriate">부적절한 내용</SelectItem>
+                <SelectItem value="fake">허위 리뷰</SelectItem>
                 <SelectItem value="spam">스팸</SelectItem>
-                <SelectItem value="abuse">욕설/비하</SelectItem>
               </SelectContent>
             </Select>
             <Button size="sm" variant="outline">엑셀</Button>
@@ -131,152 +225,154 @@ export default function AdminReportManagement() {
             <TableHeader>
               <TableRow>
                 <TableHead>신고자</TableHead>
-                <TableHead>제목</TableHead>
-                <TableHead>신고대상</TableHead>
+                <TableHead>신고 내용</TableHead>
+                <TableHead>리뷰 ID</TableHead>
                 <TableHead>신고일</TableHead>
                 <TableHead>처리 상태</TableHead>
                 <TableHead>관리</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {reports.map((report) => (
-                <TableRow key={report.id}>
-                  <TableCell>{report.reporter}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <span className="max-w-xs truncate">{report.title}</span>
-                      {getPriorityBadge(report.priority)}
-                    </div>
-                  </TableCell>
-                  <TableCell>{report.reportedUser}</TableCell>
-                  <TableCell>{report.date}</TableCell>
-                  <TableCell>{getStatusBadge(report.status)}</TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="outline">보기</Button>
-                      <Button size="sm" className="bg-green-500 hover:bg-green-600">
-                        <CheckCircle className="h-4 w-4" />
-                      </Button>
-                      <Button size="sm" variant="destructive">
-                        <XCircle className="h-4 w-4" />
-                      </Button>
-                    </div>
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-8">
+                    데이터를 불러오는 중...
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : reports.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                    신고된 리뷰가 없습니다.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                reports.map((report) => (
+                  <TableRow key={report.reportId}>
+                    <TableCell>{report.reporterName}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <span className="max-w-xs truncate">{report.reason}</span>
+                        <Badge className="bg-yellow-100 text-yellow-800">처리대기</Badge>
+                      </div>
+                    </TableCell>
+                    <TableCell>#{report.reviewId}</TableCell>
+                    <TableCell>{report.reportDate}</TableCell>
+                    <TableCell>{getStatusBadge(report.status)}</TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleViewReport(report.reportId)}
+                        >
+                          보기
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          className="bg-green-500 hover:bg-green-600"
+                          title="승인"
+                        >
+                          <CheckCircle className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="destructive"
+                          onClick={() => handleDeleteReport(report.reportId)}
+                          title="삭제"
+                        >
+                          <XCircle className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
           
           {/* 페이지네이션 */}
           <div className="flex justify-center mt-4">
             <div className="flex gap-1">
-              <Button variant="outline" size="sm">이전</Button>
+              <Button variant="outline" size="sm" disabled>이전</Button>
               <Button size="sm">1</Button>
-              <Button variant="outline" size="sm">2</Button>
-              <Button variant="outline" size="sm">3</Button>
-              <Button variant="outline" size="sm">다음</Button>
+              <Button variant="outline" size="sm" disabled>다음</Button>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* 신고된 게시글 관리 */}
+      {/* 1:1 문의 관리 */}
       <Card>
         <CardHeader>
-          <CardTitle>신고된 게시글 관리</CardTitle>
+          <CardTitle>1:1 문의 관리</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>작성자</TableHead>
+                <TableHead>사용자</TableHead>
                 <TableHead>제목</TableHead>
-                <TableHead>신고사유</TableHead>
-                <TableHead>신고일</TableHead>
+                <TableHead>문의일</TableHead>
                 <TableHead>처리 상태</TableHead>
                 <TableHead>관리</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableRow>
-                <TableCell>홍길동</TableCell>
-                <TableCell>이용약관 위반 부품 아저씨에게 문의드립니다.</TableCell>
-                <TableCell>복원/취돼</TableCell>
-                <TableCell>2025-09-08</TableCell>
-                <TableCell>
-                  <Badge className="bg-red-100 text-red-800">처리대기</Badge>
-                </TableCell>
-                <TableCell>
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline">처리</Button>
-                    <Button size="sm" variant="destructive">삭제</Button>
-                  </div>
-                </TableCell>
-              </TableRow>
+              {inquiries.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                    처리할 문의가 없습니다.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                inquiries.map((inquiry) => (
+                  <TableRow key={inquiry.inquiryId}>
+                    <TableCell>{inquiry.userId}</TableCell>
+                    <TableCell className="max-w-xs truncate">{inquiry.title}</TableCell>
+                    <TableCell>{new Date(inquiry.createdAt).toLocaleDateString('ko-KR')}</TableCell>
+                    <TableCell>{getStatusBadge(inquiry.status)}</TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleViewInquiry(inquiry.inquiryId)}
+                        >
+                          답변하기
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
           
           {/* 페이지네이션 */}
           <div className="flex justify-center mt-4">
             <div className="flex gap-1">
-              <Button variant="outline" size="sm">이전</Button>
+              <Button variant="outline" size="sm" disabled>이전</Button>
               <Button size="sm">1</Button>
-              <Button variant="outline" size="sm">2</Button>
-              <Button variant="outline" size="sm">3</Button>
-              <Button variant="outline" size="sm">다음</Button>
+              <Button variant="outline" size="sm" disabled>다음</Button>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* 신고된 후기사용 관리 */}
-      <Card>
-        <CardHeader>
-          <CardTitle>신고된 후기사용 관리</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>작성자</TableHead>
-                <TableHead>제목</TableHead>
-                <TableHead>신고사유</TableHead>
-                <TableHead>신고일</TableHead>
-                <TableHead>처리 상태</TableHead>
-                <TableHead>관리</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {inquiries.map((inquiry) => (
-                <TableRow key={inquiry.id}>
-                  <TableCell>{inquiry.author}</TableCell>
-                  <TableCell className="max-w-xs truncate">{inquiry.title}</TableCell>
-                  <TableCell>{inquiry.category}</TableCell>
-                  <TableCell>{inquiry.inquiryDate}</TableCell>
-                  <TableCell>{getPriorityBadge(inquiry.priority)}</TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="outline">처리</Button>
-                      <Button size="sm" variant="destructive">삭제</Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-          
-          {/* 페이지네이션 */}
-          <div className="flex justify-center mt-4">
-            <div className="flex gap-1">
-              <Button variant="outline" size="sm">이전</Button>
-              <Button size="sm">1</Button>
-              <Button variant="outline" size="sm">2</Button>
-              <Button variant="outline" size="sm">3</Button>
-              <Button variant="outline" size="sm">다음</Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* 모달들 */}
+      <ReviewReportDetailModal 
+        open={showReportModal}
+        onClose={() => setShowReportModal(false)}
+        reportId={selectedReportId}
+        onReportUpdate={handleReportUpdate}
+      />
+
+      <CsInquiryDetailModal 
+        open={showInquiryModal}
+        onClose={() => setShowInquiryModal(false)}
+        inquiryId={selectedInquiryId}
+        onInquiryUpdate={handleInquiryUpdate}
+      />
     </div>
   );
 }
