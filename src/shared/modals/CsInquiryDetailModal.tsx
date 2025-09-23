@@ -35,7 +35,7 @@ export default function CsInquiryDetailModal({
   inquiryId,
   onInquiryUpdate 
 }: CsInquiryDetailModalProps) {
-  const [inquiryData, setInquiryData] = useState<CsInquiry | null>(null);
+  const [inquiryData, setInquiryData] = useState<CsInquiryResDTO | null>(null);
   const [answer, setAnswer] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -63,7 +63,7 @@ export default function CsInquiryDetailModal({
       // setInquiryData(data);
       
       // 개발용 임시 데이터
-      const tempData: CsInquiry = {
+      const tempData: CsInquiryResDTO = {
         inquiryId: inquiryId,
         userId: "user123",
         userName: "홍길동",
@@ -101,7 +101,7 @@ export default function CsInquiryDetailModal({
 
     setIsSaving(true);
     try {
-      const updatedInquiry: CsInquiry = {
+      const updatedInquiry: CsInquiryResDTO = {
         ...inquiryData,
         answerContent: answer,
         status: 'ANSWERED',

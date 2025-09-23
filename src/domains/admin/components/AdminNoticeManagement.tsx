@@ -24,7 +24,7 @@ export default function AdminNoticeManagement() {
    * - DELETE /api/admin/announcements/{id} - 공지사항 삭제
    */
   
-  const [notices, setNotices] = useState<Announcement[]>([]);
+  const [notices, setNotices] = useState<AnnouncementResDTO[]>([]);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedNoticeId, setSelectedNoticeId] = useState<number | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
@@ -42,7 +42,7 @@ export default function AdminNoticeManagement() {
       // setNotices(data);
 
       // 개발용 임시 데이터
-      const tempData: Announcement[] = [
+      const tempData: AnnouncementResDTO[] = [
         {
           announcementId: 1,
           title: "서버 업데이트 안내",

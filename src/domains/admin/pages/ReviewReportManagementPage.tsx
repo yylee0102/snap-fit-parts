@@ -59,7 +59,7 @@ export default function ReviewReportManagementPage() {
       // setReports(data);
       
       // 개발용 임시 데이터
-      const tempReports: ReviewReport[] = [
+      const tempReports: ReviewReportResDTO[] = [
         {
           reportId: 1,
           reviewId: 101,

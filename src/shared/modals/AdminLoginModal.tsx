@@ -82,10 +82,10 @@ export default function AdminLoginModal({ open, onClose }: AdminLoginModalProps)
       }
 
       // 실제 API 호출
-      const response = await adminApiService.login({
-        username: formData.username,
-        password: formData.password
-      });
+      const response = await adminApiService.login(
+        formData.username,
+        formData.password
+      );
 
       // Authorization 헤더에서 토큰 저장 (임시로 백엔드 API 구조에 맞춤)
       localStorage.setItem('authToken', 'Bearer temp-admin-token');

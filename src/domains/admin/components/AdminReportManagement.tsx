@@ -58,7 +58,7 @@ export default function AdminReportManagement() {
       // setReports(data);
       
       // 개발용 임시 데이터
-      const tempReports: ReviewReport[] = [
+      const tempReports: ReviewReportResDTO[] = [
         {
           reportId: 1,
           reviewId: 101,
@@ -98,7 +98,7 @@ export default function AdminReportManagement() {
       // setInquiries(data);
       
       // 개발용 임시 데이터
-      const tempInquiries: CsInquiry[] = [
+      const tempInquiries: CsInquiryResDTO[] = [
         {
           inquiryId: 1,
           userId: "user123",

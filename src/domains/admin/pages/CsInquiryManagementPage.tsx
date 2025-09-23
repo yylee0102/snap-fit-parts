@@ -26,8 +26,8 @@ import PageContainer from "@/shared/components/layout/PageContainer";
 import ProtectedRoute from "@/shared/components/ProtectedRoute";
 
 export default function CsInquiryManagementPage() {
-  const [inquiries, setInquiries] = useState<CsInquiry[]>([]);
-  const [selectedInquiry, setSelectedInquiry] = useState<CsInquiry | null>(null);
+  const [inquiries, setInquiries] = useState<CsInquiryResDTO[]>([]);
+  const [selectedInquiry, setSelectedInquiry] = useState<CsInquiryResDTO | null>(null);
   const [answerContent, setAnswerContent] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -49,7 +49,7 @@ export default function CsInquiryManagementPage() {
       // setInquiries(data);
       
       // 개발용 임시 데이터
-      const tempInquiries: CsInquiry[] = [
+      const tempInquiries: CsInquiryResDTO[] = [
         {
           inquiryId: 1,
           userId: "user123",
@@ -96,7 +96,7 @@ export default function CsInquiryManagementPage() {
   /**
    * 문의 상세 보기
    */
-  const handleViewInquiry = (inquiry: CsInquiry) => {
+  const handleViewInquiry = (inquiry: CsInquiryResDTO) => {
     setSelectedInquiry(inquiry);
     setAnswerContent(inquiry.answerContent || "");
   };
@@ -117,7 +117,7 @@ export default function CsInquiryManagementPage() {
 
     setIsSaving(true);
     try {
-      const updatedInquiry: CsInquiry = {
+      const updatedInquiry: CsInquiryResDTO = {
         ...selectedInquiry,
         answerContent: answerContent.trim(),
         status: 'ANSWERED',

@@ -1,4 +1,4 @@
-// 카센터 API 서비스 - 최신 백엔드 API 명세에 맞춰 수정
+// 카센터 통합 API 서비스 - car-center.api.ts와 estimate.api.ts 통합
 const API_BASE_URL = '/api';
 
 // ==================== 카센터 관련 타입 정의 ====================
@@ -18,32 +18,6 @@ export interface ReservationResDTO {
   carInfo: string;
   reservationDate: string;
   requestDetails: string;
-}
-
-export interface EstimateRequest {
-  requestId: number;
-  customerId: string;
-  customerName?: string;
-  carModel: string;
-  carYear: number;
-  mileage: number;
-  description: string;
-  requestedAt: string;
-  status: 'PENDING' | 'ESTIMATED' | 'COMPLETED';
-}
-
-export interface EstimateItem {
-  itemName: string;
-  price: number;
-  requiredHours: number;
-  partType: 'NEW' | 'USED' | 'RECYCLED';
-}
-
-export interface EstimateReqDTO {
-  requestId: number;
-  estimatedCost: number;
-  details: string;
-  estimateItems: EstimateItem[];
 }
 
 export interface UsedPartReqDTO {
@@ -97,7 +71,60 @@ export interface ReviewReportResDTO {
   createdAt: string;
 }
 
-// ==================== 카센터 API 서비스 ====================
+// ==================== 견적 관련 타입 정의 ====================
+export interface EstimateItemReqDTO {
+  itemName: string;
+  price: number;
+  requiredHours: number;
+  partType: string;
+}
+
+export interface EstimateItemResDTO {
+  itemId: number;
+  itemName: string;
+  price: number;
+  requiredHours: number;
+  partType: string;
+}
+
+export interface EstimateReqDTO {
+  requestId: number;
+  estimatedCost: number;
+  details: string;
+  estimateItems: EstimateItemReqDTO[];
+}
+
+export interface EstimateResDTO {
+  estimateId: number;
+  requestId: number;
+  estimatedCost: number;
+  details: string;
+  createdAt: string;
+  estimateItems: EstimateItemResDTO[];
+}
+
+export interface QuoteRequestResDTO {
+  requestId: number;
+  requestDetails: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+  createdAt: string;
+  writer: {
+    userId: string;
+    name: string;
+  };
+  car: {
+    userCarId: number;
+  };
+  images: {
+    imageId: number;
+    imageUrl: string;
+  }[];
+  estimateCount: number;
+}
+
+// ==================== 카센터 통합 API 서비스 ====================
 class CarCenterApiService {
   private getAuthHeaders(): Record<string, string> {
     const token = localStorage.getItem('authToken');
@@ -153,7 +180,7 @@ class CarCenterApiService {
    * 견적 요청 목록 조회
    * GET /api/estimates/requests
    */
-  async getEstimateRequests(): Promise<EstimateRequest[]> {
+  async getEstimateRequests(): Promise<QuoteRequestResDTO[]> {
     const response = await fetch(`${API_BASE_URL}/estimates/requests`, {
       headers: this.getAuthHeaders(),
     });
@@ -169,7 +196,7 @@ class CarCenterApiService {
    * 견적서 제출
    * POST /api/estimates
    */
-  async submitEstimate(estimate: EstimateReqDTO): Promise<void> {
+  async submitEstimate(estimate: EstimateReqDTO): Promise<EstimateResDTO> {
     const response = await fetch(`${API_BASE_URL}/estimates`, {
       method: 'POST',
       headers: this.getAuthHeaders(),
@@ -178,6 +205,73 @@ class CarCenterApiService {
 
     if (!response.ok) {
       throw new Error('견적서 제출에 실패했습니다.');
+    }
+
+    return response.json();
+  }
+
+  /**
+   * 내가 제출한 견적서 목록 조회
+   * GET /api/estimates/My-estimates
+   */
+  async getMyEstimates(): Promise<EstimateResDTO[]> {
+    const response = await fetch(`${API_BASE_URL}/estimates/My-estimates`, {
+      headers: this.getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error('견적서 목록 조회에 실패했습니다.');
+    }
+
+    return response.json();
+  }
+
+  /**
+   * 견적서 수정
+   * PUT /api/estimates/{estimateId}
+   */
+  async updateEstimate(estimateId: number, estimate: EstimateReqDTO): Promise<EstimateResDTO> {
+    const response = await fetch(`${API_BASE_URL}/estimates/${estimateId}`, {
+      method: 'PUT',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(estimate),
+    });
+
+    if (!response.ok) {
+      throw new Error('견적서 수정에 실패했습니다.');
+    }
+
+    return response.json();
+  }
+
+  /**
+   * 견적서 상세 조회
+   * GET /api/estimates/{estimateId}
+   */
+  async getEstimateDetails(estimateId: number): Promise<EstimateResDTO> {
+    const response = await fetch(`${API_BASE_URL}/estimates/${estimateId}`, {
+      headers: this.getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error('견적서 조회에 실패했습니다.');
+    }
+
+    return response.json();
+  }
+
+  /**
+   * 견적서 삭제
+   * DELETE /api/estimates/{estimateId}
+   */
+  async deleteEstimate(estimateId: number): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/estimates/${estimateId}`, {
+      method: 'DELETE',
+      headers: this.getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error('견적서 삭제에 실패했습니다.');
     }
   }
 

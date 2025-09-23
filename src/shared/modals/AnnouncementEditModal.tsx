@@ -131,9 +131,8 @@ export default function AnnouncementEditModal({
       if (isEditMode && announcementId) {
         // 수정 모드
         await adminApiService.updateAnnouncement(announcementId, {
-          title: formData.title,
-          content: formData.content,
-          updatedAt: new Date().toISOString()
+        title: formData.title,
+        content: formData.content,
         });
         
         toast({

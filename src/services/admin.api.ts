@@ -12,6 +12,11 @@ export interface CarCenterApprovalResDTO {
   requestedAt: string;
   centerId: string;
   centerName: string;
+  businessNumber?: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  status?: string;
 }
 
 // ==================== CS 문의 관리 관련 타입 정의 ====================
@@ -28,6 +33,8 @@ export interface CsInquiryResDTO {
   answerContent?: string;
   answeredAt?: string;
   createdAt: string;
+  status?: string; // 백엔드에서 사용할 수 있는 필드 추가
+  userId?: string; // 필요시 사용할 수 있는 필드 추가
 }
 
 // ==================== 공지사항 관리 관련 타입 정의 ====================
@@ -41,6 +48,7 @@ export interface AnnouncementResDTO {
   title: string;
   content: string;
   createdAt: string;
+  updatedAt?: string;
 }
 
 // ==================== 리뷰 신고 관리 관련 타입 정의 ====================
@@ -59,6 +67,11 @@ export interface ReviewReportResDTO {
   content: string;
   status: string;
   createdAt: string;
+  // 기존 컴포넌트 호환성을 위한 필드들
+  reviewId?: number;
+  reportDate?: string;
+  reporterName?: string;
+  reviewContent?: string;
 }
 
 // ==================== 관리자 API 서비스 ====================
@@ -69,6 +82,26 @@ class AdminApiService {
       'Authorization': token || '',
       'Content-Type': 'application/json',
     };
+  }
+
+  /**
+   * 관리자 로그인 (별도 엔드포인트가 있다면)
+   * POST /api/admin/login
+   */
+  async login(adminId: string, password: string): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/admin/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ adminId, password }),
+    });
+
+    if (!response.ok) {
+      throw new Error('관리자 로그인에 실패했습니다.');
+    }
+
+    return response.json();
   }
 
   // ==================== 통계 조회 ====================

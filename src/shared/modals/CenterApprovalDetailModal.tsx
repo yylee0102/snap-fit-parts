@@ -57,7 +57,7 @@ export default function CenterApprovalDetailModal({
       // setApprovalData(data);
       
       // 개발용 임시 데이터
-      const tempData: CarCenterApproval = {
+      const tempData: CarCenterApprovalResDTO = {
         approvalId: approvalId,
         requestedAt: "2025-09-08",
         centerId: "center1",

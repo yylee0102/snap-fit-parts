@@ -35,7 +35,7 @@ export default function ReviewReportDetailModal({
   reportId,
   onReportUpdate 
 }: ReviewReportDetailModalProps) {
-  const [reportData, setReportData] = useState<ReviewReport | null>(null);
+  const [reportData, setReportData] = useState<ReviewReportResDTO | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [processingAction, setProcessingAction] = useState<string | null>(null);
   const [actionReason, setActionReason] = useState("");
@@ -57,7 +57,7 @@ export default function ReviewReportDetailModal({
       // setReportData(data);
       
       // 개발용 임시 데이터
-      const tempData: ReviewReport = {
+      const tempData: ReviewReportResDTO = {
         reportId: reportId,
         reviewId: 101,
         reporterName: "홍길동",

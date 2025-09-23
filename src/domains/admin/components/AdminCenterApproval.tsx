@@ -30,7 +30,7 @@ export default function AdminCenterApproval() {
    * - showDetailModal: 상세 모달 표시 여부
    * - isLoading: 데이터 로딩 상태
    */
-  const [pendingCenters, setPendingCenters] = useState<CarCenterApproval[]>([]);
+  const [pendingCenters, setPendingCenters] = useState<CarCenterApprovalResDTO[]>([]);
   const [selectedApprovalId, setSelectedApprovalId] = useState<number | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -53,7 +53,7 @@ export default function AdminCenterApproval() {
       // setPendingCenters(data);
 
       // 개발용 임시 데이터
-      const tempData: CarCenterApproval[] = [
+      const tempData: CarCenterApprovalResDTO[] = [
         {
           approvalId: 1,
           requestedAt: "2025-09-08",
