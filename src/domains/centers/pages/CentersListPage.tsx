@@ -12,27 +12,16 @@ import { useModal } from "@/shared/hooks/useModal";
 import CenterMapModal from "../modals/CenterMapModal";
 
 interface CarCenter {
-  id: string;
-  name: string;
+  centerId: string;
+  centerName: string;
+  businessNumber: string;
   address: string;
   phone: string;
-  rating: number;
-  reviewCount: number;
-  services: string[];
-  operatingHours: {
-    weekday: string;
-    weekend: string;
-    holiday: string;
-  };
-  images: string[];
-  description: string;
-  coordinates: {
-    lat: number;
-    lng: number;
-  };
-  distance?: number;
-  isOpen: boolean;
-  averagePrice: number;
+  rating?: number;
+  responseRate?: number;
+  totalReviews?: number;
+  isApproved: boolean;
+  createdAt: string;
 }
 
 const serviceCategories = [
@@ -71,97 +60,62 @@ export default function CentersListPage() {
       // 임시 데이터 (실제로는 API 호출)
       const mockCenters: CarCenter[] = [
         {
-          id: "1",
-          name: "믿음 자동차 정비소",
+          centerId: "1",
+          centerName: "믿음 자동차 정비소",
+          businessNumber: "123-45-67890",
           address: "서울시 강남구 테헤란로 123",
           phone: "02-1234-5678",
           rating: 4.8,
-          reviewCount: 127,
-          services: ["엔진 수리", "브레이크 정비", "타이어 교체"],
-          operatingHours: {
-            weekday: "09:00 - 18:00",
-            weekend: "09:00 - 17:00",
-            holiday: "휴무"
-          },
-          images: ["/placeholder.svg"],
-          description: "20년 경력의 숙련된 정비사가 직접 진단합니다.",
-          coordinates: { lat: 37.5665, lng: 126.9780 },
-          distance: 1.2,
-          isOpen: true,
-          averagePrice: 80000
+          totalReviews: 127,
+          isApproved: true,
+          createdAt: "2024-01-01T00:00:00Z"
         },
         {
-          id: "2",
-          name: "전문 카서비스",
+          centerId: "2",
+          centerName: "전문 카서비스",
+          businessNumber: "234-56-78901",
           address: "서울시 강남구 역삼동 456",
           phone: "02-2345-6789",
           rating: 4.6,
-          reviewCount: 89,
-          services: ["에어컨 수리", "전기계통", "정기 점검"],
-          operatingHours: {
-            weekday: "08:30 - 19:00",
-            weekend: "09:00 - 18:00",
-            holiday: "휴무"
-          },
-          images: ["/placeholder.svg"],
-          description: "최신 장비로 정확한 진단을 제공합니다.",
-          coordinates: { lat: 37.5665, lng: 126.9780 },
-          distance: 2.5,
-          isOpen: false,
-          averagePrice: 95000
+          totalReviews: 89,
+          isApproved: true,
+          createdAt: "2024-01-15T00:00:00Z"
         },
         {
-          id: "3",
-          name: "신속 오토센터",
+          centerId: "3",
+          centerName: "신속 오토센터",
+          businessNumber: "345-67-89012",
           address: "서울시 서초구 서초대로 789",
           phone: "02-3456-7890",
           rating: 4.9,
-          reviewCount: 203,
-          services: ["브레이크 정비", "타이어 교체", "차체 수리"],
-          operatingHours: {
-            weekday: "09:00 - 18:30",
-            weekend: "10:00 - 17:00",
-            holiday: "휴무"
-          },
-          images: ["/placeholder.svg"],
-          description: "빠르고 정확한 수리 서비스를 제공합니다.",
-          coordinates: { lat: 37.5665, lng: 126.9780 },
-          distance: 0.8,
-          isOpen: true,
-          averagePrice: 120000
+          totalReviews: 203,
+          isApproved: true,
+          createdAt: "2024-02-01T00:00:00Z"
         }
       ];
 
       // 필터링 적용
       let filteredCenters = mockCenters;
       
-      if (selectedCategory !== "전체") {
-        filteredCenters = filteredCenters.filter(center => 
-          center.services.includes(selectedCategory)
-        );
-      }
-
       if (searchKeyword.trim()) {
         filteredCenters = filteredCenters.filter(center =>
-          center.name.includes(searchKeyword) || 
-          center.description.includes(searchKeyword) ||
-          center.services.some(service => service.includes(searchKeyword))
+          center.centerName.includes(searchKeyword) || 
+          center.address.includes(searchKeyword)
         );
       }
 
-      // 정렬 적용
+      // 정렬 적용 (승인된 카센터만)
+      filteredCenters = filteredCenters.filter(center => center.isApproved);
+      
       switch (sortBy) {
-        case "distance":
-          filteredCenters.sort((a, b) => (a.distance || 0) - (b.distance || 0));
-          break;
         case "rating":
-          filteredCenters.sort((a, b) => b.rating - a.rating);
+          filteredCenters.sort((a, b) => (b.rating || 0) - (a.rating || 0));
           break;
         case "review":
-          filteredCenters.sort((a, b) => b.reviewCount - a.reviewCount);
+          filteredCenters.sort((a, b) => (b.totalReviews || 0) - (a.totalReviews || 0));
           break;
-        case "price":
-          filteredCenters.sort((a, b) => a.averagePrice - b.averagePrice);
+        case "name":
+          filteredCenters.sort((a, b) => a.centerName.localeCompare(b.centerName));
           break;
       }
 
@@ -238,20 +192,7 @@ export default function CentersListPage() {
                   <Button type="submit">검색</Button>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="서비스 카테고리" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {serviceCategories.map((category) => (
-                        <SelectItem key={category} value={category}>
-                          {category}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   <Select value={selectedDistrict} onValueChange={setSelectedDistrict}>
                     <SelectTrigger>
                       <SelectValue placeholder="지역" />
@@ -270,10 +211,9 @@ export default function CentersListPage() {
                       <SelectValue placeholder="정렬" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="distance">거리순</SelectItem>
                       <SelectItem value="rating">평점순</SelectItem>
                       <SelectItem value="review">리뷰순</SelectItem>
-                      <SelectItem value="price">가격순</SelectItem>
+                      <SelectItem value="name">이름순</SelectItem>
                     </SelectContent>
                   </Select>
 
@@ -300,49 +240,31 @@ export default function CentersListPage() {
             ) : (
               centers.map((center) => (
                 <Card 
-                  key={center.id}
+                  key={center.centerId}
                   className="cursor-pointer hover:shadow-md transition-shadow"
-                  onClick={() => handleCenterClick(center.id)}
+                  onClick={() => handleCenterClick(center.centerId)}
                 >
                   <CardHeader className="pb-3">
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
                           <CardTitle className="text-xl text-on-surface">
-                            {center.name}
+                            {center.centerName}
                           </CardTitle>
-                          {center.isOpen ? (
+                          {center.isApproved && (
                             <Badge variant="default" className="bg-green-100 text-green-800">
-                              영업중
+                              승인완료
                             </Badge>
-                          ) : (
-                            <Badge variant="secondary">영업종료</Badge>
                           )}
                         </div>
                         <div className="flex items-center gap-4 text-sm text-on-surface-variant">
                           <div className="flex items-center gap-1">
                             <Star className="h-4 w-4 fill-primary text-primary" />
-                            <span className="font-medium text-on-surface">{center.rating}</span>
-                            <span>({center.reviewCount})</span>
-                          </div>
-                          {center.distance && (
-                            <div className="flex items-center gap-1">
-                              <Navigation className="h-4 w-4" />
-                              <span>{center.distance}km</span>
-                            </div>
-                          )}
-                          <div className="flex items-center gap-1">
-                            <span>평균 {formatKRW(center.averagePrice)}</span>
+                            <span className="font-medium text-on-surface">{center.rating || 0}</span>
+                            <span>({center.totalReviews || 0})</span>
                           </div>
                         </div>
                       </div>
-                      {center.images.length > 0 && (
-                        <img
-                          src={center.images[0]}
-                          alt={center.name}
-                          className="w-20 h-20 object-cover rounded-lg"
-                        />
-                      )}
                     </div>
                   </CardHeader>
                   
@@ -352,34 +274,15 @@ export default function CentersListPage() {
                       <span>{center.address}</span>
                     </div>
 
-                    <p className="text-on-surface-variant text-sm mb-3">
-                      {center.description}
-                    </p>
-
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {center.services.slice(0, 3).map((service) => (
-                        <Badge key={service} variant="outline" className="text-xs">
-                          {service}
-                        </Badge>
-                      ))}
-                      {center.services.length > 3 && (
-                        <Badge variant="outline" className="text-xs">
-                          +{center.services.length - 3}개
-                        </Badge>
-                      )}
-                    </div>
-
                     <div className="flex items-center gap-2 text-sm text-on-surface-variant mb-4">
-                      <Clock className="h-4 w-4" />
-                      <span>평일 {center.operatingHours.weekday}</span>
-                      <span>|</span>
-                      <span>주말 {center.operatingHours.weekend}</span>
+                      <Phone className="h-4 w-4" />
+                      <span>{center.phone}</span>
                     </div>
 
                     <div className="flex gap-2">
                       <Button 
                         size="sm"
-                        onClick={(e) => handleBooking(e, center.id, center.name)}
+                        onClick={(e) => handleBooking(e, center.centerId, center.centerName)}
                         className="flex-1"
                       >
                         견적 요청

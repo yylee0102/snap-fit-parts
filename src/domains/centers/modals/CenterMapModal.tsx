@@ -1,25 +1,21 @@
 import { useState } from "react";
-import BaseModal from "@/shared/components/modal/BaseModal";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Star, Phone, Navigation } from "lucide-react";
-import { formatKRW } from "@/shared/utils/format";
+import { Card, CardContent } from "@/components/ui/card";
+import { MapPin, Star, Phone } from "lucide-react";
 
 interface CarCenter {
-  id: string;
-  name: string;
+  centerId: string;
+  centerName: string;
+  businessNumber: string;
   address: string;
   phone: string;
-  rating: number;
-  reviewCount: number;
-  services: string[];
-  coordinates: {
-    lat: number;
-    lng: number;
-  };
-  distance?: number;
-  isOpen: boolean;
-  averagePrice: number;
+  rating?: number;
+  responseRate?: number;
+  totalReviews?: number;
+  isApproved: boolean;
+  createdAt: string;
 }
 
 interface CenterMapModalProps {
@@ -35,167 +31,110 @@ export default function CenterMapModal({
 }: CenterMapModalProps) {
   const [selectedCenter, setSelectedCenter] = useState<CarCenter | null>(null);
 
-  const handleCenterSelect = (center: CarCenter) => {
-    setSelectedCenter(center);
-  };
-
-  const handleCall = (phone: string) => {
-    window.location.href = `tel:${phone}`;
-  };
-
   const handleDirections = (center: CarCenter) => {
-    // 구글 맵이나 네이버 맵으로 길찾기
-    const url = `https://map.naver.com/v5/directions/${center.coordinates.lng},${center.coordinates.lat}`;
+    // 네이버 지도 길찾기 링크 (임시 좌표)
+    const url = `https://map.naver.com/v5/directions/127.027618,37.497952`;
     window.open(url, '_blank');
   };
 
   if (!isOpen) return null;
 
   return (
-    <BaseModal 
-      open={isOpen}
-      onClose={onClose}
-      title="지도에서 카센터 찾기"
-      size="xl"
-    >
-      <div className="space-y-4">
-        {/* 지도 영역 */}
-        <div className="h-96 bg-surface rounded-lg flex items-center justify-center relative">
-          <div className="text-center">
-            <MapPin className="h-12 w-12 text-on-surface-variant mx-auto mb-4" />
-            <p className="text-on-surface-variant">지도 API 연동 필요</p>
-            <p className="text-sm text-on-surface-variant mt-1">
-              Naver Maps API 또는 Kakao Maps API 연동
-            </p>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl h-[80vh]">
+        <DialogHeader>
+          <DialogTitle>지도에서 카센터 찾기</DialogTitle>
+        </DialogHeader>
+        
+        <div className="flex h-full gap-4">
+          {/* 지도 영역 */}
+          <div className="flex-1 bg-muted rounded-lg flex items-center justify-center">
+            <div className="text-center text-muted-foreground">
+              <MapPin className="h-12 w-12 mx-auto mb-2" />
+              <p>지도 API 연결 필요</p>
+              <p className="text-sm">네이버 지도 또는 카카오 지도 API</p>
+            </div>
           </div>
           
-          {/* 임시 마커 표시 */}
-          <div className="absolute top-4 left-4 space-y-2">
-            {centers.slice(0, 3).map((center, index) => (
-              <button
-                key={center.id}
-                onClick={() => handleCenterSelect(center)}
-                className={`
-                  flex items-center gap-2 p-2 rounded-lg text-sm
-                  ${selectedCenter?.id === center.id 
-                    ? 'bg-primary text-primary-foreground' 
-                    : 'bg-surface border border-outline-variant text-on-surface'
-                  }
-                `}
+          {/* 카센터 목록 */}
+          <div className="w-80 space-y-3 overflow-y-auto">
+            {centers.map((center) => (
+              <Card 
+                key={center.centerId}
+                className={`cursor-pointer transition-colors ${
+                  selectedCenter?.centerId === center.centerId ? 'ring-2 ring-primary' : ''
+                }`}
+                onClick={() => setSelectedCenter(center)}
               >
-                <MapPin className="h-4 w-4" />
-                <span>{center.name}</span>
-                {center.distance && (
-                  <span className="text-xs">({center.distance}km)</span>
-                )}
-              </button>
+                <CardContent className="p-3">
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="font-medium text-sm text-on-surface">{center.centerName}</h3>
+                  </div>
+                  <p className="text-xs text-on-surface-variant mb-2">{center.address}</p>
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-1 text-xs">
+                      <Star className="h-3 w-3 fill-primary text-primary" />
+                      <span>{center.rating || 0}★ ({center.totalReviews || 0})</span>
+                    </div>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDirections(center);
+                      }}
+                      className="h-6 px-2 text-xs"
+                    >
+                      길찾기
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>
-
-        {/* 선택된 카센터 정보 */}
+        
+        {/* 선택된 카센터 상세 정보 */}
         {selectedCenter && (
-          <div className="p-4 bg-surface rounded-lg border border-outline-variant">
-            <div className="flex justify-between items-start mb-3">
+          <div className="border-t pt-4">
+            <div className="flex justify-between items-start">
               <div>
-                <h3 className="text-lg font-semibold text-on-surface">
-                  {selectedCenter.name}
-                </h3>
+                <h3 className="font-semibold text-on-surface">{selectedCenter.centerName}</h3>
                 <div className="flex items-center gap-2 mt-1">
                   <div className="flex items-center gap-1">
                     <Star className="h-4 w-4 fill-primary text-primary" />
-                    <span className="font-medium text-on-surface">{selectedCenter.rating}</span>
-                    <span className="text-sm text-on-surface-variant">
-                      ({selectedCenter.reviewCount})
+                    <span className="font-medium text-on-surface">{selectedCenter.rating || 0}</span>
+                    <span className="text-on-surface-variant">
+                      ({selectedCenter.totalReviews || 0})
                     </span>
                   </div>
-                  {selectedCenter.isOpen ? (
+                  {selectedCenter.isApproved && (
                     <Badge variant="default" className="bg-green-100 text-green-800">
-                      영업중
+                      승인완료
                     </Badge>
-                  ) : (
-                    <Badge variant="secondary">영업종료</Badge>
                   )}
                 </div>
-              </div>
-              <div className="text-right">
-                <div className="text-lg font-semibold text-primary">
-                  평균 {formatKRW(selectedCenter.averagePrice)}
+                <div className="flex items-center gap-2 text-sm text-on-surface-variant mt-2">
+                  <MapPin className="h-4 w-4" />
+                  <span>{selectedCenter.address}</span>
                 </div>
-                {selectedCenter.distance && (
-                  <div className="text-sm text-on-surface-variant">
-                    {selectedCenter.distance}km 거리
-                  </div>
-                )}
+                <div className="flex items-center gap-2 text-sm text-on-surface-variant">
+                  <Phone className="h-4 w-4" />
+                  <span>{selectedCenter.phone}</span>
+                </div>
               </div>
-            </div>
-
-            <div className="flex items-center gap-2 text-sm text-on-surface-variant mb-3">
-              <MapPin className="h-4 w-4" />
-              <span>{selectedCenter.address}</span>
-            </div>
-
-            <div className="flex flex-wrap gap-2 mb-4">
-              {selectedCenter.services.map((service) => (
-                <Badge key={service} variant="outline" className="text-xs">
-                  {service}
-                </Badge>
-              ))}
-            </div>
-
-            <div className="flex gap-2">
-              <Button 
-                size="sm"
-                onClick={() => handleCall(selectedCenter.phone)}
-                className="flex-1"
-              >
-                <Phone className="h-4 w-4 mr-2" />
-                전화하기
-              </Button>
-              <Button 
-                size="sm"
-                variant="outline"
-                onClick={() => handleDirections(selectedCenter)}
-                className="flex-1"
-              >
-                <Navigation className="h-4 w-4 mr-2" />
-                길찾기
-              </Button>
+              <div className="flex gap-2">
+                <Button size="sm" onClick={() => handleDirections(selectedCenter)}>
+                  길찾기
+                </Button>
+                <Button size="sm" variant="outline" onClick={onClose}>
+                  견적 요청
+                </Button>
+              </div>
             </div>
           </div>
         )}
-
-        {/* 카센터 목록 */}
-        <div className="max-h-48 overflow-y-auto space-y-2">
-          <h4 className="font-medium text-on-surface mb-2">근처 카센터 ({centers.length})</h4>
-          {centers.map((center) => (
-            <button
-              key={center.id}
-              onClick={() => handleCenterSelect(center)}
-              className={`
-                w-full p-3 rounded-lg border text-left transition-colors
-                ${selectedCenter?.id === center.id 
-                  ? 'border-primary bg-primary/5' 
-                  : 'border-outline-variant hover:bg-surface'
-                }
-              `}
-            >
-              <div className="flex justify-between items-start">
-                <div>
-                  <div className="font-medium text-on-surface">{center.name}</div>
-                  <div className="text-sm text-on-surface-variant flex items-center gap-2">
-                    <span>{center.rating}★ ({center.reviewCount})</span>
-                    {center.distance && <span>{center.distance}km</span>}
-                  </div>
-                </div>
-                <div className="text-sm text-on-surface-variant">
-                  {formatKRW(center.averagePrice)}
-                </div>
-              </div>
-            </button>
-          ))}
-        </div>
-      </div>
-    </BaseModal>
+      </DialogContent>
+    </Dialog>
   );
 }
