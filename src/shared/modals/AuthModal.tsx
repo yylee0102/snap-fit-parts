@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Eye, EyeOff } from "lucide-react";
 import VehicleRegisterModal from "./VehicleRegisterModal";
 
@@ -38,11 +37,11 @@ export default function AuthModal({ open, onClose, onLogin }: AuthModalProps) {
     confirmPassword: "",
     name: "",
     phone: "",
-    businessNumber: "", // 카센터용
-    centerName: "",     // 카센터용
-    address: "",        // 카센터용
-    centerPhone: "",    // 카센터용
-    centerEmail: "",    // 카센터용
+    businessNumber: "",
+    centerName: "",
+    address: "",
+    centerPhone: "",
+    centerEmail: "",
     agreeTerms: false,
     agreePrivacy: false,
     agreeMarketing: false
@@ -51,12 +50,9 @@ export default function AuthModal({ open, onClose, onLogin }: AuthModalProps) {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // TODO: API 연결 - 로그인
-    // POST /api/auth/login
     try {
       console.log("로그인 요청:", loginData);
       
-      // 임시 로그인 처리
       const userData = {
         id: loginData.id,
         userType: loginData.id.includes("admin") ? "관리자" : "개인",
@@ -84,17 +80,13 @@ export default function AuthModal({ open, onClose, onLogin }: AuthModalProps) {
       return;
     }
 
-    // API 연결: 회원가입
     try {
       if (signupData.userType === "일반") {
-        // POST /api/auth/signup (일반 사용자)
         console.log("일반 사용자 회원가입 요청:", signupData);
         alert("회원가입이 완료되었습니다!");
         onClose();
-        // 일반 사용자는 차량 등록 모달 표시
         setTimeout(() => setShowVehicleModal(true), 300);
       } else {
-        // POST /api/car-centers/register (카센터)
         console.log("카센터 회원가입 요청:", signupData);
         alert("카센터 회원가입 신청이 완료되었습니다. 승인 후 이용 가능합니다.");
         setActiveTab("login");
@@ -114,27 +106,9 @@ export default function AuthModal({ open, onClose, onLogin }: AuthModalProps) {
           <div className="bg-surface-container p-4 rounded-lg">
             <h4 className="font-medium mb-2">이용약관</h4>
             <p className="text-sm text-on-surface-variant">
-              카파트너 서비스 이용을 위한 약관입니다. 
-              사용자는 서비스 이용 시 해당 약관을 준수해야 합니다.
+              카파트너 서비스 이용을 위한 약관입니다.
             </p>
           </div>
-          
-          <div className="bg-surface-container p-4 rounded-lg">
-            <h4 className="font-medium mb-2">개인정보 수집 및 이용</h4>
-            <p className="text-sm text-on-surface-variant">
-              개인정보는 서비스 제공을 위해서만 수집되며, 
-              제3자에게 제공되지 않습니다.
-            </p>
-          </div>
-
-          <div className="bg-surface-container p-4 rounded-lg">
-            <h4 className="font-medium mb-2">개인정보 보유 및 이용 동의</h4>
-            <p className="text-sm text-on-surface-variant">
-              수집된 개인정보는 서비스 제공 목적으로만 사용되며,
-              관련 법령에 따라 안전하게 보관됩니다.
-            </p>
-          </div>
-
           <div className="flex gap-2">
             <Button onClick={() => setShowTermsModal(false)} className="flex-1">
               모두 동의
@@ -219,30 +193,38 @@ export default function AuthModal({ open, onClose, onLogin }: AuthModalProps) {
 
             {/* 회원가입 탭 */}
             <TabsContent value="signup">
-              {/* 사용자 유형 선택 */}
-              <div className="mb-4">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger 
-                    value="일반 사용자용"
-                    className={userType === "일반 사용자용" ? "bg-primary text-primary-foreground" : ""}
+              {/* 사용자 유형 선택 - 업로드된 이미지 참고 */}
+              <div className="mb-6">
+                <div className="grid grid-cols-2 rounded-lg overflow-hidden border border-border">
+                  <button
+                    type="button"
+                    className={`py-3 px-4 text-sm font-medium transition-colors ${
+                      userType === "일반 사용자용" 
+                        ? "bg-muted text-muted-foreground" 
+                        : "bg-primary text-primary-foreground hover:bg-primary/90"
+                    }`}
                     onClick={() => {
                       setUserType("일반 사용자용");
                       setSignupData(prev => ({ ...prev, userType: "일반" }));
                     }}
                   >
                     일반 사용자용
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="카센터용"
-                    className={userType === "카센터용" ? "bg-primary text-primary-foreground" : ""}
+                  </button>
+                  <button
+                    type="button"
+                    className={`py-3 px-4 text-sm font-medium transition-colors ${
+                      userType === "카센터용" 
+                        ? "bg-primary text-primary-foreground" 
+                        : "bg-muted text-muted-foreground hover:bg-muted/80"
+                    }`}
                     onClick={() => {
                       setUserType("카센터용");
                       setSignupData(prev => ({ ...prev, userType: "카센터" }));
                     }}
                   >
                     카센터용
-                  </TabsTrigger>
-                </TabsList>
+                  </button>
+                </div>
               </div>
 
               <form onSubmit={handleSignup} className="space-y-4">
@@ -256,12 +238,58 @@ export default function AuthModal({ open, onClose, onLogin }: AuthModalProps) {
                       value={signupData.id}
                       onChange={(e) => setSignupData(prev => ({ ...prev, id: e.target.value }))}
                       required
+                      className={signupData.id && signupData.id.length < 4 ? "border-red-300" : ""}
                     />
-                    <Button type="button" variant="outline" size="sm">
+                    <Button type="button" variant="outline" size="sm" className="bg-teal-600 text-white hover:bg-teal-700 shrink-0">
                       중복 확인
                     </Button>
                   </div>
+                  {signupData.id && signupData.id.length < 4 && (
+                    <p className="text-xs text-red-500">중복된 아이디입니다.</p>
+                  )}
                 </div>
+
+                {userType === "카센터용" && (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="businessNumber">사업자등록번호</Label>
+                      <Input
+                        id="businessNumber"
+                        type="text"
+                        placeholder="사업자등록번호"
+                        value={signupData.businessNumber}
+                        onChange={(e) => setSignupData(prev => ({ ...prev, businessNumber: e.target.value }))}
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="centerName">이름</Label>
+                      <Input
+                        id="centerName"
+                        type="text"
+                        placeholder="대표자명"
+                        value={signupData.centerName}
+                        onChange={(e) => setSignupData(prev => ({ ...prev, centerName: e.target.value }))}
+                        required
+                      />
+                    </div>
+                  </>
+                )}
+
+                {userType === "일반 사용자용" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="name">이름</Label>
+                    <Input
+                      id="name"
+                      type="text"
+                      placeholder="이름을 입력하세요"
+                      value={signupData.name}
+                      onChange={(e) => setSignupData(prev => ({ ...prev, name: e.target.value }))}
+                      required
+                    />
+                  </div>
+                )}
 
                 <div className="space-y-2">
                   <Label htmlFor="signupPassword">비밀번호</Label>
@@ -273,6 +301,7 @@ export default function AuthModal({ open, onClose, onLogin }: AuthModalProps) {
                       value={signupData.password}
                       onChange={(e) => setSignupData(prev => ({ ...prev, password: e.target.value }))}
                       required
+                      className={signupData.password && signupData.password.length < 6 ? "border-red-300" : ""}
                     />
                     <Button
                       type="button"
@@ -284,6 +313,9 @@ export default function AuthModal({ open, onClose, onLogin }: AuthModalProps) {
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </Button>
                   </div>
+                  {signupData.password && signupData.password.length < 6 && (
+                    <p className="text-xs text-red-500">비밀번자가 같지 않습니다.</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -296,6 +328,7 @@ export default function AuthModal({ open, onClose, onLogin }: AuthModalProps) {
                       value={signupData.confirmPassword}
                       onChange={(e) => setSignupData(prev => ({ ...prev, confirmPassword: e.target.value }))}
                       required
+                      className={signupData.confirmPassword && signupData.password !== signupData.confirmPassword ? "border-red-300" : ""}
                     />
                     <Button
                       type="button"
@@ -307,74 +340,10 @@ export default function AuthModal({ open, onClose, onLogin }: AuthModalProps) {
                       {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </Button>
                   </div>
+                  {signupData.confirmPassword && signupData.password !== signupData.confirmPassword && (
+                    <p className="text-xs text-red-500">비밀번호가 일치하지 않습니다.</p>
+                  )}
                 </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="name">{userType === "카센터용" ? "카센터명" : "이름"}</Label>
-                  <Input
-                    id="name"
-                    type="text"
-                    placeholder={userType === "카센터용" ? "카센터명을 입력하세요" : "이름을 입력하세요"}
-                    value={userType === "카센터용" ? signupData.centerName : signupData.name}
-                    onChange={(e) => setSignupData(prev => ({ 
-                      ...prev, 
-                      [userType === "카센터용" ? "centerName" : "name"]: e.target.value 
-                    }))}
-                    required
-                  />
-                </div>
-
-                {userType === "카센터용" && (
-                  <>
-                    <div className="space-y-2">
-                      <Label htmlFor="businessNumber">사업자등록번호</Label>
-                      <Input
-                        id="businessNumber"
-                        type="text"
-                        placeholder="사업자등록번호를 입력하세요"
-                        value={signupData.businessNumber}
-                        onChange={(e) => setSignupData(prev => ({ ...prev, businessNumber: e.target.value }))}
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="address">카센터 주소</Label>
-                      <Input
-                        id="address"
-                        type="text"
-                        placeholder="카센터 주소를 입력하세요"
-                        value={signupData.address}
-                        onChange={(e) => setSignupData(prev => ({ ...prev, address: e.target.value }))}
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="centerPhone">카센터 전화번호</Label>
-                      <Input
-                        id="centerPhone"
-                        type="tel"
-                        placeholder="카센터 전화번호를 입력하세요"
-                        value={signupData.centerPhone}
-                        onChange={(e) => setSignupData(prev => ({ ...prev, centerPhone: e.target.value }))}
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="centerEmail">카센터 이메일</Label>
-                      <Input
-                        id="centerEmail"
-                        type="email"
-                        placeholder="카센터 이메일을 입력하세요"
-                        value={signupData.centerEmail}
-                        onChange={(e) => setSignupData(prev => ({ ...prev, centerEmail: e.target.value }))}
-                        required
-                      />
-                    </div>
-                  </>
-                )}
 
                 <div className="space-y-2">
                   <Label htmlFor="phone">휴대폰번호</Label>
@@ -425,7 +394,7 @@ export default function AuthModal({ open, onClose, onLogin }: AuthModalProps) {
                       }
                     />
                     <Label htmlFor="agreeMarketing" className="text-sm">
-                      마케팅 정보 수신에 동의합니다(선택)
+                      이용약관에 동의하시겠습니까?
                     </Label>
                   </div>
 
@@ -434,17 +403,26 @@ export default function AuthModal({ open, onClose, onLogin }: AuthModalProps) {
                     variant="outline"
                     size="sm"
                     onClick={() => setShowTermsModal(true)}
-                    className="text-xs"
+                    className="text-sm"
                   >
                     약관 동의
                   </Button>
                 </div>
 
-                <div className="flex gap-2">
-                  <Button type="submit" className="flex-1">
-                    등록하기
+                <div className="flex gap-2 pt-4">
+                  <Button 
+                    type="submit" 
+                    className="flex-1 bg-teal-600 hover:bg-teal-700"
+                    disabled={!signupData.agreeTerms || !signupData.agreePrivacy}
+                  >
+                    등록
                   </Button>
-                  <Button type="button" variant="outline" onClick={onClose} className="flex-1">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    className="flex-1"
+                    onClick={onClose}
+                  >
                     취소
                   </Button>
                 </div>
@@ -454,14 +432,14 @@ export default function AuthModal({ open, onClose, onLogin }: AuthModalProps) {
         </DialogContent>
       </Dialog>
 
+      {/* 약관 모달 */}
       <TermsModal />
+      
+      {/* 차량 등록 모달 */}
       <VehicleRegisterModal 
-        open={showVehicleModal}
+        open={showVehicleModal} 
         onClose={() => setShowVehicleModal(false)}
-        onComplete={() => {
-          setShowVehicleModal(false);
-          alert("차량 등록이 완료되었습니다!");
-        }}
+        onComplete={() => setShowVehicleModal(false)}
       />
     </>
   );

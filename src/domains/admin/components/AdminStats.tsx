@@ -5,8 +5,8 @@ import { Users, ShoppingCart, MessageCircle, TrendingUp } from "lucide-react";
 interface AdminStatsProps {
   stats: {
     users: { total: number; new: number; centers: number; };
-    orders: { total: number; completed: number; pending: number; cancelled: number; };
-    revenue: { total: number; monthly: number; };
+    pendingCenters: { total: number; pending: number; approved: number; };
+    notices: { total: number; active: number; };
     reports: { total: number; pending: number; resolved: number; };
   };
 }
@@ -52,9 +52,9 @@ export default function AdminStats({ stats }: AdminStatsProps) {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">총 거래</p>
-                <p className="text-2xl font-bold">{stats.orders.total.toLocaleString()}</p>
-                <p className="text-xs text-green-600">완료 {stats.orders.completed}</p>
+                <p className="text-sm font-medium text-muted-foreground">카센터 승인</p>
+                <p className="text-2xl font-bold">{stats.pendingCenters.total.toLocaleString()}</p>
+                <p className="text-xs text-yellow-600">대기 {stats.pendingCenters.pending}</p>
               </div>
               <ShoppingCart className="h-8 w-8 text-green-600" />
             </div>
@@ -65,9 +65,9 @@ export default function AdminStats({ stats }: AdminStatsProps) {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">월 매출</p>
-                <p className="text-2xl font-bold">{stats.revenue.monthly.toLocaleString()}만원</p>
-                <p className="text-xs text-green-600">+12.5% 증가</p>
+                <p className="text-sm font-medium text-muted-foreground">공지사항</p>
+                <p className="text-2xl font-bold">{stats.notices.total.toLocaleString()}</p>
+                <p className="text-xs text-green-600">활성 {stats.notices.active}</p>
               </div>
               <TrendingUp className="h-8 w-8 text-orange-600" />
             </div>

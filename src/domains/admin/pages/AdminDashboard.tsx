@@ -4,7 +4,7 @@ import PageContainer from "@/shared/components/layout/PageContainer";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AdminStats from "@/domains/admin/components/AdminStats";
-import AdminUserManagement from "@/domains/admin/components/AdminUserManagement";
+import AdminCenterApproval from "@/domains/admin/components/AdminCenterApproval";
 import AdminNoticeManagement from "@/domains/admin/components/AdminNoticeManagement";
 import AdminReportManagement from "@/domains/admin/components/AdminReportManagement";
 import { BarChart3, Users, MessageSquare, AlertTriangle, Settings } from "lucide-react";
@@ -14,8 +14,8 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [dashboardStats, setDashboardStats] = useState({
     users: { total: 12547, new: 234, centers: 89 },
-    orders: { total: 3456, completed: 3120, pending: 256, cancelled: 80 },
-    revenue: { total: 45600000, monthly: 4560 },
+    pendingCenters: { total: 34, pending: 12, approved: 22 },
+    notices: { total: 15, active: 12 },
     reports: { total: 23, pending: 7, resolved: 16 }
   });
 
@@ -54,14 +54,14 @@ export default function AdminDashboard() {
 
         {/* 탭 네비게이션 */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="dashboard" className="gap-2">
               <BarChart3 className="h-4 w-4" />
               대시보드
             </TabsTrigger>
-            <TabsTrigger value="users" className="gap-2">
+            <TabsTrigger value="centers" className="gap-2">
               <Users className="h-4 w-4" />
-              사용자 관리
+              카센터 승인
             </TabsTrigger>
             <TabsTrigger value="notices" className="gap-2">
               <MessageSquare className="h-4 w-4" />
@@ -82,9 +82,9 @@ export default function AdminDashboard() {
             <AdminStats stats={dashboardStats} />
           </TabsContent>
 
-          {/* 사용자 관리 탭 */}
-          <TabsContent value="users">
-            <AdminUserManagement />
+          {/* 카센터 승인 관리 탭 */}
+          <TabsContent value="centers">
+            <AdminCenterApproval />
           </TabsContent>
 
           {/* 공지사항 관리 탭 */}
