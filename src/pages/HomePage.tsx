@@ -105,14 +105,15 @@ export default function HomePage() {
   return (
     <PageContainer>
       <div className="container mx-auto px-4 py-6">
-        {/* 서비스 소개 - 위로 이동 */}
+        {/* 통합된 메인 섹션 */}
         <div className="relative overflow-hidden bg-gradient-to-br from-surface via-surface-container to-surface-container-high rounded-3xl p-12 mb-12">
           {/* 배경 장식 */}
           <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-primary/10 via-primary/5 to-transparent rounded-full blur-3xl"></div>
           <div className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-secondary/10 via-secondary/5 to-transparent rounded-full blur-2xl"></div>
           
           <div className="relative z-10">
-            <div className="text-center mb-12">
+            {/* 상단 제목 */}
+            <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold text-on-surface mb-4">
                 안전하고 편리한 중고부품 거래
               </h2>
@@ -121,7 +122,8 @@ export default function HomePage() {
               </p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* 서비스 특징 */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
               <div className="group text-center p-8 rounded-2xl bg-surface/50 backdrop-blur-sm border border-outline-variant/20 hover:bg-surface/80 hover:shadow-elevation-2 transition-all duration-300">
                 <div className="w-20 h-20 bg-gradient-to-br from-primary to-primary/70 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
                   <Search className="h-10 w-10 text-white" />
@@ -152,41 +154,41 @@ export default function HomePage() {
                 </p>
               </div>
             </div>
-          </div>
-        </div>
 
-        {/* 히어로 섹션 - AI 견적 포함 */}
-        <div className="text-center py-12 mb-8">
-          <h1 className="text-4xl md:text-5xl font-bold text-on-surface mb-4">
-            <span className="bg-gradient-to-r from-primary to-brand-primary bg-clip-text text-transparent">
-              CAR PARTER
-            </span>
-          </h1>
-          <p className="text-xl text-on-surface-variant mb-8">
-            중고차 부품의 새로운 거래 플랫폼
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-lg mx-auto">
-            <Button 
-              size="lg"
-              onClick={() => navigate("/estimates/ai")}
-              className="bg-gradient-to-r from-primary to-brand-primary hover:opacity-90 text-white font-semibold"
-            >
-              AI 견적 받기
-            </Button>
-            <Button 
-              variant="outline"
-              size="lg"
-              onClick={() => navigate("/search")}
-            >
-              부품 찾기
-            </Button>
-            <Button 
-              variant="outline" 
-              size="lg"
-              onClick={() => navigate("/centers")}
-            >
-              카센터 찾기
-            </Button>
+            {/* CAR PARTER 브랜드 및 버튼 */}
+            <div className="text-center">
+              <h1 className="text-4xl md:text-5xl font-bold text-on-surface mb-4">
+                <span className="bg-gradient-to-r from-primary to-brand-primary bg-clip-text text-transparent">
+                  CAR PARTER
+                </span>
+              </h1>
+              <p className="text-xl text-on-surface-variant mb-8">
+                중고차 부품의 새로운 거래 플랫폼
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-lg mx-auto">
+                <Button 
+                  size="lg"
+                  onClick={() => navigate("/estimates/ai")}
+                  className="bg-gradient-to-r from-primary to-brand-primary hover:opacity-90 text-white font-semibold"
+                >
+                  AI 견적 받기
+                </Button>
+                <Button 
+                  variant="outline"
+                  size="lg"
+                  onClick={() => navigate("/search")}
+                >
+                  부품 찾기
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="lg"
+                  onClick={() => navigate("/centers")}
+                >
+                  카센터 찾기
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
 
