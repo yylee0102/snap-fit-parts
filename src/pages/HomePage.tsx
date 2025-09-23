@@ -155,39 +155,15 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* CAR PARTER 브랜드 및 버튼 */}
+            {/* AI 견적 받기 버튼 */}
             <div className="text-center">
-              <h1 className="text-4xl md:text-5xl font-bold text-on-surface mb-4">
-                <span className="bg-gradient-to-r from-primary to-brand-primary bg-clip-text text-transparent">
-                  CAR PARTER
-                </span>
-              </h1>
-              <p className="text-xl text-on-surface-variant mb-8">
-                중고차 부품의 새로운 거래 플랫폼
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-lg mx-auto">
-                <Button 
-                  size="lg"
-                  onClick={() => navigate("/estimates/ai")}
-                  className="bg-gradient-to-r from-primary to-brand-primary hover:opacity-90 text-white font-semibold"
-                >
-                  AI 견적 받기
-                </Button>
-                <Button 
-                  variant="outline"
-                  size="lg"
-                  onClick={() => navigate("/search")}
-                >
-                  부품 찾기
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="lg"
-                  onClick={() => navigate("/centers")}
-                >
-                  카센터 찾기
-                </Button>
-              </div>
+              <Button 
+                size="lg"
+                onClick={() => navigate("/estimates/ai")}
+                className="bg-gradient-to-r from-primary to-brand-primary hover:opacity-90 text-white font-semibold px-8 py-4 text-lg"
+              >
+                AI 견적 받기
+              </Button>
             </div>
           </div>
         </div>

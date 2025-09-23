@@ -48,11 +48,7 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
     password: "",
     confirmPassword: "",
     name: "",
-    email: "",
-    phone: "",
-    address: "",
-    birthDate: "",
-    gender: ""
+    phone: ""
   });
 
   // 카센터 등록 폼 상태
@@ -64,7 +60,6 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
     businessNumber: "",
     address: "",
     phone: "",
-    email: "",
     description: ""
   });
 
@@ -274,11 +269,7 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
       password: "",
       confirmPassword: "",
       name: "",
-      email: "",
-      phone: "",
-      address: "",
-      birthDate: "",
-      gender: ""
+      phone: ""
     });
     setCenterRegisterForm({
       username: "",
@@ -288,7 +279,6 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
       businessNumber: "",
       address: "",
       phone: "",
-      email: "",
       description: ""
     });
   };
@@ -301,7 +291,8 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto" aria-describedby="auth-modal-description">
+        <div id="auth-modal-description" className="sr-only">로그인 및 회원가입 모달</div>
         <DialogHeader>
           <DialogTitle className="text-center">CarParter</DialogTitle>
         </DialogHeader>
@@ -417,18 +408,7 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="userJoin-email">이메일</Label>
-                  <Input
-                    id="userJoin-email"
-                    type="email"
-                    value={userJoinForm.email}
-                    onChange={(e) => handleInputChange("userJoin", "email", e.target.value)}
-                    placeholder="이메일"
-                    disabled={isLoading}
-                  />
-                </div>
+              <div>
                 <div className="space-y-2">
                   <Label htmlFor="userJoin-phone">전화번호</Label>
                   <Input
@@ -516,7 +496,7 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div>
                 <div className="space-y-2">
                   <Label htmlFor="center-phone">전화번호</Label>
                   <Input
@@ -524,17 +504,6 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
                     value={centerRegisterForm.phone}
                     onChange={(e) => handleInputChange("centerRegister", "phone", e.target.value)}
                     placeholder="전화번호"
-                    disabled={isLoading}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="center-email">이메일</Label>
-                  <Input
-                    id="center-email"
-                    type="email"
-                    value={centerRegisterForm.email}
-                    onChange={(e) => handleInputChange("centerRegister", "email", e.target.value)}
-                    placeholder="이메일"
                     disabled={isLoading}
                   />
                 </div>

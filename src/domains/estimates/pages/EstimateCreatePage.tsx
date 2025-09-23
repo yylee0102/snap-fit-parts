@@ -24,16 +24,6 @@ interface EstimateRequest {
   centerId?: string;
 }
 
-const carBrands = [
-  "현대", "기아", "제네시스", "쌍용", "르노코리아", 
-  "BMW", "벤츠", "아우디", "폭스바겐", "토요타", "혼다", "닛산", "기타"
-];
-
-const categories = [
-  "엔진 수리", "브레이크 정비", "타이어 교체", "에어컨 수리",
-  "전기계통", "차체 수리", "내부 수리", "정기 점검", "기타"
-];
-
 export default function EstimateCreatePage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -144,15 +134,12 @@ export default function EstimateCreatePage() {
     try {
       setIsSubmitting(true);
 
-      // API 연결: 견적 요청 생성
-      // POST /api/estimates
-      // FormData를 사용하여 이미지와 함께 전송
+      // API 연결: 견적 요청 생성 (QuoteRequest 엔티티 기준)
+      // POST /api/quote-requests
       const formDataToSend = new FormData();
-      formDataToSend.append('title', formData.title);
-      formDataToSend.append('description', formData.description);
+      formDataToSend.append('requestDetails', formData.description);
+      formDataToSend.append('address', formData.location);
       formDataToSend.append('carInfo', JSON.stringify(formData.carInfo));
-      formDataToSend.append('category', formData.category);
-      formDataToSend.append('location', formData.location);
       
       if (formData.centerId) {
         formDataToSend.append('centerId', formData.centerId);
@@ -204,33 +191,7 @@ export default function EstimateCreatePage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label htmlFor="title">제목 *</Label>
-                <Input
-                  id="title"
-                  placeholder="예: 브레이크 패드 교체 요청"
-                  value={formData.title}
-                  onChange={(e) => handleInputChange("title", e.target.value)}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="category">카테고리 *</Label>
-                <Select onValueChange={(value) => handleInputChange("category", value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="수리 카테고리를 선택하세요" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((category) => (
-                      <SelectItem key={category} value={category}>
-                        {category}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="description">상세 내용 *</Label>
+                <Label htmlFor="description">수리 요청 내용 *</Label>
                 <Textarea
                   id="description"
                   placeholder="수리가 필요한 부분에 대해 자세히 설명해주세요..."
@@ -241,7 +202,7 @@ export default function EstimateCreatePage() {
               </div>
 
               <div>
-                <Label htmlFor="location">지역 *</Label>
+                <Label htmlFor="location">주소 *</Label>
                 <Input
                   id="location"
                   placeholder="예: 서울시 강남구"
@@ -260,52 +221,34 @@ export default function EstimateCreatePage() {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="brand">브랜드 *</Label>
-                  <Select onValueChange={(value) => handleCarInfoChange("brand", value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="브랜드 선택" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {carBrands.map((brand) => (
-                        <SelectItem key={brand} value={brand}>
-                          {brand}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="carModel">차량 모델 *</Label>
+                  <Input
+                    id="carModel"
+                    placeholder="예: 현대 소나타"
+                    value={formData.carInfo.carModel}
+                    onChange={(e) => handleCarInfoChange("carModel", e.target.value)}
+                  />
                 </div>
 
                 <div>
-                  <Label htmlFor="model">모델 *</Label>
+                  <Label htmlFor="carNumber">차량 번호 *</Label>
                   <Input
-                    id="model"
-                    placeholder="예: 소나타"
-                    value={formData.carInfo.model}
-                    onChange={(e) => handleCarInfoChange("model", e.target.value)}
+                    id="carNumber"
+                    placeholder="예: 12가3456"
+                    value={formData.carInfo.carNumber}
+                    onChange={(e) => handleCarInfoChange("carNumber", e.target.value)}
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="year">연식</Label>
-                  <Input
-                    id="year"
-                    placeholder="예: 2020"
-                    value={formData.carInfo.year}
-                    onChange={(e) => handleCarInfoChange("year", e.target.value)}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="mileage">주행거리</Label>
-                  <Input
-                    id="mileage"
-                    placeholder="예: 50,000km"
-                    value={formData.carInfo.mileage}
-                    onChange={(e) => handleCarInfoChange("mileage", e.target.value)}
-                  />
-                </div>
+              <div>
+                <Label htmlFor="modelYear">연식</Label>
+                <Input
+                  id="modelYear"
+                  placeholder="예: 2020"
+                  value={formData.carInfo.modelYear}
+                  onChange={(e) => handleCarInfoChange("modelYear", e.target.value)}
+                />
               </div>
             </CardContent>
           </Card>
