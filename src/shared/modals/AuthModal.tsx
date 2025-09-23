@@ -230,7 +230,7 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
       if (userType === "관리자") {
         navigate("/admin");
       } else if (userType === "카센터") {
-        navigate("/car-center");
+        navigate("/center/mypage");
       } else {
         navigate("/");
       }

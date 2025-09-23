@@ -26,6 +26,7 @@ import SentEstimatesPage from "./domains/centers/pages/SentEstimatesPage";
 import ChatPage from "./domains/chat/pages/ChatPage";
 import SupportPage from "./domains/support/pages/SupportPage";
 import MyPage from "./domains/mypage/pages/MyPage";
+import UserMyPage from "./domains/mypage/pages/UserMyPage";
 import CenterMyPage from "./domains/centers/pages/CenterMyPage";
 import AdminDashboard from "./domains/admin/pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
@@ -64,6 +65,9 @@ const App = () => (
           <Route path="/center/estimates/requests" element={<EstimateRequestsPage />} />
           <Route path="/center/estimates/create/:requestId?" element={<CenterEstimateCreatePage />} />
           <Route path="/center/estimates/sent" element={<SentEstimatesPage />} />
+          
+          {/* 사용자별 마이페이지 */}
+          <Route path="/user/mypage" element={<UserMyPage />} />
           
           {/* 고객센터 관련 */}
           <Route path="/support" element={<SupportPage />} />
