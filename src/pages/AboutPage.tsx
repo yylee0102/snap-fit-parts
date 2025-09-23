@@ -1,6 +1,7 @@
 import { Building2, TrendingUp, Users, Award, Globe, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import koreanFlag from "@/assets/korean-flag.jpg";
+import logoImage from "@/assets/logo.png";
 
 export default function AboutPage() {
   return (
@@ -12,9 +13,13 @@ export default function AboutPage() {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-8">
               <div className="space-y-4">
-                <h1 className="text-5xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                  CAR PARTER
-                </h1>
+                <div className="flex items-center space-x-4">
+                  <img 
+                    src={logoImage} 
+                    alt="CAR PARTER 로고" 
+                    className="h-16 w-auto"
+                  />
+                </div>
                 <p className="text-2xl text-on-surface-variant font-light">
                   대한민국을 대표하는 혁신 기업
                 </p>

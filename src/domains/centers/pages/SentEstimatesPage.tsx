@@ -1,280 +1,311 @@
-// 보낸 견적 관리 페이지 (임시)
-import { useState } from "react";
-import { FileText, Eye, Edit, Trash2, Download, Phone, Calendar, Filter } from "lucide-react";
-import PageContainer from "@/shared/components/layout/PageContainer";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+/**
+ * 카센터 전송 견적서 관리 페이지
+ * - 내가 작성해서 전송한 견적서 목록 조회
+ * - 견적서 상태 관리 (대기중, 승인됨, 거절됨)
+ * - 견적서 수정 및 재전송
+ * EstimateController의 견적서 관리 API 기반
+ */
+import React, { useState, useEffect } from 'react';
+import PageContainer from '@/shared/components/layout/PageContainer';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
+import { FileText, Calendar, DollarSign, User, Eye, Edit, Trash2, CheckCircle, XCircle, Clock } from 'lucide-react';
+import ProtectedRoute from '@/shared/components/ProtectedRoute';
 
-export default function SentEstimatesPage() {
-  const [filterStatus, setFilterStatus] = useState("all");
-  const [sortBy, setSortBy] = useState("recent");
+interface SentEstimate {
+  estimateId: number;
+  customerName: string;
+  carModel: string;
+  totalPrice: number;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  sentDate: string;
+  validUntil: string;
+  workDuration?: string;
+  description?: string;
+  items: EstimateItem[];
+}
 
-  // 임시 보낸 견적 데이터
-  const sentEstimates = [
-    {
-      id: "EST001",
-      requestId: "REQ001",
-      customerName: "김철수", 
-      customerPhone: "010-1234-5678",
-      vehicleInfo: "현대 아반떼 2020년",
-      sentDate: "2024.01.15 16:30",
-      amount: 350000,
-      status: "pending", // pending, accepted, rejected, expired
-      validUntil: "2024.01.22",
-      items: ["앞범퍼 교체", "헤드라이트 수리"],
-      responseDate: null
-    },
-    {
-      id: "EST002",
-      requestId: "REQ002", 
-      customerName: "이영희",
-      customerPhone: "010-2345-6789",
-      vehicleInfo: "기아 쏘렌토 2019년",
-      sentDate: "2024.01.15 15:45",
-      amount: 280000,
-      status: "accepted",
-      validUntil: "2024.01.22",
-      items: ["엔진오일 교체", "브레이크 패드 교체"],
-      responseDate: "2024.01.16 10:20"
-    },
-    {
-      id: "EST003",
-      requestId: "REQ003",
-      customerName: "박민수",
-      customerPhone: "010-3456-7890",
-      vehicleInfo: "BMW 320i 2021년", 
-      sentDate: "2024.01.14 14:20",
-      amount: 450000,
-      status: "rejected",
-      validUntil: "2024.01.21",
-      items: ["타이어 4개 교체", "휠 얼라인먼트"],
-      responseDate: "2024.01.15 09:30"
-    },
-    {
-      id: "EST004",
-      requestId: "REQ004",
-      customerName: "정수민",
-      customerPhone: "010-4567-8901", 
-      vehicleInfo: "토요타 캠리 2018년",
-      sentDate: "2024.01.10 11:30",
-      amount: 180000,
-      status: "expired",
-      validUntil: "2024.01.17",
-      items: ["배터리 교체"],
-      responseDate: null
-    }
-  ];
+interface EstimateItem {
+  itemName: string;
+  partPrice: number;
+  laborCost: number;
+  quantity: number;
+}
+
+export const SentEstimatesPage = () => {
+  const { toast } = useToast();
+  const [sentEstimates, setSentEstimates] = useState<SentEstimate[]>([]);
+
+  useEffect(() => {
+    loadSentEstimates();
+  }, []);
+
+  const loadSentEstimates = () => {
+    // Mock data - 실제로는 API 호출: GET /api/estimates/My-estimates
+    const mockEstimates: SentEstimate[] = [
+      {
+        estimateId: 1,
+        customerName: '김고객',
+        carModel: '현대 아반떼',
+        totalPrice: 250000,
+        status: 'PENDING',
+        sentDate: '2024-01-15',
+        validUntil: '2024-01-22',
+        workDuration: '2-3시간',
+        description: '브레이크 패드 교체 작업입니다.',
+        items: [
+          { itemName: '브레이크 패드', partPrice: 120000, laborCost: 80000, quantity: 1 },
+          { itemName: '브레이크 오일', partPrice: 30000, laborCost: 20000, quantity: 1 }
+        ]
+      },
+      {
+        estimateId: 2,
+        customerName: '이고객',
+        carModel: '기아 K5',
+        totalPrice: 80000,
+        status: 'APPROVED',
+        sentDate: '2024-01-14',
+        validUntil: '2024-01-21',
+        workDuration: '1시간',
+        description: '엔진오일 교체 및 정기점검',
+        items: [
+          { itemName: '엔진오일', partPrice: 45000, laborCost: 35000, quantity: 1 }
+        ]
+      },
+      {
+        estimateId: 3,
+        customerName: '박고객',
+        carModel: '현대 소나타',
+        totalPrice: 150000,
+        status: 'REJECTED',
+        sentDate: '2024-01-13',
+        validUntil: '2024-01-20',
+        workDuration: '2시간',
+        description: '에어컨 점검 및 수리',
+        items: [
+          { itemName: '에어컨 가스', partPrice: 80000, laborCost: 70000, quantity: 1 }
+        ]
+      }
+    ];
+    setSentEstimates(mockEstimates);
+  };
+
+  const handleEditEstimate = (estimateId: number) => {
+    // API 호출: PUT /api/estimates/{estimateId}
+    toast({ title: '견적서 수정 기능을 준비중입니다.' });
+  };
+
+  const handleDeleteEstimate = (estimateId: number) => {
+    // API 호출: DELETE /api/estimates/{estimateId}
+    setSentEstimates(prev => prev.filter(est => est.estimateId !== estimateId));
+    toast({ title: '견적서가 삭제되었습니다.' });
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "pending": return "bg-yellow-100 text-yellow-800";
-      case "accepted": return "bg-green-100 text-green-800";
-      case "rejected": return "bg-red-100 text-red-800";
-      case "expired": return "bg-gray-100 text-gray-800";
-      default: return "bg-gray-100 text-gray-800";
+      case 'PENDING': return 'bg-yellow-100 text-yellow-800';
+      case 'APPROVED': return 'bg-green-100 text-green-800';
+      case 'REJECTED': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case "pending": return "대기중";
-      case "accepted": return "수락됨";
-      case "rejected": return "거절됨";
-      case "expired": return "만료됨";
-      default: return "알수없음";
+      case 'PENDING': return '대기중';
+      case 'APPROVED': return '승인됨';
+      case 'REJECTED': return '거절됨';
+      default: return status;
     }
   };
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('ko-KR').format(price) + '원';
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'PENDING': return <Clock className="h-4 w-4" />;
+      case 'APPROVED': return <CheckCircle className="h-4 w-4" />;
+      case 'REJECTED': return <XCircle className="h-4 w-4" />;
+      default: return <FileText className="h-4 w-4" />;
+    }
   };
 
-  const filteredEstimates = sentEstimates.filter(estimate => {
-    if (filterStatus === "all") return true;
-    return estimate.status === filterStatus;
-  });
-
-  const statusCounts = {
-    total: sentEstimates.length,
-    pending: sentEstimates.filter(e => e.status === 'pending').length,
-    accepted: sentEstimates.filter(e => e.status === 'accepted').length,
-    rejected: sentEstimates.filter(e => e.status === 'rejected').length,
-    expired: sentEstimates.filter(e => e.status === 'expired').length
+  const formatCurrency = (amount: number) => {
+    return amount.toLocaleString('ko-KR') + '원';
   };
 
   return (
-    <PageContainer>
-      <div className="container mx-auto px-4 py-6">
-        {/* 페이지 헤더 */}
-        <div className="flex justify-between items-center mb-6">
+    <ProtectedRoute allowedUserTypes={["카센터"]} fallbackMessage="카센터 운영자만 접근할 수 있는 페이지입니다.">
+      <PageContainer>
+        <div className="space-y-6">
+          {/* 헤더 */}
           <div>
-            <h1 className="text-2xl font-bold">보낸 견적 관리</h1>
-            <p className="text-muted-foreground">발송한 견적서의 상태를 확인하고 관리하세요</p>
+            <h1 className="text-3xl font-bold">전송한 견적서</h1>
+            <p className="text-muted-foreground">고객에게 전송한 견적서의 상태를 확인하고 관리하세요</p>
           </div>
-          <div className="flex gap-2">
-            <Select value={filterStatus} onValueChange={setFilterStatus}>
-              <SelectTrigger className="w-32">
-                <Filter className="h-4 w-4 mr-2" />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">전체</SelectItem>
-                <SelectItem value="pending">대기중</SelectItem>
-                <SelectItem value="accepted">수락됨</SelectItem>
-                <SelectItem value="rejected">거절됨</SelectItem>
-                <SelectItem value="expired">만료됨</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
 
-        {/* 통계 카드 */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-          <Card>
-            <CardContent className="p-4">
-              <div className="text-center">
-                <p className="text-sm text-muted-foreground">총 견적</p>
-                <p className="text-2xl font-bold text-blue-600">{statusCounts.total}</p>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-4">
-              <div className="text-center">
-                <p className="text-sm text-muted-foreground">대기중</p>
-                <p className="text-2xl font-bold text-yellow-600">{statusCounts.pending}</p>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-4">
-              <div className="text-center">
-                <p className="text-sm text-muted-foreground">수락됨</p>
-                <p className="text-2xl font-bold text-green-600">{statusCounts.accepted}</p>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-4">
-              <div className="text-center">
-                <p className="text-sm text-muted-foreground">거절됨</p>
-                <p className="text-2xl font-bold text-red-600">{statusCounts.rejected}</p>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-4">
-              <div className="text-center">
-                <p className="text-sm text-muted-foreground">만료됨</p>
-                <p className="text-2xl font-bold text-gray-600">{statusCounts.expired}</p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* 견적 목록 */}
-        <div className="space-y-4">
-          {filteredEstimates.map(estimate => (
-            <Card key={estimate.id} className="hover:shadow-md transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex items-center gap-4">
-                    <div>
-                      <h3 className="font-semibold text-lg">{estimate.customerName}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        견적번호: {estimate.id} | 요청번호: {estimate.requestId}
-                      </p>
-                    </div>
-                    <Badge className={getStatusColor(estimate.status)}>
-                      {getStatusText(estimate.status)}
-                    </Badge>
-                  </div>
-                  
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm">
-                      <Eye className="h-4 w-4 mr-2" />
-                      상세보기
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      <Download className="h-4 w-4 mr-2" />
-                      다운로드
-                    </Button>
-                    {estimate.status === "pending" && (
-                      <>
-                        <Button variant="outline" size="sm">
-                          <Edit className="h-4 w-4 mr-2" />
-                          수정
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          취소
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-                  <div className="flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">{estimate.vehicleInfo}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Phone className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">{estimate.customerPhone}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">발송: {estimate.sentDate}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">만료: {estimate.validUntil}</span>
-                  </div>
-                </div>
-
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">견적 항목:</p>
-                    <div className="flex gap-2 flex-wrap">
-                      {estimate.items.map((item, index) => (
-                        <Badge key={index} variant="outline">{item}</Badge>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  <div className="text-right">
-                    <p className="text-sm text-muted-foreground">견적 금액</p>
-                    <p className="text-xl font-bold text-primary">{formatPrice(estimate.amount)}</p>
-                    {estimate.responseDate && (
-                      <p className="text-xs text-muted-foreground">
-                        응답: {estimate.responseDate}
-                      </p>
-                    )}
+          {/* 통계 카드 */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center">
+                  <FileText className="h-4 w-4 text-blue-500" />
+                  <div className="ml-2">
+                    <p className="text-sm font-medium text-muted-foreground">총 견적서</p>
+                    <p className="text-2xl font-bold text-blue-600">{sentEstimates.length}건</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
-          ))}
-        </div>
-
-        {/* 페이지네이션 */}
-        <div className="flex justify-center mt-8">
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm">이전</Button>
-            <Button size="sm">1</Button>
-            <Button variant="outline" size="sm">2</Button>
-            <Button variant="outline" size="sm">3</Button>
-            <Button variant="outline" size="sm">다음</Button>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center">
+                  <Clock className="h-4 w-4 text-yellow-500" />
+                  <div className="ml-2">
+                    <p className="text-sm font-medium text-muted-foreground">대기중</p>
+                    <p className="text-2xl font-bold text-yellow-600">
+                      {sentEstimates.filter(e => e.status === 'PENDING').length}건
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center">
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                  <div className="ml-2">
+                    <p className="text-sm font-medium text-muted-foreground">승인됨</p>
+                    <p className="text-2xl font-bold text-green-600">
+                      {sentEstimates.filter(e => e.status === 'APPROVED').length}건
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center">
+                  <XCircle className="h-4 w-4 text-red-500" />
+                  <div className="ml-2">
+                    <p className="text-sm font-medium text-muted-foreground">거절됨</p>
+                    <p className="text-2xl font-bold text-red-600">
+                      {sentEstimates.filter(e => e.status === 'REJECTED').length}건
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
+
+          {/* 견적서 목록 */}
+          <Card>
+            <CardHeader>
+              <CardTitle>견적서 목록</CardTitle>
+              <CardDescription>전송한 견적서의 진행 상황을 확인하세요</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {sentEstimates.map((estimate) => (
+                  <div key={estimate.estimateId} className="border rounded-lg p-4">
+                    <div className="flex justify-between items-start">
+                      <div className="space-y-3 flex-1">
+                        {/* 기본 정보 */}
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-2">
+                            <User className="h-4 w-4" />
+                            <span className="font-medium">{estimate.customerName}</span>
+                          </div>
+                          <Badge className={getStatusColor(estimate.status)}>
+                            <div className="flex items-center gap-1">
+                              {getStatusIcon(estimate.status)}
+                              {getStatusText(estimate.status)}
+                            </div>
+                          </Badge>
+                          <span className="text-sm text-muted-foreground">#{estimate.estimateId}</span>
+                        </div>
+
+                        {/* 차량 및 금액 정보 */}
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          <span>{estimate.carModel}</span>
+                          <div className="flex items-center gap-1">
+                            <DollarSign className="h-4 w-4" />
+                            <span className="font-medium text-lg text-primary">
+                              {formatCurrency(estimate.totalPrice)}
+                            </span>
+                          </div>
+                          {estimate.workDuration && (
+                            <span>작업시간: {estimate.workDuration}</span>
+                          )}
+                        </div>
+
+                        {/* 날짜 정보 */}
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-1">
+                            <Calendar className="h-4 w-4" />
+                            <span>전송일: {estimate.sentDate}</span>
+                          </div>
+                          <span>유효기간: {estimate.validUntil}</span>
+                        </div>
+
+                        {/* 견적 항목 */}
+                        <div>
+                          <span className="text-sm font-medium">견적 항목: </span>
+                          <div className="flex gap-2 mt-1">
+                            {estimate.items.map((item, index) => (
+                              <Badge key={index} variant="outline">
+                                {item.itemName} ({item.quantity}개)
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* 설명 */}
+                        {estimate.description && (
+                          <div>
+                            <span className="text-sm font-medium">설명: </span>
+                            <span className="text-sm text-muted-foreground">{estimate.description}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* 액션 버튼 */}
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm">
+                          <Eye className="h-4 w-4 mr-1" />
+                          상세보기
+                        </Button>
+                        {estimate.status === 'PENDING' && (
+                          <>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleEditEstimate(estimate.estimateId)}
+                            >
+                              <Edit className="h-4 w-4 mr-1" />
+                              수정
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleDeleteEstimate(estimate.estimateId)}
+                            >
+                              <Trash2 className="h-4 w-4 mr-1" />
+                              삭제
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
-      </div>
-    </PageContainer>
+      </PageContainer>
+    </ProtectedRoute>
   );
-}
+};
+
+export default SentEstimatesPage;

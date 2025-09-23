@@ -5,6 +5,7 @@ import { useAuth } from "@/shared/contexts/AuthContext";
 import AuthModal from "@/shared/modals/AuthModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import logoImage from "@/assets/logo.png";
 import {
   Select,
   SelectContent,
@@ -63,11 +64,13 @@ export default function Header({ className }: HeaderProps) {
             )}
             <Link 
               to="/" 
-              className="flex items-center space-x-2 text-2xl font-bold text-primary hover:text-primary/80 transition-colors"
+              className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
             >
-              <span className="bg-gradient-to-r from-primary to-brand-primary bg-clip-text text-transparent">
-                CAR PARTER
-              </span>
+              <img 
+                src={logoImage} 
+                alt="CAR PARTER 로고" 
+                className="h-10 w-auto"
+              />
             </Link>
           </div>
 

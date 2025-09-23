@@ -23,17 +23,22 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/shared/contexts/AuthContext";
 import ProtectedRoute from "@/shared/components/ProtectedRoute";
+import { VehicleRegisterModal } from "@/domains/users/modals/VehicleRegisterModal";
+import { QuoteRequestModal } from "@/domains/users/modals/QuoteRequestModal";
 
 export default function UserMyPage() {
   const { user } = useAuth();
 
+  const [vehicleModalOpen, setVehicleModalOpen] = useState(false);
+  const [quoteRequestModalOpen, setQuoteRequestModalOpen] = useState(false);
+
   const menuItems = [
-    { icon: User, label: "내 정보 관리", href: "/mypage/profile" },
-    { icon: Car, label: "내 차량 관리", href: "/mypage/vehicles" },
-    { icon: FileText, label: "견적 요청 내역", href: "/mypage/estimates" },
-    { icon: MessageSquare, label: "리뷰 관리", href: "/mypage/reviews" },
-    { icon: HelpCircle, label: "고객센터", href: "/support" },
-    { icon: Settings, label: "설정", href: "/mypage/settings" },
+    { icon: User, label: "내 정보 관리", href: "/user/profile", action: () => console.log('Profile') },
+    { icon: Car, label: "내 차량 관리", href: "/user/vehicles", action: () => setVehicleModalOpen(true) },
+    { icon: FileText, label: "견적 요청 내역", href: "/user/quote-requests", action: () => setQuoteRequestModalOpen(true) },
+    { icon: MessageSquare, label: "리뷰 관리", href: "/user/reviews", action: () => console.log('Reviews') },
+    { icon: HelpCircle, label: "고객센터", href: "/support", action: () => console.log('Support') },
+    { icon: Settings, label: "설정", href: "/user/settings", action: () => console.log('Settings') },
   ];
 
   return (
@@ -112,7 +117,11 @@ export default function UserMyPage() {
         {/* 메뉴 그리드 */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {menuItems.map((item) => (
-            <Card key={item.label} className="hover:shadow-md transition-shadow cursor-pointer">
+            <Card 
+              key={item.label} 
+              className="hover:shadow-md transition-shadow cursor-pointer"
+              onClick={item.action}
+            >
               <CardContent className="p-6">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
@@ -148,6 +157,25 @@ export default function UserMyPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* 모달들 */}
+        <VehicleRegisterModal
+          open={vehicleModalOpen}
+          onClose={() => setVehicleModalOpen(false)}
+          onSubmit={(vehicleData) => {
+            console.log('Vehicle registered:', vehicleData);
+            // 실제로는 API 호출
+          }}
+        />
+
+        <QuoteRequestModal
+          open={quoteRequestModalOpen}
+          onClose={() => setQuoteRequestModalOpen(false)}
+          onSubmit={(requestData) => {
+            console.log('Quote request submitted:', requestData);
+            // 실제로는 API 호출
+          }}
+        />
       </div>
       </PageContainer>
     </ProtectedRoute>

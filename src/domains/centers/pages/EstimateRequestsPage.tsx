@@ -1,280 +1,296 @@
 /**
- * 견적 요청 관리 페이지 (카센터용)
- * 
- * 이 페이지의 역할:
- * - 고객들로부터 접수된 견적 요청 확인
- * - 요청 상태별 분류 및 관리 (대기중/견적완료/수리완료)
- * - 고객 정보 및 차량 정보 상세 확인
- * - 견적서 작성 페이지로 연결
- * 
- * 왜 필요한가:
- * - 카센터가 고객 요청을 체계적으로 관리할 수 있는 업무 도구
- * - 요청부터 완료까지의 전체 프로세스를 한 곳에서 추적
- * - 고객 대응 시간 단축으로 서비스 품질 향상
- * - 데이터 기반의 효율적인 카센터 운영 지원
+ * 카센터 견적 요청 관리 페이지
+ * - 고객이 요청한 견적서 목록 조회
+ * - 견적서 작성 및 전송
+ * - 요청 상세 정보 확인
+ * CarCenterController의 견적 요청 관리 API 기반
  */
+import React, { useState, useEffect } from 'react';
+import PageContainer from '@/shared/components/layout/PageContainer';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
+import { Car, Calendar, MapPin, FileText, Eye, Send, Clock, User, Phone, Edit } from 'lucide-react';
+import { EstimateCreateModal } from '@/domains/centers/modals/EstimateCreateModal';
+import ProtectedRoute from '@/shared/components/ProtectedRoute';
 
-// 견적 요청 관리 페이지 (임시)
-import { useState } from "react";
-import { FileText, Clock, User, Phone, Calendar, Filter, Eye, Edit } from "lucide-react";
-import PageContainer from "@/shared/components/layout/PageContainer";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import ProtectedRoute from "@/shared/components/ProtectedRoute";
+interface QuoteRequest {
+  quoteRequestId: number;
+  customerName: string;
+  customerPhone: string;
+  carModel: string;
+  carYear: number;
+  issueDescription: string;
+  preferredDate: string;
+  location: string;
+  status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
+  createdDate: string;
+  images?: string[];
+}
 
-export default function EstimateRequestsPage() {
-  const [filterStatus, setFilterStatus] = useState("all");
-  const [sortBy, setSortBy] = useState("recent");
+export const EstimateRequestsPage = () => {
+  const { toast } = useToast();
+  const [quoteRequests, setQuoteRequests] = useState<QuoteRequest[]>([]);
+  const [selectedRequest, setSelectedRequest] = useState<QuoteRequest | null>(null);
+  const [estimateModalOpen, setEstimateModalOpen] = useState(false);
 
-  // 임시 견적 요청 데이터
-  const estimateRequests = [
-    {
-      id: "REQ001",
-      customerName: "김철수",
-      customerPhone: "010-1234-5678",
-      vehicleInfo: "현대 아반떼 2020년",
-      requestDate: "2024.01.15 14:30",
-      status: "pending",
-      category: "외장수리",
-      description: "앞범퍼 교체 필요, 사고로 인한 파손",
-      images: ["/api/placeholder/150/150"],
-      urgency: "normal"
-    },
-    {
-      id: "REQ002", 
-      customerName: "이영희",
-      customerPhone: "010-2345-6789",
-      vehicleInfo: "기아 쏘렌토 2019년",
-      requestDate: "2024.01.15 13:20",
-      status: "quoted",
-      category: "엔진수리",
-      description: "엔진오일 누유, 점검 및 수리 요청",
-      images: ["/api/placeholder/150/150", "/api/placeholder/150/150"],
-      urgency: "high"
-    },
-    {
-      id: "REQ003",
-      customerName: "박민수",
-      customerPhone: "010-3456-7890", 
-      vehicleInfo: "BMW 320i 2021년",
-      requestDate: "2024.01.14 16:45",
-      status: "completed",
-      category: "타이어교체",
-      description: "타이어 4개 교체, 계절용 타이어로 변경",
-      images: ["/api/placeholder/150/150"],
-      urgency: "normal"
-    }
-  ];
+  useEffect(() => {
+    loadQuoteRequests();
+  }, []);
+
+  const loadQuoteRequests = () => {
+    // Mock data - 실제로는 API 호출: GET /api/car-centers/estimate-requests
+    const mockRequests: QuoteRequest[] = [
+      {
+        quoteRequestId: 1,
+        customerName: '김고객',
+        customerPhone: '010-1234-5678',
+        carModel: '현대 아반떼',
+        carYear: 2020,
+        issueDescription: '브레이크에서 소음이 나고 진동이 느껴집니다. 브레이크 패드 교체가 필요할 것 같습니다.',
+        preferredDate: '2024-01-20',
+        location: '서울 강남구',
+        status: 'PENDING',
+        createdDate: '2024-01-15',
+        images: ['/placeholder.svg', '/placeholder.svg']
+      },
+      {
+        quoteRequestId: 2,
+        customerName: '이고객',
+        customerPhone: '010-2345-6789',
+        carModel: '기아 K5',
+        carYear: 2019,
+        issueDescription: '엔진오일 교체 및 정기점검을 받고 싶습니다.',
+        preferredDate: '2024-01-25',
+        location: '서울 서초구',
+        status: 'PENDING',
+        createdDate: '2024-01-14'
+      },
+      {
+        quoteRequestId: 3,
+        customerName: '박고객',
+        customerPhone: '010-3456-7890',
+        carModel: '현대 소나타',
+        carYear: 2018,
+        issueDescription: '에어컨이 제대로 작동하지 않습니다. 점검 및 수리 부탁드립니다.',
+        preferredDate: '2024-01-18',
+        location: '서울 마포구',
+        status: 'COMPLETED',
+        createdDate: '2024-01-10'
+      }
+    ];
+    setQuoteRequests(mockRequests);
+  };
+
+  const handleCreateEstimate = (request: QuoteRequest) => {
+    setSelectedRequest(request);
+    setEstimateModalOpen(true);
+  };
+
+  const handleEstimateSubmit = (estimateData: any) => {
+    // API 호출: POST /api/estimates/
+    console.log('Estimate submitted:', estimateData);
+    
+    // 요청 상태 업데이트
+    setQuoteRequests(prev => 
+      prev.map(req => 
+        req.quoteRequestId === estimateData.quoteRequestId 
+          ? { ...req, status: 'COMPLETED' as const }
+          : req
+      )
+    );
+    
+    toast({ title: '견적서가 성공적으로 전송되었습니다.' });
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "pending": return "bg-yellow-100 text-yellow-800";
-      case "quoted": return "bg-blue-100 text-blue-800";
-      case "completed": return "bg-green-100 text-green-800";
-      case "cancelled": return "bg-red-100 text-red-800";
-      default: return "bg-gray-100 text-gray-800";
+      case 'PENDING': return 'bg-yellow-100 text-yellow-800';
+      case 'IN_PROGRESS': return 'bg-blue-100 text-blue-800';
+      case 'COMPLETED': return 'bg-green-100 text-green-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case "pending": return "대기중";
-      case "quoted": return "견적완료";
-      case "completed": return "수리완료";
-      case "cancelled": return "취소됨";
-      default: return "알수없음";
+      case 'PENDING': return '대기중';
+      case 'IN_PROGRESS': return '진행중';
+      case 'COMPLETED': return '완료';
+      default: return status;
     }
   };
-
-  const getUrgencyColor = (urgency: string) => {
-    switch (urgency) {
-      case "high": return "text-red-600";
-      case "normal": return "text-gray-600";
-      case "low": return "text-gray-400";
-      default: return "text-gray-600";
-    }
-  };
-
-  const filteredRequests = estimateRequests.filter(request => {
-    if (filterStatus === "all") return true;
-    return request.status === filterStatus;
-  });
 
   return (
     <ProtectedRoute allowedUserTypes={["카센터"]} fallbackMessage="카센터 운영자만 접근할 수 있는 페이지입니다.">
       <PageContainer>
-      <div className="container mx-auto px-4 py-6">
-        {/* 페이지 헤더 */}
-        <div className="flex justify-between items-center mb-6">
+        <div className="space-y-6">
+          {/* 헤더 */}
           <div>
-            <h1 className="text-2xl font-bold">견적 요청 관리</h1>
-            <p className="text-muted-foreground">고객의 견적 요청을 확인하고 관리하세요</p>
+            <h1 className="text-3xl font-bold">견적 요청 관리</h1>
+            <p className="text-muted-foreground">고객의 견적 요청을 확인하고 견적서를 작성하세요</p>
           </div>
-          <div className="flex gap-2">
-            <Select value={filterStatus} onValueChange={setFilterStatus}>
-              <SelectTrigger className="w-32">
-                <Filter className="h-4 w-4 mr-2" />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">전체</SelectItem>
-                <SelectItem value="pending">대기중</SelectItem>
-                <SelectItem value="quoted">견적완료</SelectItem>
-                <SelectItem value="completed">수리완료</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
 
-        {/* 통계 카드 */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">총 요청</p>
-                  <p className="text-2xl font-bold text-blue-600">{estimateRequests.length}</p>
-                </div>
-                <FileText className="h-8 w-8 text-blue-500" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">대기중</p>
-                  <p className="text-2xl font-bold text-yellow-600">
-                    {estimateRequests.filter(r => r.status === 'pending').length}
-                  </p>
-                </div>
-                <Clock className="h-8 w-8 text-yellow-500" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">견적완료</p>
-                  <p className="text-2xl font-bold text-blue-600">
-                    {estimateRequests.filter(r => r.status === 'quoted').length}
-                  </p>
-                </div>
-                <Edit className="h-8 w-8 text-blue-500" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">수리완료</p>
-                  <p className="text-2xl font-bold text-green-600">
-                    {estimateRequests.filter(r => r.status === 'completed').length}
-                  </p>
-                </div>
-                <FileText className="h-8 w-8 text-green-500" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* 견적 요청 목록 */}
-        <div className="space-y-4">
-          {filteredRequests.map(request => (
-            <Card key={request.id} className="hover:shadow-md transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex items-center gap-4">
-                    <div>
-                      <h3 className="font-semibold text-lg">{request.customerName}</h3>
-                      <p className="text-sm text-muted-foreground">요청번호: {request.id}</p>
-                    </div>
-                    <Badge className={getStatusColor(request.status)}>
-                      {getStatusText(request.status)}
-                    </Badge>
-                    {request.urgency === "high" && (
-                      <Badge variant="destructive">긴급</Badge>
-                    )}
-                  </div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm">
-                      <Eye className="h-4 w-4 mr-2" />
-                      상세보기
-                    </Button>
-                    {request.status === "pending" && (
-                      <Button size="sm">
-                        <Edit className="h-4 w-4 mr-2" />
-                        견적작성
-                      </Button>
-                    )}
+          {/* 통계 카드 */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center">
+                  <FileText className="h-4 w-4 text-blue-500" />
+                  <div className="ml-2">
+                    <p className="text-sm font-medium text-muted-foreground">총 요청</p>
+                    <p className="text-2xl font-bold text-blue-600">{quoteRequests.length}건</p>
                   </div>
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="flex items-center gap-2">
-                    <User className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">{request.vehicleInfo}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Phone className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">{request.customerPhone}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">{request.requestDate}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">{request.category}</span>
-                  </div>
-                </div>
-
-                <div className="mt-4">
-                  <p className="text-sm text-muted-foreground mb-2">요청 내용:</p>
-                  <p className="text-sm">{request.description}</p>
-                </div>
-
-                {request.images && request.images.length > 0 && (
-                  <div className="mt-4">
-                    <p className="text-sm text-muted-foreground mb-2">첨부 이미지:</p>
-                    <div className="flex gap-2">
-                      {request.images.map((image, index) => (
-                        <div key={index} className="w-16 h-16 bg-muted rounded overflow-hidden">
-                          <img 
-                            src={image} 
-                            alt={`첨부이미지 ${index + 1}`}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </CardContent>
             </Card>
-          ))}
-        </div>
-
-        {/* 페이지네이션 */}
-        <div className="flex justify-center mt-8">
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm">이전</Button>
-            <Button size="sm">1</Button>
-            <Button variant="outline" size="sm">2</Button>
-            <Button variant="outline" size="sm">3</Button>
-            <Button variant="outline" size="sm">다음</Button>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center">
+                  <Clock className="h-4 w-4 text-yellow-500" />
+                  <div className="ml-2">
+                    <p className="text-sm font-medium text-muted-foreground">대기중</p>
+                    <p className="text-2xl font-bold text-yellow-600">
+                      {quoteRequests.filter(r => r.status === 'PENDING').length}건
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center">
+                  <Edit className="h-4 w-4 text-blue-500" />
+                  <div className="ml-2">
+                    <p className="text-sm font-medium text-muted-foreground">진행중</p>
+                    <p className="text-2xl font-bold text-blue-600">
+                      {quoteRequests.filter(r => r.status === 'IN_PROGRESS').length}건
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center">
+                  <Send className="h-4 w-4 text-green-500" />
+                  <div className="ml-2">
+                    <p className="text-sm font-medium text-muted-foreground">완료</p>
+                    <p className="text-2xl font-bold text-green-600">
+                      {quoteRequests.filter(r => r.status === 'COMPLETED').length}건
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
+
+          {/* 견적 요청 목록 */}
+          <Card>
+            <CardHeader>
+              <CardTitle>견적 요청 목록</CardTitle>
+              <CardDescription>고객이 요청한 견적을 확인하고 견적서를 작성하세요</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {quoteRequests.map((request) => (
+                  <div key={request.quoteRequestId} className="border rounded-lg p-4">
+                    <div className="flex justify-between items-start">
+                      <div className="space-y-3 flex-1">
+                        {/* 기본 정보 */}
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-2">
+                            <User className="h-4 w-4" />
+                            <span className="font-medium">{request.customerName}</span>
+                          </div>
+                          <Badge className={getStatusColor(request.status)}>
+                            {getStatusText(request.status)}
+                          </Badge>
+                          <span className="text-sm text-muted-foreground">#{request.quoteRequestId}</span>
+                        </div>
+
+                        {/* 차량 및 연락처 정보 */}
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-1">
+                            <Car className="h-4 w-4" />
+                            <span>{request.carModel} ({request.carYear}년)</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Phone className="h-4 w-4" />
+                            <span>{request.customerPhone}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <MapPin className="h-4 w-4" />
+                            <span>{request.location}</span>
+                          </div>
+                        </div>
+
+                        {/* 날짜 정보 */}
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-1">
+                            <Calendar className="h-4 w-4" />
+                            <span>희망일: {request.preferredDate}</span>
+                          </div>
+                          <span>요청일: {request.createdDate}</span>
+                        </div>
+
+                        {/* 문제 설명 */}
+                        <div>
+                          <span className="text-sm font-medium">문제 설명: </span>
+                          <span className="text-sm text-muted-foreground">{request.issueDescription}</span>
+                        </div>
+
+                        {/* 이미지 */}
+                        {request.images && request.images.length > 0 && (
+                          <div className="flex gap-2">
+                            {request.images.map((image, index) => (
+                              <img
+                                key={index}
+                                src={image}
+                                alt={`차량 사진 ${index + 1}`}
+                                className="w-16 h-16 object-cover rounded"
+                              />
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* 액션 버튼 */}
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm">
+                          <Eye className="h-4 w-4 mr-1" />
+                          상세보기
+                        </Button>
+                        {request.status === 'PENDING' && (
+                          <Button 
+                            size="sm"
+                            onClick={() => handleCreateEstimate(request)}
+                          >
+                            <Edit className="h-4 w-4 mr-1" />
+                            견적 작성
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* 견적서 작성 모달 */}
+          <EstimateCreateModal
+            open={estimateModalOpen}
+            onClose={() => {
+              setEstimateModalOpen(false);
+              setSelectedRequest(null);
+            }}
+            quoteRequest={selectedRequest}
+            onSubmit={handleEstimateSubmit}
+          />
         </div>
-      </div>
       </PageContainer>
     </ProtectedRoute>
   );
-}
+};

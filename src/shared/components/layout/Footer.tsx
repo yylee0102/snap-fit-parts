@@ -1,4 +1,5 @@
 import { useLocation } from "react-router-dom";
+import logoImage from "@/assets/logo.png";
 
 interface FooterProps {
   className?: string;
@@ -24,7 +25,11 @@ export default function Footer({ className }: FooterProps) {
           {/* 좌측: 로고 + 저작권 */}
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
-              <span className="text-xl font-bold text-on-surface-variant">CAR PARTER</span>
+              <img 
+                src={logoImage} 
+                alt="CAR PARTER 로고" 
+                className="h-8 w-auto"
+              />
             </div>
             <p className="text-sm text-on-surface-variant">
               © 2024 CAR PARTER. All rights reserved.
