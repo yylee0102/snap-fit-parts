@@ -3,7 +3,6 @@ import { useState } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/shared/contexts/AuthContext";
 import AuthModal from "@/shared/modals/AuthModal";
-import AdminLoginModal from "@/shared/modals/AdminLoginModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -31,7 +30,6 @@ export default function Header({ className }: HeaderProps) {
   const [searchType, setSearchType] = useState("parts");
   const [searchQuery, setSearchQuery] = useState("");
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [showAdminModal, setShowAdminModal] = useState(false);
   
   // 루트(/)에서는 뒤로가기 숨김
   const showBackButton = location.pathname !== "/";
@@ -168,24 +166,15 @@ export default function Header({ className }: HeaderProps) {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <div className="flex gap-2">
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={() => setShowAuthModal(true)}
-                  className="flex items-center gap-2"
-                >
-                  <LogIn className="h-5 w-5" />
-                  <span className="hidden md:inline">로그인</span>
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => setShowAdminModal(true)}
-                >
-                  관리자
-                </Button>
-              </div>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => setShowAuthModal(true)}
+                className="flex items-center gap-2"
+              >
+                <LogIn className="h-5 w-5" />
+                <span className="hidden md:inline">로그인</span>
+              </Button>
             )}
 
             {/* 햄버거 메뉴 */}
@@ -196,15 +185,10 @@ export default function Header({ className }: HeaderProps) {
         </div>
       </div>
       
-      {/* 로그인/회원가입 모달 */}
+      {/* 통합 로그인/회원가입 모달 */}
       <AuthModal 
         open={showAuthModal} 
         onClose={() => setShowAuthModal(false)}
-      />
-      
-      <AdminLoginModal 
-        open={showAdminModal} 
-        onClose={() => setShowAdminModal(false)}
       />
     </header>
   );

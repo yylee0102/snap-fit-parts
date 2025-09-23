@@ -1,469 +1,576 @@
+/**
+ * 통합 로그인 모달
+ * 
+ * 이 모달의 역할:
+ * - 모든 사용자 타입(관리자, 카센터, 일반사용자)의 통합 로그인
+ * - 단일 로그인 엔드포인트 사용
+ * - 로그인 후 역할별 리디렉션
+ * 
+ * 왜 필요한가:
+ * - 통합된 사용자 경험 제공
+ * - 백엔드 API 명세에 정확히 부합
+ * - 역할 기반 접근 제어 구현
+ */
+
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Eye, EyeOff } from "lucide-react";
-import VehicleRegisterModal from "./VehicleRegisterModal";
-import PhoneVerificationModal from "./PhoneVerificationModal";
+import { useAuth } from "@/shared/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+import { Loader2, LogIn, UserPlus, Building } from "lucide-react";
+import authApiService from "@/services/auth.api";
+import { useNavigate } from "react-router-dom";
 
 interface AuthModalProps {
   open: boolean;
   onClose: () => void;
-  onLogin?: (userData: any) => void;
 }
 
-export default function AuthModal({ open, onClose, onLogin }: AuthModalProps) {
+export default function AuthModal({ open, onClose }: AuthModalProps) {
   const [activeTab, setActiveTab] = useState("login");
-  const [userType, setUserType] = useState("일반 사용자용");
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [showTermsModal, setShowTermsModal] = useState(false);
-  const [showVehicleModal, setShowVehicleModal] = useState(false);
-  const [showPhoneVerification, setShowPhoneVerification] = useState(false);
-  
-  // 로그인 폼 데이터
-  const [loginData, setLoginData] = useState({
-    id: "",
-    password: "",
-    rememberMe: false
+  const [isLoading, setIsLoading] = useState(false);
+  const { login } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
+  // 로그인 폼 상태
+  const [loginForm, setLoginForm] = useState({
+    username: "",
+    password: ""
   });
 
-  // 회원가입 폼 데이터
-  const [signupData, setSignupData] = useState({
-    userType: "일반",
-    id: "",
+  // 일반 사용자 회원가입 폼 상태
+  const [userJoinForm, setUserJoinForm] = useState({
+    username: "",
     password: "",
     confirmPassword: "",
     name: "",
+    email: "",
     phone: "",
-    businessNumber: "",
-    centerName: "",
     address: "",
-    centerPhone: "",
-    centerEmail: "",
-    agreeTerms: false,
-    agreePrivacy: false,
-    agreeMarketing: false
+    birthDate: "",
+    gender: ""
   });
 
+  // 카센터 등록 폼 상태
+  const [centerRegisterForm, setCenterRegisterForm] = useState({
+    username: "",
+    password: "",
+    confirmPassword: "",
+    centerName: "",
+    businessNumber: "",
+    address: "",
+    phone: "",
+    email: "",
+    description: ""
+  });
+
+  const handleInputChange = (form: string, field: string, value: string) => {
+    if (form === "login") {
+      setLoginForm(prev => ({ ...prev, [field]: value }));
+    } else if (form === "userJoin") {
+      setUserJoinForm(prev => ({ ...prev, [field]: value }));
+    } else if (form === "centerRegister") {
+      setCenterRegisterForm(prev => ({ ...prev, [field]: value }));
+    }
+  };
+
+  /**
+   * 통합 로그인 처리
+   */
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!loginForm.username || !loginForm.password) {
+      toast({
+        title: "입력 오류",
+        description: "아이디와 비밀번호를 모두 입력해주세요.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsLoading(true);
     try {
-      console.log("로그인 요청:", loginData);
-      
+      const response = await authApiService.login({
+        username: loginForm.username,
+        password: loginForm.password
+      });
+
+      // 사용자 타입 결정 (role 기반)
+      let userType: "개인" | "카센터" | "관리자" = "개인";
+      if (response.role === "ROLE_ADMIN") {
+        userType = "관리자";
+      } else if (response.role === "ROLE_CARCENTER") {
+        userType = "카센터";
+      } else if (response.role === "ROLE_USER") {
+        userType = "개인";
+      }
+
       const userData = {
-        id: loginData.id,
-        userType: loginData.id.includes("admin") ? "관리자" : "개인",
-        name: "사용자",
+        id: response.userId,
+        name: response.name,
+        userType,
+        role: response.role,
         isLoggedIn: true
       };
-      
-      onLogin?.(userData);
+
+      login(userData);
+
+      toast({
+        title: "로그인 성공",
+        description: `${userType} 계정으로 로그인되었습니다.`
+      });
+
       onClose();
+      resetForms();
+
+      // 역할별 리디렉션
+      if (userType === "관리자") {
+        navigate("/admin");
+      } else if (userType === "카센터") {
+        navigate("/car-center");
+      } else {
+        navigate("/");
+      }
+
     } catch (error) {
       console.error("로그인 실패:", error);
+      
+      // 개발용 임시 로그인
+      if (loginForm.username === "admin" && loginForm.password === "admin") {
+        const tempUser = {
+          id: "admin1",
+          name: "관리자",
+          userType: "관리자" as const,
+          role: "ROLE_ADMIN",
+          isLoggedIn: true
+        };
+        
+        login(tempUser);
+        localStorage.setItem('authToken', 'Bearer temp-admin-token');
+        
+        toast({
+          title: "임시 관리자 로그인",
+          description: "개발용 관리자 계정으로 로그인되었습니다."
+        });
+        
+        onClose();
+        resetForms();
+        navigate("/admin");
+      } else {
+        toast({
+          title: "로그인 실패",
+          description: "아이디 또는 비밀번호가 올바르지 않습니다.",
+          variant: "destructive"
+        });
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleSignup = async (e: React.FormEvent) => {
+  /**
+   * 일반 사용자 회원가입
+   */
+  const handleUserJoin = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (signupData.password !== signupData.confirmPassword) {
-      alert("비밀번호가 일치하지 않습니다.");
+    if (userJoinForm.password !== userJoinForm.confirmPassword) {
+      toast({
+        title: "비밀번호 불일치",
+        description: "비밀번호와 비밀번호 확인이 일치하지 않습니다.",
+        variant: "destructive"
+      });
       return;
     }
 
-    if (!signupData.agreeTerms || !signupData.agreePrivacy) {
-      alert("필수 약관에 동의해주세요.");
-      return;
-    }
-
+    setIsLoading(true);
     try {
-      if (signupData.userType === "일반") {
-        console.log("일반 사용자 회원가입 요청:", signupData);
-        alert("회원가입이 완료되었습니다!");
-        onClose();
-        setTimeout(() => setShowVehicleModal(true), 300);
-      } else {
-        console.log("카센터 회원가입 요청:", signupData);
-        alert("카센터 회원가입 신청이 완료되었습니다. 승인 후 이용 가능합니다.");
-        setActiveTab("login");
-      }
+      await authApiService.userJoin({
+        username: userJoinForm.username,
+        password: userJoinForm.password,
+        name: userJoinForm.name,
+        email: userJoinForm.email,
+        phone: userJoinForm.phone,
+        address: userJoinForm.address || undefined,
+        birthDate: userJoinForm.birthDate || undefined,
+        gender: userJoinForm.gender as 'MALE' | 'FEMALE' | undefined
+      });
+
+      toast({
+        title: "회원가입 완료",
+        description: "회원가입이 완료되었습니다. 로그인해주세요."
+      });
+
+      setActiveTab("login");
+      resetForms();
+
     } catch (error) {
       console.error("회원가입 실패:", error);
+      toast({
+        title: "회원가입 실패",
+        description: "회원가입 중 오류가 발생했습니다.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const TermsModal = () => (
-    <Dialog open={showTermsModal} onOpenChange={setShowTermsModal}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>약관 동의</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          <div className="bg-surface-container p-4 rounded-lg">
-            <h4 className="font-medium mb-2">이용약관</h4>
-            <p className="text-sm text-on-surface-variant">
-              카파트너 서비스 이용을 위한 약관입니다.
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <Button onClick={() => setShowTermsModal(false)} className="flex-1">
-              모두 동의
-            </Button>
-            <Button variant="outline" onClick={() => setShowTermsModal(false)} className="flex-1">
-              취소
-            </Button>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
+  /**
+   * 카센터 등록
+   */
+  const handleCenterRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (centerRegisterForm.password !== centerRegisterForm.confirmPassword) {
+      toast({
+        title: "비밀번호 불일치",
+        description: "비밀번호와 비밀번호 확인이 일치하지 않습니다.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await authApiService.carCenterRegister({
+        username: centerRegisterForm.username,
+        password: centerRegisterForm.password,
+        centerName: centerRegisterForm.centerName,
+        businessNumber: centerRegisterForm.businessNumber,
+        address: centerRegisterForm.address,
+        phone: centerRegisterForm.phone,
+        email: centerRegisterForm.email,
+        description: centerRegisterForm.description || undefined
+      });
+
+      toast({
+        title: "카센터 등록 완료",
+        description: "카센터 등록이 완료되었습니다. 승인 후 이용 가능합니다."
+      });
+
+      setActiveTab("login");
+      resetForms();
+
+    } catch (error) {
+      console.error("카센터 등록 실패:", error);
+      toast({
+        title: "등록 실패",
+        description: "카센터 등록 중 오류가 발생했습니다.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const resetForms = () => {
+    setLoginForm({ username: "", password: "" });
+    setUserJoinForm({
+      username: "",
+      password: "",
+      confirmPassword: "",
+      name: "",
+      email: "",
+      phone: "",
+      address: "",
+      birthDate: "",
+      gender: ""
+    });
+    setCenterRegisterForm({
+      username: "",
+      password: "",
+      confirmPassword: "",
+      centerName: "",
+      businessNumber: "",
+      address: "",
+      phone: "",
+      email: "",
+      description: ""
+    });
+  };
+
+  const handleClose = () => {
+    resetForms();
+    setActiveTab("login");
+    onClose();
+  };
 
   return (
-    <>
-      <Dialog open={open} onOpenChange={onClose}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>회원가입</DialogTitle>
-          </DialogHeader>
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="text-center">CarParter</DialogTitle>
+        </DialogHeader>
+        
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="login" className="gap-2">
+              <LogIn className="h-4 w-4" />
+              로그인
+            </TabsTrigger>
+            <TabsTrigger value="userJoin" className="gap-2">
+              <UserPlus className="h-4 w-4" />
+              일반 회원가입
+            </TabsTrigger>
+            <TabsTrigger value="centerRegister" className="gap-2">
+              <Building className="h-4 w-4" />
+              카센터 등록
+            </TabsTrigger>
+          </TabsList>
 
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login">로그인</TabsTrigger>
-              <TabsTrigger value="signup">회원가입</TabsTrigger>
-            </TabsList>
+          {/* 로그인 탭 */}
+          <TabsContent value="login">
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="username">아이디</Label>
+                <Input
+                  id="username"
+                  type="text"
+                  value={loginForm.username}
+                  onChange={(e) => handleInputChange("login", "username", e.target.value)}
+                  placeholder="아이디를 입력하세요"
+                  disabled={isLoading}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="password">비밀번호</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={loginForm.password}
+                  onChange={(e) => handleInputChange("login", "password", e.target.value)}
+                  placeholder="비밀번호를 입력하세요"
+                  disabled={isLoading}
+                />
+              </div>
 
-            {/* 로그인 탭 */}
-            <TabsContent value="login">
-              <form onSubmit={handleLogin} className="space-y-4">
+              <div className="text-xs text-muted-foreground bg-muted p-3 rounded-md">
+                <strong>개발용 계정:</strong> admin / admin (관리자)
+              </div>
+              
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    로그인 중...
+                  </>
+                ) : (
+                  "로그인"
+                )}
+              </Button>
+            </form>
+          </TabsContent>
+
+          {/* 일반 사용자 회원가입 탭 */}
+          <TabsContent value="userJoin">
+            <form onSubmit={handleUserJoin} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="loginId">아이디</Label>
+                  <Label htmlFor="userJoin-username">아이디</Label>
                   <Input
-                    id="loginId"
-                    type="text"
-                    placeholder="아이디를 입력하세요"
-                    value={loginData.id}
-                    onChange={(e) => setLoginData(prev => ({ ...prev, id: e.target.value }))}
-                    required
+                    id="userJoin-username"
+                    value={userJoinForm.username}
+                    onChange={(e) => handleInputChange("userJoin", "username", e.target.value)}
+                    placeholder="아이디"
+                    disabled={isLoading}
                   />
                 </div>
-
                 <div className="space-y-2">
-                  <Label htmlFor="loginPassword">비밀번호</Label>
-                  <div className="relative">
-                    <Input
-                      id="loginPassword"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="비밀번호를 입력하세요"
-                      value={loginData.password}
-                      onChange={(e) => setLoginData(prev => ({ ...prev, password: e.target.value }))}
-                      required
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-2 top-1/2 -translate-y-1/2 h-auto p-1"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="rememberMe"
-                    checked={loginData.rememberMe}
-                    onCheckedChange={(checked) => 
-                      setLoginData(prev => ({ ...prev, rememberMe: checked as boolean }))
-                    }
+                  <Label htmlFor="userJoin-name">이름</Label>
+                  <Input
+                    id="userJoin-name"
+                    value={userJoinForm.name}
+                    onChange={(e) => handleInputChange("userJoin", "name", e.target.value)}
+                    placeholder="이름"
+                    disabled={isLoading}
                   />
-                  <Label htmlFor="rememberMe" className="text-sm">자동로그인</Label>
-                </div>
-
-                <Button type="submit" className="w-full">
-                  로그인
-                </Button>
-              </form>
-            </TabsContent>
-
-            {/* 회원가입 탭 */}
-            <TabsContent value="signup">
-              {/* 사용자 유형 선택 - 업로드된 이미지 참고 */}
-              <div className="mb-6">
-                <div className="grid grid-cols-2 rounded-lg overflow-hidden border border-border">
-                  <button
-                    type="button"
-                    className={`py-3 px-4 text-sm font-medium transition-colors ${
-                      userType === "일반 사용자용" 
-                        ? "bg-muted text-muted-foreground" 
-                        : "bg-primary text-primary-foreground hover:bg-primary/90"
-                    }`}
-                    onClick={() => {
-                      setUserType("일반 사용자용");
-                      setSignupData(prev => ({ ...prev, userType: "일반" }));
-                    }}
-                  >
-                    일반 사용자용
-                  </button>
-                  <button
-                    type="button"
-                    className={`py-3 px-4 text-sm font-medium transition-colors ${
-                      userType === "카센터용" 
-                        ? "bg-primary text-primary-foreground" 
-                        : "bg-muted text-muted-foreground hover:bg-muted/80"
-                    }`}
-                    onClick={() => {
-                      setUserType("카센터용");
-                      setSignupData(prev => ({ ...prev, userType: "카센터" }));
-                    }}
-                  >
-                    카센터용
-                  </button>
                 </div>
               </div>
 
-              <form onSubmit={handleSignup} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signupId">아이디</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      id="signupId"
-                      type="text"
-                      placeholder="아이디를 입력하세요"
-                      value={signupData.id}
-                      onChange={(e) => setSignupData(prev => ({ ...prev, id: e.target.value }))}
-                      required
-                      className={signupData.id && signupData.id.length < 4 ? "border-red-300" : ""}
-                    />
-                    <Button type="button" variant="outline" size="sm" className="bg-teal-600 text-white hover:bg-teal-700 shrink-0">
-                      중복 확인
-                    </Button>
-                  </div>
-                  {signupData.id && signupData.id.length < 4 && (
-                    <p className="text-xs text-red-500">중복된 아이디입니다.</p>
-                  )}
+                  <Label htmlFor="userJoin-password">비밀번호</Label>
+                  <Input
+                    id="userJoin-password"
+                    type="password"
+                    value={userJoinForm.password}
+                    onChange={(e) => handleInputChange("userJoin", "password", e.target.value)}
+                    placeholder="비밀번호"
+                    disabled={isLoading}
+                  />
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="userJoin-confirmPassword">비밀번호 확인</Label>
+                  <Input
+                    id="userJoin-confirmPassword"
+                    type="password"
+                    value={userJoinForm.confirmPassword}
+                    onChange={(e) => handleInputChange("userJoin", "confirmPassword", e.target.value)}
+                    placeholder="비밀번호 확인"
+                    disabled={isLoading}
+                  />
+                </div>
+              </div>
 
-                {userType === "카센터용" && (
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="userJoin-email">이메일</Label>
+                  <Input
+                    id="userJoin-email"
+                    type="email"
+                    value={userJoinForm.email}
+                    onChange={(e) => handleInputChange("userJoin", "email", e.target.value)}
+                    placeholder="이메일"
+                    disabled={isLoading}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="userJoin-phone">전화번호</Label>
+                  <Input
+                    id="userJoin-phone"
+                    value={userJoinForm.phone}
+                    onChange={(e) => handleInputChange("userJoin", "phone", e.target.value)}
+                    placeholder="전화번호"
+                    disabled={isLoading}
+                  />
+                </div>
+              </div>
+
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? (
                   <>
-                    <div className="space-y-2">
-                      <Label htmlFor="businessNumber">사업자등록번호</Label>
-                      <Input
-                        id="businessNumber"
-                        type="text"
-                        placeholder="사업자등록번호"
-                        value={signupData.businessNumber}
-                        onChange={(e) => setSignupData(prev => ({ ...prev, businessNumber: e.target.value }))}
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="centerName">이름</Label>
-                      <Input
-                        id="centerName"
-                        type="text"
-                        placeholder="대표자명"
-                        value={signupData.centerName}
-                        onChange={(e) => setSignupData(prev => ({ ...prev, centerName: e.target.value }))}
-                        required
-                      />
-                    </div>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    가입 중...
                   </>
+                ) : (
+                  "회원가입"
                 )}
+              </Button>
+            </form>
+          </TabsContent>
 
-                {userType === "일반 사용자용" && (
-                  <div className="space-y-2">
-                    <Label htmlFor="name">이름</Label>
-                    <Input
-                      id="name"
-                      type="text"
-                      placeholder="이름을 입력하세요"
-                      value={signupData.name}
-                      onChange={(e) => setSignupData(prev => ({ ...prev, name: e.target.value }))}
-                      required
-                    />
-                  </div>
+          {/* 카센터 등록 탭 */}
+          <TabsContent value="centerRegister">
+            <form onSubmit={handleCenterRegister} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="center-username">아이디</Label>
+                  <Input
+                    id="center-username"
+                    value={centerRegisterForm.username}
+                    onChange={(e) => handleInputChange("centerRegister", "username", e.target.value)}
+                    placeholder="아이디"
+                    disabled={isLoading}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="center-centerName">카센터명</Label>
+                  <Input
+                    id="center-centerName"
+                    value={centerRegisterForm.centerName}
+                    onChange={(e) => handleInputChange("centerRegister", "centerName", e.target.value)}
+                    placeholder="카센터명"
+                    disabled={isLoading}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="center-password">비밀번호</Label>
+                  <Input
+                    id="center-password"
+                    type="password"
+                    value={centerRegisterForm.password}
+                    onChange={(e) => handleInputChange("centerRegister", "password", e.target.value)}
+                    placeholder="비밀번호"
+                    disabled={isLoading}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="center-confirmPassword">비밀번호 확인</Label>
+                  <Input
+                    id="center-confirmPassword"
+                    type="password"
+                    value={centerRegisterForm.confirmPassword}
+                    onChange={(e) => handleInputChange("centerRegister", "confirmPassword", e.target.value)}
+                    placeholder="비밀번호 확인"
+                    disabled={isLoading}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="center-businessNumber">사업자등록번호</Label>
+                <Input
+                  id="center-businessNumber"
+                  value={centerRegisterForm.businessNumber}
+                  onChange={(e) => handleInputChange("centerRegister", "businessNumber", e.target.value)}
+                  placeholder="사업자등록번호"
+                  disabled={isLoading}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="center-phone">전화번호</Label>
+                  <Input
+                    id="center-phone"
+                    value={centerRegisterForm.phone}
+                    onChange={(e) => handleInputChange("centerRegister", "phone", e.target.value)}
+                    placeholder="전화번호"
+                    disabled={isLoading}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="center-email">이메일</Label>
+                  <Input
+                    id="center-email"
+                    type="email"
+                    value={centerRegisterForm.email}
+                    onChange={(e) => handleInputChange("centerRegister", "email", e.target.value)}
+                    placeholder="이메일"
+                    disabled={isLoading}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="center-address">주소</Label>
+                <Input
+                  id="center-address"
+                  value={centerRegisterForm.address}
+                  onChange={(e) => handleInputChange("centerRegister", "address", e.target.value)}
+                  placeholder="주소"
+                  disabled={isLoading}
+                />
+              </div>
+
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    등록 중...
+                  </>
+                ) : (
+                  "카센터 등록"
                 )}
+              </Button>
 
-                <div className="space-y-2">
-                  <Label htmlFor="signupPassword">비밀번호</Label>
-                  <div className="relative">
-                    <Input
-                      id="signupPassword"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="비밀번호를 입력하세요"
-                      value={signupData.password}
-                      onChange={(e) => setSignupData(prev => ({ ...prev, password: e.target.value }))}
-                      required
-                      className={signupData.password && signupData.password.length < 6 ? "border-red-300" : ""}
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-2 top-1/2 -translate-y-1/2 h-auto p-1"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </Button>
-                  </div>
-                  {signupData.password && signupData.password.length < 6 && (
-                    <p className="text-xs text-red-500">비밀번자가 같지 않습니다.</p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">비밀번호 확인</Label>
-                  <div className="relative">
-                    <Input
-                      id="confirmPassword"
-                      type={showConfirmPassword ? "text" : "password"}
-                      placeholder="비밀번호를 다시 입력하세요"
-                      value={signupData.confirmPassword}
-                      onChange={(e) => setSignupData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                      required
-                      className={signupData.confirmPassword && signupData.password !== signupData.confirmPassword ? "border-red-300" : ""}
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-2 top-1/2 -translate-y-1/2 h-auto p-1"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    >
-                      {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </Button>
-                  </div>
-                  {signupData.confirmPassword && signupData.password !== signupData.confirmPassword && (
-                    <p className="text-xs text-red-500">비밀번호가 일치하지 않습니다.</p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="phone">휴대폰번호</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      id="phone"
-                      type="tel"
-                      placeholder="휴대폰번호를 입력하세요"
-                      value={signupData.phone}
-                      onChange={(e) => setSignupData(prev => ({ ...prev, phone: e.target.value }))}
-                      required
-                      className="flex-1"
-                    />
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      size="sm" 
-                      className="bg-teal-600 text-white hover:bg-teal-700 shrink-0"
-                      onClick={() => setShowPhoneVerification(true)}
-                      disabled={!signupData.phone}
-                    >
-                      인증
-                    </Button>
-                  </div>
-                </div>
-
-                {/* 약관 동의 */}
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="agreeTerms"
-                      checked={signupData.agreeTerms}
-                      onCheckedChange={(checked) => 
-                        setSignupData(prev => ({ ...prev, agreeTerms: checked as boolean }))
-                      }
-                    />
-                    <Label htmlFor="agreeTerms" className="text-sm">
-                      이용약관에 동의합니다(필수)
-                    </Label>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="agreePrivacy"
-                      checked={signupData.agreePrivacy}
-                      onCheckedChange={(checked) => 
-                        setSignupData(prev => ({ ...prev, agreePrivacy: checked as boolean }))
-                      }
-                    />
-                    <Label htmlFor="agreePrivacy" className="text-sm">
-                      개인정보 수집 및 이용에 동의합니다(필수)
-                    </Label>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="agreeMarketing"
-                      checked={signupData.agreeMarketing}
-                      onCheckedChange={(checked) => 
-                        setSignupData(prev => ({ ...prev, agreeMarketing: checked as boolean }))
-                      }
-                    />
-                    <Label htmlFor="agreeMarketing" className="text-sm">
-                      이용약관에 동의하시겠습니까?
-                    </Label>
-                  </div>
-
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowTermsModal(true)}
-                    className="text-sm"
-                  >
-                    약관 동의
-                  </Button>
-                </div>
-
-                <div className="flex gap-2 pt-4">
-                  <Button 
-                    type="submit" 
-                    className="flex-1 bg-teal-600 hover:bg-teal-700"
-                    disabled={!signupData.agreeTerms || !signupData.agreePrivacy}
-                  >
-                    등록
-                  </Button>
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    className="flex-1"
-                    onClick={onClose}
-                  >
-                    취소
-                  </Button>
-                </div>
-              </form>
-            </TabsContent>
-          </Tabs>
-        </DialogContent>
-      </Dialog>
-
-      {/* 약관 모달 */}
-      <TermsModal />
-      
-      {/* 차량 등록 모달 */}
-      <VehicleRegisterModal 
-        open={showVehicleModal} 
-        onClose={() => setShowVehicleModal(false)}
-        onComplete={() => setShowVehicleModal(false)}
-      />
-      
-      {/* 휴대폰 인증 모달 */}
-      <PhoneVerificationModal
-        open={showPhoneVerification}
-        onClose={() => setShowPhoneVerification(false)}
-        onVerified={() => alert("휴대폰 인증이 완료되었습니다!")}
-        phoneNumber={signupData.phone}
-      />
-    </>
+              <div className="text-xs text-muted-foreground text-center">
+                등록 후 관리자 승인이 필요합니다
+              </div>
+            </form>
+          </TabsContent>
+        </Tabs>
+      </DialogContent>
+    </Dialog>
   );
 }
