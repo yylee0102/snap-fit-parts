@@ -101,7 +101,7 @@ export default function SearchResultsPage() {
         {/* 필터 및 정렬 */}
         <div className="flex justify-between items-center mb-6">
           <div className="flex gap-4">
-            <Select value={filterType} onValueChange={setFilterType}>
+            <Select value="parts" onValueChange={() => {}}>
               <SelectTrigger className="w-32">
                 <Filter className="h-4 w-4 mr-2" />
                 <SelectValue />

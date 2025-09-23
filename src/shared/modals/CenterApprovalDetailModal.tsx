@@ -35,7 +35,7 @@ export default function CenterApprovalDetailModal({
   approvalId,
   onApprovalUpdate 
 }: CenterApprovalDetailModalProps) {
-  const [approvalData, setApprovalData] = useState<CarCenterApproval | null>(null);
+  const [approvalData, setApprovalData] = useState<CarCenterApprovalResDTO | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showRejectInput, setShowRejectInput] = useState(false);
   const [rejectReason, setRejectReason] = useState("");

@@ -105,34 +105,6 @@ export default function HomePage() {
   return (
     <PageContainer>
       <div className="container mx-auto px-4 py-6">
-        {/* 히어로 섹션 - 배너 제거하고 간소화 */}
-        <div className="text-center py-12 mb-8">
-          <h1 className="text-4xl md:text-5xl font-bold text-on-surface mb-4">
-            <span className="bg-gradient-to-r from-primary to-brand-primary bg-clip-text text-transparent">
-              CAR PARTER
-            </span>
-          </h1>
-          <p className="text-xl text-on-surface-variant mb-8">
-            중고차 부품의 새로운 거래 플랫폼
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
-            <Button 
-              size="lg"
-              onClick={() => navigate("/search")}
-              className="bg-primary hover:bg-primary/90"
-            >
-              부품 찾기
-            </Button>
-            <Button 
-              variant="outline" 
-              size="lg"
-              onClick={() => navigate("/centers")}
-            >
-              카센터 찾기
-            </Button>
-          </div>
-        </div>
-
         {/* 서비스 소개 - 위로 이동 */}
         <div className="relative overflow-hidden bg-gradient-to-br from-surface-container via-surface-container-high to-surface-container rounded-3xl p-12 mb-12">
           {/* 배경 장식 */}
@@ -180,6 +152,41 @@ export default function HomePage() {
                 </p>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* 히어로 섹션 - AI 견적 포함 */}
+        <div className="text-center py-12 mb-8">
+          <h1 className="text-4xl md:text-5xl font-bold text-on-surface mb-4">
+            <span className="bg-gradient-to-r from-primary to-brand-primary bg-clip-text text-transparent">
+              CAR PARTER
+            </span>
+          </h1>
+          <p className="text-xl text-on-surface-variant mb-8">
+            중고차 부품의 새로운 거래 플랫폼
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-lg mx-auto">
+            <Button 
+              size="lg"
+              onClick={() => navigate("/estimates/ai")}
+              className="bg-gradient-to-r from-primary to-brand-primary hover:opacity-90 text-white font-semibold"
+            >
+              AI 견적 받기
+            </Button>
+            <Button 
+              size="lg"
+              onClick={() => navigate("/search")}
+              className="bg-secondary hover:bg-secondary/90"
+            >
+              부품 찾기
+            </Button>
+            <Button 
+              variant="outline" 
+              size="lg"
+              onClick={() => navigate("/centers")}
+            >
+              카센터 찾기
+            </Button>
           </div>
         </div>
 

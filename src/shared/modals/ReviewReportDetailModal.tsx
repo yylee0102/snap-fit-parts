@@ -59,12 +59,11 @@ export default function ReviewReportDetailModal({
       // 개발용 임시 데이터
       const tempData: ReviewReportResDTO = {
         reportId: reportId,
-        reviewId: 101,
-        reporterName: "홍길동",
+        reportedReviewId: 101,
+        reportingCenterName: "홍길동",
         reason: "부적절한 언어 사용",
         content: "리뷰에 욕설과 비방이 포함되어 있습니다. 해당 내용은 다른 사용자들에게 불쾌감을 줄 수 있어 신고합니다.",
-        reviewContent: "서비스가 정말 최악이었습니다. 기사님도 불친절하고 가격도 터무니없이 비쌉니다. 절대 이용하지 마세요.",
-        reportDate: "2025-09-08",
+        createdAt: "2025-09-08T10:00:00Z",
         status: 'PENDING'
       };
       setReportData(tempData);
