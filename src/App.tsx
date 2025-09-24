@@ -33,7 +33,7 @@ import { ReservationManagementPage } from "./domains/centers/pages/ReservationMa
 import { ReviewReplyManagementPage } from "./domains/centers/pages/ReviewReplyManagementPage";
 import { MyQuoteRequestsPage } from "./domains/users/pages/MyQuoteRequestsPage";
 import { MyReviewsPage } from "./domains/users/pages/MyReviewsPage";
-import { MyCompletedRepairsPage } from "./domains/users/pages/MyCompletedRepairsPage";
+import MyCompletedRepairsPage from "./domains/users/pages/MyCompletedRepairsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();

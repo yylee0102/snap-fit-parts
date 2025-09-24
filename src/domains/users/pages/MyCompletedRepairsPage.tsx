@@ -9,8 +9,10 @@ import PageContainer from '@/shared/components/layout/PageContainer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
-import { Car, Calendar, MapPin, Wrench, DollarSign, Trash2, FileText } from 'lucide-react';
+import { toast } from 'sonner';
+import { Car, Calendar, MapPin, Wrench, DollarSign, Trash2, FileText, Star } from 'lucide-react';
+import { ReviewWriteModal } from '@/domains/users/modals/ReviewWriteModal';
+import ProtectedRoute from '@/shared/components/ProtectedRoute';
 
 interface CompletedRepair {
   repairId: number;
@@ -27,9 +29,10 @@ interface CompletedRepair {
   status: 'COMPLETED' | 'WARRANTY';
 }
 
-export const MyCompletedRepairsPage = () => {
-  const { toast } = useToast();
+export default function MyCompletedRepairsPage() {
   const [completedRepairs, setCompletedRepairs] = useState<CompletedRepair[]>([]);
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [selectedRepair, setSelectedRepair] = useState<CompletedRepair | null>(null);
 
   useEffect(() => {
     loadMyCompletedRepairs();
@@ -87,7 +90,7 @@ export const MyCompletedRepairsPage = () => {
   const handleDeleteRepair = (repairId: number) => {
     // API 호출: DELETE /api/users/completed-repairs/{id}
     setCompletedRepairs(prev => prev.filter(repair => repair.repairId !== repairId));
-    toast({ title: '수리 내역이 삭제되었습니다.' });
+    toast.success('수리 내역이 삭제되었습니다.');
   };
 
   const getStatusColor = (status: string) => {
@@ -115,7 +118,8 @@ export const MyCompletedRepairsPage = () => {
   };
 
   return (
-    <PageContainer>
+    <ProtectedRoute allowedUserTypes={["개인"]} fallbackMessage="일반 사용자만 접근할 수 있는 페이지입니다.">
+      <PageContainer>
       <div className="space-y-6">
         {/* 헤더 */}
         <div>
@@ -238,13 +242,25 @@ export const MyCompletedRepairsPage = () => {
                     </div>
 
                     {/* 액션 버튼 */}
-                    <div className="flex gap-2">
+                    <div className="flex flex-col gap-2">
                       <Button variant="outline" size="sm">
                         <FileText className="h-4 w-4 mr-1" />
                         영수증
                       </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="bg-primary text-primary-foreground hover:bg-primary/90"
+                        onClick={() => {
+                          setSelectedRepair(repair);
+                          setReviewModalOpen(true);
+                        }}
+                      >
+                        <Star className="h-4 w-4 mr-1" />
+                        리뷰 작성
+                      </Button>
                       <Button
-                        variant="outline"
+                        variant="destructive"
                         size="sm"
                         onClick={() => handleDeleteRepair(repair.repairId)}
                       >
@@ -257,7 +273,25 @@ export const MyCompletedRepairsPage = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* 리뷰 작성 모달 */}
+        <ReviewWriteModal
+          open={reviewModalOpen}
+          onClose={() => {
+            setReviewModalOpen(false);
+            setSelectedRepair(null);
+          }}
+          onSubmit={(reviewData) => {
+            console.log('Review submitted:', reviewData);
+            // 실제로는 API 호출
+            setReviewModalOpen(false);
+            setSelectedRepair(null);
+          }}
+          centerName={selectedRepair?.centerName || ""}
+          estimateId={selectedRepair?.repairId}
+        />
       </div>
-    </PageContainer>
+      </PageContainer>
+    </ProtectedRoute>
   );
-};
+}

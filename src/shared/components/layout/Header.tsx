@@ -71,6 +71,7 @@ export default function Header({ className }: HeaderProps) {
                 alt="CAR PARTER 로고" 
                 className="h-10 w-auto"
               />
+              <span className="text-xl font-bold text-primary">카센터</span>
             </Link>
           </div>
 

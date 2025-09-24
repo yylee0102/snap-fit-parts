@@ -25,12 +25,15 @@ import { Checkbox } from "@/components/ui/checkbox";
 import ProtectedRoute from "@/shared/components/ProtectedRoute";
 import { CenterInfoEditModal } from "@/domains/centers/modals/CenterInfoEditModal";
 import { ReservationManageModal } from "@/domains/centers/modals/ReservationManageModal";
+import { ReviewReplyModal } from "@/domains/centers/modals/ReviewReplyModal";
 
 export default function CenterMyPage() {
   const [selectedReservations, setSelectedReservations] = useState<string[]>([]);
   const [centerInfoModalOpen, setCenterInfoModalOpen] = useState(false);
   const [reservationModalOpen, setReservationModalOpen] = useState(false);
   const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
+  const [reviewReplyModalOpen, setReviewReplyModalOpen] = useState(false);
+  const [selectedReview, setSelectedReview] = useState<Review | null>(null);
 
   // 예약 관련 타입 정의 (엔티티에 맞춤)
   interface Reservation {
@@ -322,7 +325,17 @@ export default function CenterMyPage() {
                 </div>
                 <div>{new Date(review.createdAt).toLocaleDateString()}</div>
                 <div className="flex gap-1">
-                  <Button variant="outline" size="sm" className="bg-teal-600 hover:bg-teal-700 text-white">답글</Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="bg-teal-600 hover:bg-teal-700 text-white"
+                    onClick={() => {
+                      setSelectedReview(review);
+                      setReviewReplyModalOpen(true);
+                    }}
+                  >
+                    답글
+                  </Button>
                   <Button variant="outline" size="sm" className="bg-red-500 hover:bg-red-600 text-white">신고</Button>
                 </div>
               </div>
@@ -357,6 +370,19 @@ export default function CenterMyPage() {
           onUpdate={(updatedReservation) => {
             console.log('Reservation updated:', updatedReservation);
             // 실제로는 상태 업데이트 또는 API 호출
+          }}
+        />
+
+        <ReviewReplyModal
+          open={reviewReplyModalOpen}
+          onClose={() => {
+            setReviewReplyModalOpen(false);
+            setSelectedReview(null);
+          }}
+          review={selectedReview}
+          onSubmit={(replyData) => {
+            console.log('Review reply submitted:', replyData);
+            // 실제로는 API 호출
           }}
         />
       </div>

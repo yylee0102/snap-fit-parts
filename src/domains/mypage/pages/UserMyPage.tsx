@@ -25,20 +25,22 @@ import { useAuth } from "@/shared/contexts/AuthContext";
 import ProtectedRoute from "@/shared/components/ProtectedRoute";
 import { VehicleRegisterModal } from "@/domains/users/modals/VehicleRegisterModal";
 import { QuoteRequestModal } from "@/domains/users/modals/QuoteRequestModal";
+import { ProfileEditModal } from "@/domains/users/modals/ProfileEditModal";
+import { useNavigate } from "react-router-dom";
 
 export default function UserMyPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const [vehicleModalOpen, setVehicleModalOpen] = useState(false);
   const [quoteRequestModalOpen, setQuoteRequestModalOpen] = useState(false);
+  const [profileEditModalOpen, setProfileEditModalOpen] = useState(false);
 
   const menuItems = [
-    { icon: User, label: "내 정보 관리", href: "/user/profile", action: () => console.log('Profile') },
+    { icon: User, label: "내 정보 관리", href: "/user/profile", action: () => setProfileEditModalOpen(true) },
     { icon: Car, label: "내 차량 관리", href: "/user/vehicles", action: () => setVehicleModalOpen(true) },
-    { icon: FileText, label: "견적 요청 내역", href: "/user/quote-requests", action: () => setQuoteRequestModalOpen(true) },
-    { icon: MessageSquare, label: "리뷰 관리", href: "/user/reviews", action: () => console.log('Reviews') },
-    { icon: HelpCircle, label: "고객센터", href: "/support", action: () => console.log('Support') },
-    { icon: Settings, label: "설정", href: "/user/settings", action: () => console.log('Settings') },
+    { icon: FileText, label: "견적 요청 내역", href: "/user/quote-requests", action: () => navigate('/user/quote-requests') },
+    { icon: MessageSquare, label: "견적 완료 내역", href: "/user/completed-repairs", action: () => navigate('/user/completed-repairs') },
   ];
 
   return (
@@ -106,9 +108,9 @@ export default function UserMyPage() {
                 <p className="text-muted-foreground">{user?.email}</p>
                 <Badge variant="outline" className="mt-2">일반 사용자</Badge>
               </div>
-              <Button variant="outline">
+              <Button variant="outline" onClick={() => setProfileEditModalOpen(true)}>
                 <Settings className="w-4 h-4 mr-2" />
-                설정
+                정보 수정
               </Button>
             </div>
           </CardContent>
@@ -173,6 +175,15 @@ export default function UserMyPage() {
           onClose={() => setQuoteRequestModalOpen(false)}
           onSubmit={(requestData) => {
             console.log('Quote request submitted:', requestData);
+            // 실제로는 API 호출
+          }}
+        />
+
+        <ProfileEditModal
+          open={profileEditModalOpen}
+          onClose={() => setProfileEditModalOpen(false)}
+          onUpdate={(profileData) => {
+            console.log('Profile updated:', profileData);
             // 실제로는 API 호출
           }}
         />
