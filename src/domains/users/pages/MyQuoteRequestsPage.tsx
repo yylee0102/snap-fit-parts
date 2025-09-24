@@ -216,7 +216,11 @@ export const MyQuoteRequestsPage = () => {
 
                     {/* 액션 버튼 */}
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => window.location.href = `/mypage/quote-requests/${request.quoteRequestId}`}
+                      >
                         <Eye className="h-4 w-4 mr-1" />
                         상세보기
                       </Button>

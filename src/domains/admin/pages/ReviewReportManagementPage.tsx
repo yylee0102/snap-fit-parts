@@ -186,8 +186,7 @@ export default function ReviewReportManagementPage() {
 
   return (
     <ProtectedRoute allowedUserTypes={["관리자"]} fallbackMessage="관리자만 접근할 수 있는 페이지입니다.">
-      <PageContainer>
-        <div className="container mx-auto px-4 py-6 space-y-6">
+      <div className="container mx-auto px-4 py-6 space-y-6">
           {/* 헤더 */}
           <div className="flex items-center justify-between">
             <div>
@@ -371,7 +370,6 @@ export default function ReviewReportManagementPage() {
             onReportUpdate={handleReportUpdate}
           />
         </div>
-      </PageContainer>
     </ProtectedRoute>
   );
 }

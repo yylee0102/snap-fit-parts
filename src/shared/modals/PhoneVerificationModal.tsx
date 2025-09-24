@@ -1,10 +1,11 @@
-// 휴대폰 번호 인증 모달 (임시)
+// 휴대폰 번호 인증 모달 (개선된 버전)
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { Phone, Shield } from "lucide-react";
 import authApiService from "@/services/auth.api";
 
 interface PhoneVerificationModalProps {
@@ -130,17 +131,24 @@ export default function PhoneVerificationModal({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>휴대폰 번호 인증</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <Shield className="h-5 w-5" />
+            휴대폰 번호 인증
+          </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label>휴대폰 번호</Label>
+            <Label className="flex items-center gap-2">
+              <Phone className="h-4 w-4" />
+              휴대폰 번호
+            </Label>
             <div className="flex gap-2">
               <Input 
                 value={phoneNumber} 
                 disabled 
                 className="flex-1"
+                placeholder="휴대폰 번호"
               />
               <Button 
                 variant="outline" 
@@ -148,27 +156,25 @@ export default function PhoneVerificationModal({
                 disabled={isSending || timeLeft > 0}
                 className="shrink-0"
               >
-                {isSending ? "발송중..." : timeLeft > 0 ? `${Math.floor(timeLeft/60)}:${(timeLeft%60).toString().padStart(2, '0')}` : "인증코드 발송"}
+                {isSending ? "발송중..." : timeLeft > 0 ? formatTime(timeLeft) : "인증코드 발송"}
               </Button>
             </div>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="verificationCode">인증코드</Label>
-            <div className="flex gap-2">
-              <Input
-                id="verificationCode"
-                type="text"
-                placeholder="인증코드 6자리 입력"
-                value={verificationCode}
-                onChange={(e) => setVerificationCode(e.target.value)}
-                maxLength={6}
-                className="flex-1"
-              />
-            </div>
+            <Input
+              id="verificationCode"
+              type="text"
+              placeholder="인증코드 6자리 입력"
+              value={verificationCode}
+              onChange={(e) => setVerificationCode(e.target.value)}
+              maxLength={6}
+              className="text-center tracking-widest text-lg"
+            />
             {codeSent && (
-              <p className="text-xs text-muted-foreground">
-                개발용 임시 인증코드: 123456
+              <p className="text-xs text-muted-foreground bg-blue-50 p-2 rounded">
+                💡 개발용 임시 인증코드: <strong>123456</strong>
               </p>
             )}
           </div>

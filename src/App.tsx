@@ -23,6 +23,8 @@ import CenterEstimatesPage from "./domains/centers/pages/CenterEstimatesPage";
 import { EstimateRequestsPage } from "./domains/centers/pages/EstimateRequestsPage";
 import CenterEstimateCreatePage from "./domains/centers/pages/EstimateCreatePage";
 import { SentEstimatesPage } from "./domains/centers/pages/SentEstimatesPage";
+import { QuoteRequestDetailPage as CenterQuoteRequestDetailPage } from "./domains/centers/pages/QuoteRequestDetailPage";
+import { SentEstimatesManagementPage } from "./domains/centers/pages/SentEstimatesManagementPage";
 import ChatPage from "./domains/chat/pages/ChatPage";
 import SupportPage from "./domains/support/pages/SupportPage";
 import MyPage from "./domains/mypage/pages/MyPage";
@@ -32,6 +34,7 @@ import AdminDashboard from "./domains/admin/pages/AdminDashboard";
 import { ReservationManagementPage } from "./domains/centers/pages/ReservationManagementPage";
 import { ReviewReplyManagementPage } from "./domains/centers/pages/ReviewReplyManagementPage";
 import { MyQuoteRequestsPage } from "./domains/users/pages/MyQuoteRequestsPage";
+import { QuoteRequestDetailPage } from "./domains/users/pages/QuoteRequestDetailPage";
 import { MyReviewsPage } from "./domains/users/pages/MyReviewsPage";
 import MyCompletedRepairsPage from "./domains/users/pages/MyCompletedRepairsPage";
 import NotFound from "./pages/NotFound";
@@ -68,8 +71,10 @@ const App = () => (
           
           {/* 카센터 견적 관리 */}
           <Route path="/center/estimates/requests" element={<EstimateRequestsPage />} />
+          <Route path="/center/estimates/requests/:id" element={<CenterQuoteRequestDetailPage />} />
           <Route path="/center/estimates/create/:requestId?" element={<CenterEstimateCreatePage />} />
           <Route path="/center/estimates/sent" element={<SentEstimatesPage />} />
+          <Route path="/center/estimates/sent-management" element={<SentEstimatesManagementPage />} />
           
           {/* 카센터 추가 관리 페이지 */}
           <Route path="/center/reservations" element={<ReservationManagementPage />} />
@@ -78,6 +83,7 @@ const App = () => (
           {/* 사용자별 마이페이지 */}
           <Route path="/user/mypage" element={<UserMyPage />} />
           <Route path="/user/quote-requests" element={<MyQuoteRequestsPage />} />
+          <Route path="/user/quote-requests/:id" element={<QuoteRequestDetailPage />} />
           <Route path="/user/reviews" element={<MyReviewsPage />} />
           <Route path="/user/completed-repairs" element={<MyCompletedRepairsPage />} />
           

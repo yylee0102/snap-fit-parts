@@ -71,7 +71,7 @@ export default function Header({ className }: HeaderProps) {
                 alt="CAR PARTER 로고" 
                 className="h-10 w-auto"
               />
-              <span className="text-xl font-bold text-primary">카센터</span>
+              <span className="text-xl font-bold text-primary">carparter</span>
             </Link>
           </div>
 
@@ -125,19 +125,23 @@ export default function Header({ className }: HeaderProps) {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="sm" className="flex items-center gap-2">
                     <User className="h-5 w-5" />
-                    <span className="hidden md:inline text-sm">{user?.name}</span>
+                    {user?.userType !== "개인" && (
+                      <span className="hidden md:inline text-sm">{user?.name}</span>
+                    )}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48 bg-surface border-outline-variant">
-                  <DropdownMenuItem onClick={() => {
-                    if (user?.userType === "개인") {
-                      navigate("/mypage");
-                    } else if (user?.userType === "카센터") {
-                      navigate("/center/mypage");
-                    }
-                  }}>
-                    마이페이지
-                  </DropdownMenuItem>
+                  {user?.userType !== "관리자" && (
+                    <DropdownMenuItem onClick={() => {
+                      if (user?.userType === "개인") {
+                        navigate("/mypage");
+                      } else if (user?.userType === "카센터") {
+                        navigate("/center/mypage");
+                      }
+                    }}>
+                      마이페이지
+                    </DropdownMenuItem>
+                  )}
                   {user?.userType === "카센터" && (
                     <DropdownMenuItem onClick={() => navigate("/center/estimates/requests")}>
                       견적 관리
