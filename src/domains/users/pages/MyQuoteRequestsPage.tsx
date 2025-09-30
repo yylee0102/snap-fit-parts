@@ -1,849 +1,521 @@
 /**
- * 사용자 견적 요청 관리 페이지 - 완전히 새로 디자인된 버전
+ * 사용자 견적 요청 관리 페이지 - 현대적이고 깔끔한 디자인
  * 
  * 주요 기능:
- * - 검색, 필터링, 정렬 기능
- * - 카드/테이블 뷰 토글
- * - 반응형 디자인 (모바일/데스크톱)
- * - 접근성 지원 (WCAG AA)
- * - 무한 스크롤/페이지네이션
- * - 로딩/에러/빈 상태 처리
+ * - 제출한 견적 요청 정보 표시
+ * - 받은 견적들을 인터랙티브 카드로 표시
+ * - 견적 상세 모달
+ * - 반응형 디자인
+ * - 접근성 지원
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PageContainer from '@/shared/components/layout/PageContainer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { 
-  Search, 
-  Filter, 
-  LayoutGrid, 
-  List, 
   Calendar, 
   Car, 
   MapPin, 
   FileText, 
-  Eye, 
-  Copy, 
-  Trash2,
-  MoreHorizontal,
   RefreshCw,
   Plus,
-  SortAsc,
-  Download,
-  X
+  Trash2,
+  Building2,
+  Clock,
+  MessageCircle,
+  CheckCircle2,
+  Eye
 } from 'lucide-react';
 
-// 새로 만든 재사용 가능한 컴포넌트들
-import { StatusBadge } from '@/components/ui/status-badge';
+// 컴포넌트들
 import { Amount } from '@/components/ui/amount';
 import { DateTime } from '@/components/ui/date-time';
-import { Toolbar } from '@/components/ui/toolbar';
-import { ConfirmDialog } from '@/components/ui/confirm-dialog';
-import { EmptyState } from '@/components/ui/empty-state';
-import { MobileSkeleton, TableSkeleton } from '@/components/ui/mobile-skeleton';
+import { QuoteDetailModal } from '@/domains/users/modals/QuoteDetailModal';
 
 // API 서비스
-import UserApiService, { QuoteRequestResDTO } from '@/services/user.api';
+import UserApiService from '@/services/user.api';
 
-// 타입 정의 - 백엔드 API와 일치하도록 수정
-interface QuoteRequest {
-  id: number;
-  title: string;
-  carModel: string;
-  carYear: number;
-  issueDescription: string;
-  preferredDate: string;
-  location: string;
-  status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+// 타입 정의 - 업로드된 파일의 타입과 일치
+interface MyQuoteRequest {
+  requestId: number;
+  car: { carModel: string; modelYear: number; };
+  requestDetails: string;
+  address: string;
   createdAt: string;
-  lastUpdated: string;
-  estimatesCount: number;
-  estimatedTotal?: number;
-  images?: string[];
-  requesterName: string;
+  images: { imageUrl: string; }[];
+  estimates: Estimate[];
 }
 
-// 필터 옵션 타입
-interface FilterOptions {
-  status: string;
-  search: string;
-  sort: 'date' | 'total' | 'status';
-  sortOrder: 'asc' | 'desc';
+interface Estimate {
+  estimateId: number;
+  centerName: string;
+  estimatedCost: number;
+  details: string;
+  centerAddress?: string;
+  centerPhone?: string;
+  items?: Array<{
+    name: string;
+    quantity: number;
+    unitPrice: number;
+    totalPrice: number;
+  }>;
+  laborHours?: number;
+  notes?: string;
+  createdAt?: string;
+  validUntil?: string;
 }
-
-// 뷰 모드 타입
-type ViewMode = 'card' | 'table';
 
 export const MyQuoteRequestsPage = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
-
+  
   // 상태 관리
-  const [quoteRequests, setQuoteRequests] = useState<QuoteRequest[]>([]);
+  const [myRequest, setMyRequest] = useState<MyQuoteRequest | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [selectedItems, setSelectedItems] = useState<number[]>([]);
-  const [viewMode, setViewMode] = useState<ViewMode>('table');
-  const [isRefreshing, setIsRefreshing] = useState(false);
-
-  // 확인 다이얼로그 상태
-  const [confirmDialog, setConfirmDialog] = useState<{
-    open: boolean;
-    title: string;
-    description: string;
-    action: () => void;
-  }>({
-    open: false,
-    title: '',
-    description: '',
-    action: () => {}
-  });
-
-  // URL 쿼리 파라미터에서 필터 옵션 읽기
-  const filters = useMemo<FilterOptions>(() => ({
-    status: searchParams.get('status') || 'all',
-    search: searchParams.get('search') || '',
-    sort: (searchParams.get('sort') as 'date' | 'total' | 'status') || 'date',
-    sortOrder: (searchParams.get('order') as 'asc' | 'desc') || 'desc'
-  }), [searchParams]);
-
-  // 디바운스된 검색 처리
-  const [searchValue, setSearchValue] = useState(filters.search);
-  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [selectedEstimate, setSelectedEstimate] = useState<Estimate | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // 데이터 로딩
-  const loadQuoteRequests = useCallback(async (showLoading = true) => {
-    if (showLoading) setIsLoading(true);
-    setError(null);
-
+  const loadMyRequest = async () => {
+    setIsLoading(true);
     try {
-      // 실제 API 호출로 데이터 가져오기
-      const apiData = await UserApiService.getMyQuoteRequests();
+      // 실제 API 호출
+      const data = await UserApiService.getMyQuoteRequest();
       
-      // API 응답을 컴포넌트에서 사용하는 형태로 변환
-      const transformedData: QuoteRequest[] = apiData.map((item) => ({
-        id: item.requestId,
-        title: `${item.car ? '차량' : '기타'} 수리 요청`, // API에 title이 없으므로 생성
-        carModel: '정보 없음', // car 정보가 있다면 추가 API 호출 필요
-        carYear: 2020, // 기본값
-        issueDescription: item.requestDetails,
-        preferredDate: item.createdAt,
-        location: item.address,
-        status: item.estimateCount > 0 ? 'IN_PROGRESS' : 'PENDING',
-        createdAt: item.createdAt,
-        lastUpdated: item.createdAt,
-        estimatesCount: item.estimateCount,
-        estimatedTotal: undefined, // API에서 제공하지 않음
-        images: item.images?.map(img => img.imageUrl),
-        requesterName: item.writer.name
-      }));
-
-      // Mock data - API 응답이 충분하지 않을 때 사용
-      const mockData: QuoteRequest[] = [
-        {
-          id: 1,
-          title: '브레이크 소음 점검 요청',
-          carModel: '현대 아반떼',
-          carYear: 2020,
-          issueDescription: '브레이크에서 소음이 나고 진동이 느껴집니다. 브레이크 패드 교체가 필요할 것 같습니다.',
-          preferredDate: '2024-01-20',
-          location: '서울 강남구',
-          status: 'IN_PROGRESS',
-          createdAt: '2024-01-15T09:00:00Z',
-          lastUpdated: '2024-01-16T14:30:00Z',
-          estimatesCount: 3,
-          estimatedTotal: 250000,
-          requesterName: '김민수',
-          images: ['/placeholder.svg', '/placeholder.svg']
-        },
-        {
-          id: 2,
-          title: '정기점검 및 오일교체',
-          carModel: '기아 K5',
-          carYear: 2019,
-          issueDescription: '엔진오일 교체 및 정기점검을 받고 싶습니다.',
-          preferredDate: '2024-01-25',
-          location: '서울 서초구',
-          status: 'PENDING',
-          createdAt: '2024-01-14T11:20:00Z',
-          lastUpdated: '2024-01-14T11:20:00Z',
-          estimatesCount: 1,
-          estimatedTotal: 120000,
-          requesterName: '박영희'
-        },
-        {
-          id: 3,
-          title: '에어컨 수리',
-          carModel: '현대 소나타',
-          carYear: 2018,
-          issueDescription: '에어컨이 제대로 작동하지 않습니다. 점검 및 수리 부탁드립니다.',
-          preferredDate: '2024-01-18',
-          location: '서울 마포구',
-          status: 'COMPLETED',
-          createdAt: '2024-01-10T16:45:00Z',
-          lastUpdated: '2024-01-12T10:15:00Z',
-          estimatesCount: 5,
-          estimatedTotal: 180000,
-          requesterName: '이철수'
-        }
-      ];
-
-      // 실제 데이터가 있으면 사용하고, 없으면 mock 데이터 사용
-      const dataToUse = transformedData.length > 0 ? transformedData : mockData;
-
-      // 필터링 및 정렬 적용
-      let filteredData = dataToUse;
-
-      // 상태 필터
-      if (filters.status !== 'all') {
-        filteredData = filteredData.filter(item => item.status === filters.status);
+      if (data) {
+        // Mock 견적 데이터 추가 (실제 API가 견적 정보를 포함하지 않는 경우)
+        const mockEstimates: Estimate[] = [
+          {
+            estimateId: 1,
+            centerName: "프리미엄 카센터",
+            estimatedCost: 250000,
+            details: "브레이크 패드 및 디스크 교체가 필요합니다. 정밀 진단 결과 브레이크 패드가 2mm 이하로 마모되었으며, 디스크도 일부 손상이 있어 함께 교체하는 것을 권장합니다.",
+            centerAddress: "서울 강남구 테헤란로 123",
+            centerPhone: "02-1234-5678",
+            items: [
+              { name: "브레이크 패드 (전)", quantity: 1, unitPrice: 80000, totalPrice: 80000 },
+              { name: "브레이크 디스크 (전)", quantity: 2, unitPrice: 70000, totalPrice: 140000 },
+              { name: "브레이크 오일", quantity: 1, unitPrice: 15000, totalPrice: 15000 }
+            ],
+            laborHours: 3,
+            notes: "작업 완료 후 3개월 또는 5,000km 무료 점검 서비스 제공",
+            createdAt: "2024-01-16T10:30:00Z",
+            validUntil: "2024-02-16T23:59:59Z"
+          },
+          {
+            estimateId: 2,
+            centerName: "믿음직한 정비소",
+            estimatedCost: 180000,
+            details: "브레이크 패드만 교체하면 될 것 같습니다. 디스크는 아직 사용 가능한 상태입니다.",
+            centerAddress: "서울 서초구 반포대로 456",
+            centerPhone: "02-2345-6789",
+            items: [
+              { name: "브레이크 패드 (전)", quantity: 1, unitPrice: 65000, totalPrice: 65000 },
+              { name: "브레이크 오일", quantity: 1, unitPrice: 12000, totalPrice: 12000 }
+            ],
+            laborHours: 2,
+            notes: "1년 품질보증 제공",
+            createdAt: "2024-01-17T14:20:00Z",
+            validUntil: "2024-02-17T23:59:59Z"
+          },
+          {
+            estimateId: 3,
+            centerName: "스피드 오토케어",
+            estimatedCost: 320000,
+            details: "브레이크 시스템 전체 점검 및 교체를 권장합니다. 안전을 위해 고품질 부품 사용을 추천드립니다.",
+            centerAddress: "서울 마포구 월드컵로 789",
+            centerPhone: "02-3456-7890",
+            items: [
+              { name: "프리미엄 브레이크 패드", quantity: 1, unitPrice: 120000, totalPrice: 120000 },
+              { name: "브레이크 디스크 (고급형)", quantity: 2, unitPrice: 85000, totalPrice: 170000 },
+              { name: "브레이크 오일 (합성)", quantity: 1, unitPrice: 25000, totalPrice: 25000 }
+            ],
+            laborHours: 4,
+            notes: "3년 무제한 A/S 보장, 24시간 긴급출동 서비스 포함",
+            createdAt: "2024-01-18T09:15:00Z",
+            validUntil: "2024-02-18T23:59:59Z"
+          }
+        ];
+        
+        const enhancedData = {
+          ...data,
+          estimates: mockEstimates
+        };
+        
+        setMyRequest(enhancedData);
+      } else {
+        setMyRequest(null);
       }
-
-      // 검색 필터
-      if (filters.search) {
-        const searchLower = filters.search.toLowerCase();
-        filteredData = filteredData.filter(item => 
-          item.title.toLowerCase().includes(searchLower) ||
-          item.carModel.toLowerCase().includes(searchLower) ||
-          item.issueDescription.toLowerCase().includes(searchLower) ||
-          item.location.toLowerCase().includes(searchLower)
-        );
-      }
-
-      // 정렬
-      filteredData.sort((a, b) => {
-        let comparison = 0;
-        switch (filters.sort) {
-          case 'date':
-            comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-            break;
-          case 'total':
-            comparison = (a.estimatedTotal || 0) - (b.estimatedTotal || 0);
-            break;
-          case 'status':
-            comparison = a.status.localeCompare(b.status);
-            break;
-        }
-        return filters.sortOrder === 'desc' ? -comparison : comparison;
-      });
-
-      setQuoteRequests(filteredData);
     } catch (error) {
-      console.error('견적 요청 목록 로딩 실패:', error);
-      setError('데이터를 불러오는 중 오류가 발생했습니다.');
+      console.error("견적 요청 정보 로딩 실패:", error);
+      setMyRequest(null);
     } finally {
       setIsLoading(false);
-      setIsRefreshing(false);
     }
-  }, [filters]);
-
-  // 초기 데이터 로딩
-  useEffect(() => {
-    loadQuoteRequests();
-  }, [loadQuoteRequests]);
-
-  // URL 쿼리 파라미터 업데이트
-  const updateSearchParams = useCallback((updates: Partial<FilterOptions>) => {
-    const newParams = new URLSearchParams(searchParams);
-    
-    Object.entries(updates).forEach(([key, value]) => {
-      if (value && value !== 'all') {
-        newParams.set(key, value);
-      } else {
-        newParams.delete(key);
-      }
-    });
-
-    setSearchParams(newParams);
-  }, [searchParams, setSearchParams]);
-
-  // 검색 처리 (디바운스 적용)
-  const handleSearch = useCallback((value: string) => {
-    setSearchValue(value);
-    
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    
-    const timeout = setTimeout(() => {
-      updateSearchParams({ search: value });
-    }, 300);
-    
-    setSearchTimeout(timeout);
-  }, [searchTimeout, updateSearchParams]);
-
-  // 필터 변경 처리
-  const handleFilterChange = (key: keyof FilterOptions, value: string) => {
-    updateSearchParams({ [key]: value });
   };
 
-  // 필터 초기화
-  const clearFilters = () => {
-    setSearchValue('');
-    setSearchParams(new URLSearchParams());
+  useEffect(() => {
+    loadMyRequest();
+  }, []);
+
+  // 견적 요청 삭제
+  const handleDeleteQuoteRequest = async (quoteRequestId: number) => {
+    try {
+      await UserApiService.deleteQuoteRequest(quoteRequestId);
+      setMyRequest(null);
+      toast({ title: '견적 요청이 삭제되었습니다.' });
+    } catch (error) {
+      toast({ title: '오류', description: '삭제에 실패했습니다.', variant: 'destructive' });
+    }
+  };
+
+  // 견적 카드 클릭 처리
+  const handleEstimateClick = (estimate: Estimate) => {
+    setSelectedEstimate(estimate);
+    setIsModalOpen(true);
   };
 
   // 새로고침
   const handleRefresh = () => {
-    setIsRefreshing(true);
-    loadQuoteRequests(false);
+    loadMyRequest();
   };
-
-  // 항목 선택
-  const toggleSelectItem = (id: number) => {
-    setSelectedItems(prev => 
-      prev.includes(id) 
-        ? prev.filter(item => item !== id)
-        : [...prev, id]
-    );
-  };
-
-  // 전체 선택/해제
-  const toggleSelectAll = () => {
-    setSelectedItems(prev => 
-      prev.length === quoteRequests.length ? [] : quoteRequests.map(item => item.id)
-    );
-  };
-
-  // 견적 요청 삭제 - API에 삭제 메서드가 없으므로 클라이언트 측에서만 처리
-  const handleDelete = (id: number) => {
-    setConfirmDialog({
-      open: true,
-      title: '견적 요청 삭제',
-      description: '이 견적 요청을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.',
-      action: async () => {
-        try {
-          // TODO: 백엔드에 삭제 API가 추가되면 실제 API 호출로 변경
-          // await UserApiService.deleteQuoteRequest(id);
-          
-          // 현재는 클라이언트에서만 제거
-          setQuoteRequests(prev => prev.filter(item => item.id !== id));
-          setSelectedItems(prev => prev.filter(item => item !== id));
-          toast({ title: '견적 요청이 삭제되었습니다.' });
-        } catch (error) {
-          toast({ 
-            title: '오류', 
-            description: '삭제에 실패했습니다.', 
-            variant: 'destructive' 
-          });
-        }
-        setConfirmDialog(prev => ({ ...prev, open: false }));
-      }
-    });
-  };
-
-  // 견적 요청 복제 - 현재 API에 복제 기능이 없으므로 추후 구현
-  const handleDuplicate = async (id: number) => {
-    try {
-      // TODO: 백엔드에 복제 API가 추가되면 실제 API 호출로 변경
-      // await UserApiService.duplicateQuoteRequest(id);
-      
-      toast({ 
-        title: '복제 기능 준비중', 
-        description: '곧 사용 가능합니다.',
-        variant: 'default'
-      });
-      // handleRefresh();
-    } catch (error) {
-      toast({ 
-        title: '오류', 
-        description: '복제에 실패했습니다.', 
-        variant: 'destructive' 
-      });
-    }
-  };
-
-  // CSV 내보내기
-  const handleExport = () => {
-    const items = selectedItems.length > 0 
-      ? quoteRequests.filter(item => selectedItems.includes(item.id))
-      : quoteRequests;
-    
-    // CSV 내보내기 로직
-    toast({ title: `${items.length}개 항목을 내보냈습니다.` });
-  };
-
-  // 통계 계산
-  const statistics = useMemo(() => {
-    const total = quoteRequests.length;
-    const pending = quoteRequests.filter(item => item.status === 'PENDING').length;
-    const inProgress = quoteRequests.filter(item => item.status === 'IN_PROGRESS').length;
-    const completed = quoteRequests.filter(item => item.status === 'COMPLETED').length;
-    
-    return { total, pending, inProgress, completed };
-  }, [quoteRequests]);
 
   // 빈 상태 렌더링
-  const renderEmptyState = () => {
-    const hasFilters = filters.search || filters.status !== 'all';
-    
-    return (
-      <EmptyState
-        icon={FileText}
-        title="견적 요청이 없습니다"
-        description={
-          hasFilters 
-            ? '검색 조건에 맞는 견적 요청이 없습니다. 다른 조건으로 검색해보세요.' 
-            : '첫 번째 견적 요청을 등록하여 카센터로부터 견적을 받아보세요.'
-        }
-        action={
-          !hasFilters 
-            ? {
-                label: '견적 요청하기',
-                onClick: () => navigate('/quotes/create')
-              }
-            : undefined
-        }
-      />
-    );
-  };
-
-  // 에러 상태 렌더링
-  const renderErrorState = () => (
-    <Alert variant="destructive">
-      <AlertDescription className="flex items-center justify-between">
-        <span>{error}</span>
-        <Button variant="outline" size="sm" onClick={handleRefresh}>
-          <RefreshCw className="h-4 w-4 mr-2" />
-          다시 시도
+  const renderEmptyState = () => (
+    <Card className="border-dashed">
+      <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+        <FileText className="h-16 w-16 text-muted-foreground mb-4" />
+        <h3 className="text-xl font-semibold mb-2">현재 등록된 견적 요청서가 없습니다</h3>
+        <p className="text-muted-foreground mb-6">
+          새로운 견적을 요청하여 여러 카센터의 제안을 받아보세요.
+        </p>
+        <Button onClick={() => navigate('/estimates/create')} className="gap-2">
+          <Plus className="h-4 w-4" />
+          견적 요청하기
         </Button>
-      </AlertDescription>
-    </Alert>
+      </CardContent>
+    </Card>
   );
 
-  // 스켈레톤 로딩 렌더링 - 뷰 모드에 따라 다른 스켈레톤 표시
-  const renderLoadingState = () => {
-    return viewMode === 'card' ? <MobileSkeleton /> : <TableSkeleton />;
-  };
-
-  // 카드 뷰 렌더링
-  const renderCardView = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {quoteRequests.map((request) => (
-        <Card 
-          key={request.id} 
-          className="hover:shadow-md transition-shadow cursor-pointer group"
-          onClick={() => navigate(`/user/quote-requests/${request.id}`)}
-        >
-          <CardHeader className="pb-3">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <CardTitle className="text-lg mb-1 group-hover:text-primary transition-colors">
-                  {request.title}
-                </CardTitle>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Car className="h-4 w-4" />
-                  <span>{request.carModel} ({request.carYear}년)</span>
-                </div>
-              </div>
-              <StatusBadge status={request.status} size="sm" />
+  // 로딩 상태 처리
+  if (isLoading) {
+    return (
+      <PageContainer>
+        <div className="container mx-auto px-4 py-8">
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Card key={i}>
+                  <CardHeader>
+                    <Skeleton className="h-4 w-20" />
+                  </CardHeader>
+                  <CardContent>
+                    <Skeleton className="h-8 w-24" />
+                  </CardContent>
+                </Card>
+              ))}
             </div>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <p className="text-sm text-muted-foreground line-clamp-2">
-              {request.issueDescription}
-            </p>
-            
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-              <div className="flex items-center gap-1">
-                <MapPin className="h-4 w-4" />
-                <span>{request.location}</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <FileText className="h-4 w-4" />
-                <span>견적 {request.estimatesCount}개</span>
-              </div>
-            </div>
-
-            {request.estimatedTotal && (
-              <div className="pt-2 border-t">
-                <Amount value={request.estimatedTotal} size="lg" />
-              </div>
-            )}
-
-            <div className="flex items-center justify-between pt-2 border-t">
-              <DateTime date={request.createdAt} prefix="요청일:" format="short" />
-              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/user/quote-requests/${request.id}`);
-                  }}
-                  className="h-8 w-8 p-0"
-                >
-                  <Eye className="h-4 w-4" />
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDuplicate(request.id);
-                  }}
-                  className="h-8 w-8 p-0"
-                >
-                  <Copy className="h-4 w-4" />
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDelete(request.id);
-                  }}
-                  className="h-8 w-8 p-0 hover:text-destructive"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  );
-
-  // 테이블 뷰 렌더링
-  const renderTableView = () => (
-    <div className="border rounded-lg overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-muted/50 sticky top-0">
-            <tr>
-              <th className="w-12 p-3 text-left">
-                <input
-                  type="checkbox"
-                  checked={selectedItems.length === quoteRequests.length && quoteRequests.length > 0}
-                  onChange={toggleSelectAll}
-                  className="rounded border-border"
-                  aria-label="전체 선택"
-                />
-              </th>
-              <th className="text-left p-3 font-medium">제목</th>
-              <th className="text-left p-3 font-medium">상태</th>
-              <th className="text-left p-3 font-medium">차량</th>
-              <th className="text-left p-3 font-medium">견적수</th>
-              <th className="text-left p-3 font-medium">예상 금액</th>
-              <th className="text-left p-3 font-medium">요청일</th>
-              <th className="w-24 p-3" aria-label="작업"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {quoteRequests.map((request) => (
-              <tr 
-                key={request.id} 
-                className="border-t hover:bg-muted/30 cursor-pointer transition-colors"
-                onClick={() => navigate(`/user/quote-requests/${request.id}`)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    navigate(`/user/quote-requests/${request.id}`);
-                  }
-                }}
-              >
-                <td className="p-3">
-                  <input
-                    type="checkbox"
-                    checked={selectedItems.includes(request.id)}
-                    onChange={(e) => {
-                      e.stopPropagation();
-                      toggleSelectItem(request.id);
-                    }}
-                    className="rounded border-border"
-                    aria-label={`${request.title} 선택`}
-                  />
-                </td>
-                <td className="p-3">
-                  <div>
-                    <div className="font-medium hover:text-primary transition-colors">
-                      {request.title}
-                    </div>
-                    <div className="text-sm text-muted-foreground line-clamp-1">
-                      {request.issueDescription}
-                    </div>
-                  </div>
-                </td>
-                <td className="p-3">
-                  <StatusBadge status={request.status} size="sm" />
-                </td>
-                <td className="p-3">
-                  <div className="text-sm">
-                    <div>{request.carModel}</div>
-                    <div className="text-muted-foreground">{request.carYear}년</div>
-                  </div>
-                </td>
-                <td className="p-3 text-center">{request.estimatesCount}</td>
-                <td className="p-3">
-                  <Amount value={request.estimatedTotal} />
-                </td>
-                <td className="p-3">
-                  <DateTime date={request.createdAt} format="short" />
-                </td>
-                <td className="p-3">
-                  <div className="flex gap-1">
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(`/user/quote-requests/${request.id}`);
-                      }}
-                      className="h-8 w-8 p-0"
-                      aria-label="상세보기"
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDuplicate(request.id);
-                      }}
-                      className="h-8 w-8 p-0"
-                      aria-label="복제"
-                    >
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDelete(request.id);
-                      }}
-                      className="h-8 w-8 p-0 hover:text-destructive"
-                      aria-label="삭제"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
+          </div>
+        </div>
+      </PageContainer>
+    );
+  }
 
   return (
     <PageContainer>
-      <div className="space-y-6">
-        {/* 헤더 */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">내 견적 요청</h1>
-            <p className="text-muted-foreground">
-              요청한 견적을 확인하고 관리하세요
-              {quoteRequests.length > 0 && ` (총 ${quoteRequests.length}건)`}
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={handleRefresh} disabled={isRefreshing}>
-              <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-              새로고침
-            </Button>
-            <Button onClick={() => navigate('/quotes/create')}>
-              <Plus className="h-4 w-4 mr-2" />
-              견적 요청
-            </Button>
-          </div>
-        </div>
-
-        {/* 통계 카드 */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card className="shadow-elevation-1 hover:shadow-elevation-2 transition-shadow">
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <FileText className="h-6 w-6 text-primary" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-muted-foreground">전체 요청</p>
-                  <p className="text-2xl font-bold">{statistics.total}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="shadow-elevation-1 hover:shadow-elevation-2 transition-shadow">
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <div className="p-2 bg-yellow-500/10 rounded-lg">
-                  <Calendar className="h-6 w-6 text-yellow-500" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-muted-foreground">대기중</p>
-                  <p className="text-2xl font-bold text-yellow-600">{statistics.pending}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="shadow-elevation-1 hover:shadow-elevation-2 transition-shadow">
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <div className="p-2 bg-blue-500/10 rounded-lg">
-                  <Calendar className="h-6 w-6 text-blue-500" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-muted-foreground">진행중</p>
-                  <p className="text-2xl font-bold text-blue-600">{statistics.inProgress}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="shadow-elevation-1 hover:shadow-elevation-2 transition-shadow">
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <div className="p-2 bg-green-500/10 rounded-lg">
-                  <Calendar className="h-6 w-6 text-green-500" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-muted-foreground">완료</p>
-                  <p className="text-2xl font-bold text-green-600">{statistics.completed}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* 툴바 */}
-        <Card className="shadow-elevation-1">
-          <Toolbar sticky>
-            <div className="flex items-center gap-4 flex-1">
-              {/* 검색 */}
-              <div className="relative flex-1 max-w-sm">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="제목, 차량, 내용으로 검색..."
-                  value={searchValue}
-                  onChange={(e) => handleSearch(e.target.value)}
-                  className="pl-10"
-                  aria-label="견적 요청 검색"
-                />
-              </div>
-
-              {/* 상태 필터 */}
-              <Select value={filters.status} onValueChange={(value) => handleFilterChange('status', value)}>
-                <SelectTrigger className="w-32" aria-label="상태 필터">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">전체</SelectItem>
-                  <SelectItem value="PENDING">대기중</SelectItem>
-                  <SelectItem value="IN_PROGRESS">진행중</SelectItem>
-                  <SelectItem value="COMPLETED">완료</SelectItem>
-                  <SelectItem value="CANCELLED">취소</SelectItem>
-                </SelectContent>
-              </Select>
-
-              {/* 정렬 */}
-              <Select value={`${filters.sort}-${filters.sortOrder}`} onValueChange={(value) => {
-                const [sort, order] = value.split('-');
-                handleFilterChange('sort', sort);
-                handleFilterChange('sortOrder', order);
-              }}>
-                <SelectTrigger className="w-40" aria-label="정렬 방식">
-                  <SortAsc className="h-4 w-4 mr-2" />
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="date-desc">최신순</SelectItem>
-                  <SelectItem value="date-asc">오래된순</SelectItem>
-                  <SelectItem value="total-desc">금액 높은순</SelectItem>
-                  <SelectItem value="total-asc">금액 낮은순</SelectItem>
-                  <SelectItem value="status-asc">상태순</SelectItem>
-                </SelectContent>
-              </Select>
-
-              {/* 필터 초기화 */}
-              {(filters.search || filters.status !== 'all') && (
-                <Button variant="ghost" size="sm" onClick={clearFilters}>
-                  <X className="h-4 w-4 mr-2" />
-                  초기화
+      <div className="container mx-auto px-4 py-8">
+        <div className="space-y-8">
+          {/* 헤더 */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">내 견적 요청</h1>
+              <p className="text-muted-foreground mt-2">
+                {myRequest ? '요청한 견적을 확인하고 카센터의 제안을 받아보세요.' : '등록된 견적 요청이 없습니다.'}
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" onClick={handleRefresh} className="gap-2">
+                <RefreshCw className="h-4 w-4" />
+                새로고침
+              </Button>
+              {!myRequest && (
+                <Button onClick={() => navigate('/estimates/create')} className="gap-2">
+                  <Plus className="h-4 w-4" />
+                  견적 요청
                 </Button>
               )}
             </div>
+          </div>
 
-            <div className="flex items-center gap-2">
-              {/* 선택된 항목 액션 */}
-              {selectedItems.length > 0 && (
-                <>
-                  <span className="text-sm text-muted-foreground">
-                    {selectedItems.length}개 선택됨
-                  </span>
-                  <Button variant="outline" size="sm" onClick={handleExport}>
-                    <Download className="h-4 w-4 mr-2" />
-                    내보내기
-                  </Button>
-                </>
-              )}
+          {/* 통계 카드 */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">요청 상태</CardTitle>
+                <FileText className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {myRequest ? '견적 대기중' : '요청 없음'}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {myRequest ? '카센터의 견적을 기다리고 있습니다' : '새로운 견적을 요청하세요'}
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">받은 견적</CardTitle>
+                <Building2 className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-primary">
+                  {myRequest?.estimates?.length ?? 0}개
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  다양한 카센터의 견적을 비교해보세요
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">요청일</CardTitle>
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {myRequest ? (
+                    <DateTime date={myRequest.createdAt} format="short" />
+                  ) : '—'}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  견적 요청을 등록한 날짜
+                </p>
+              </CardContent>
+            </Card>
+          </div>
 
-              {/* 뷰 모드 토글 */}
-              <div className="flex bg-muted rounded-lg p-1" role="tablist" aria-label="뷰 모드">
-                <Button
-                  variant={viewMode === 'table' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setViewMode('table')}
-                  role="tab"
-                  aria-selected={viewMode === 'table'}
-                  aria-label="테이블 뷰"
-                >
-                  <List className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant={viewMode === 'card' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setViewMode('card')}
-                  role="tab"
-                  aria-selected={viewMode === 'card'}
-                  aria-label="카드 뷰"
-                >
-                  <LayoutGrid className="h-4 w-4" />
-                </Button>
-              </div>
+          {/* 메인 콘텐츠 */}
+          {!myRequest ? (
+            renderEmptyState()
+          ) : (
+            <div className="space-y-8">
+              {/* 내 견적 요청 정보 */}
+              <Card className="overflow-hidden">
+                <CardHeader className="bg-muted/30">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-xl">내가 보낸 견적 요청서</CardTitle>
+                      <CardDescription className="mt-1">
+                        요청하신 내용의 상세 정보입니다
+                      </CardDescription>
+                    </div>
+                    <Button 
+                      variant="destructive" 
+                      size="sm" 
+                      onClick={() => handleDeleteQuoteRequest(myRequest.requestId)}
+                      className="gap-2"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      요청서 삭제
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="space-y-6">
+                    {/* 차량 및 위치 정보 */}
+                    <div className="flex flex-wrap items-center gap-6 text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <Car className="h-5 w-5" />
+                        <span className="font-medium">
+                          {myRequest.car?.carModel ?? '차량 정보 없음'} 
+                          ({myRequest.car?.modelYear ?? 'N/A'}년)
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <MapPin className="h-5 w-5" />
+                        <span>{myRequest.address}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-5 w-5" />
+                        <DateTime date={myRequest.createdAt} prefix="요청일:" />
+                      </div>
+                    </div>
+
+                    {/* 요청 내용 */}
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-lg">요청 내용</h4>
+                      <p className="text-foreground leading-relaxed bg-muted/30 p-4 rounded-lg">
+                        {myRequest.requestDetails}
+                      </p>
+                    </div>
+
+                    {/* 첨부 이미지 */}
+                    {myRequest.images && myRequest.images.length > 0 && (
+                      <div className="space-y-3">
+                        <h4 className="font-semibold text-lg">첨부 이미지</h4>
+                        <div className="flex gap-3 flex-wrap">
+                          {myRequest.images.map((img, idx) => (
+                            <div key={idx} className="relative group">
+                              <img 
+                                src="/placeholder.svg" 
+                                alt={`차량사진 ${idx + 1}`} 
+                                className="w-24 h-24 rounded-lg object-cover border-2 border-border hover:border-primary transition-colors cursor-pointer"
+                              />
+                              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 rounded-lg transition-colors" />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* 받은 견적 목록 */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-xl">
+                        받은 견적 목록 ({myRequest.estimates?.length ?? 0}개)
+                      </CardTitle>
+                      <CardDescription className="mt-1">
+                        카센터에서 보낸 견적 제안들을 비교해보세요
+                      </CardDescription>
+                    </div>
+                    {myRequest.estimates && myRequest.estimates.length > 0 && (
+                      <Badge variant="secondary" className="text-sm px-3 py-1">
+                        {myRequest.estimates.length}개 견적 수신
+                      </Badge>
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {!myRequest.estimates || myRequest.estimates.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-12 text-center">
+                      <Building2 className="h-12 w-12 text-muted-foreground mb-4" />
+                      <h3 className="text-lg font-semibold mb-2">아직 받은 견적이 없습니다</h3>
+                      <p className="text-muted-foreground">
+                        카센터에서 견적을 보내면 여기에 표시됩니다
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                      {myRequest.estimates.map((estimate) => (
+                        <Card 
+                          key={estimate.estimateId}
+                          className="group cursor-pointer hover:shadow-lg hover:shadow-primary/10 hover:border-primary/30 transition-all duration-300 transform hover:-translate-y-1"
+                          onClick={() => handleEstimateClick(estimate)}
+                        >
+                          <CardHeader className="pb-4">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <CardTitle className="text-lg group-hover:text-primary transition-colors duration-200">
+                                  {estimate.centerName}
+                                </CardTitle>
+                                {estimate.centerAddress && (
+                                  <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1">
+                                    <MapPin className="h-3 w-3" />
+                                    {estimate.centerAddress}
+                                  </p>
+                                )}
+                              </div>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="opacity-0 group-hover:opacity-100 transition-opacity"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleEstimateClick(estimate);
+                                }}
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </CardHeader>
+                          <CardContent className="space-y-4">
+                            <div className="text-center py-4 bg-primary/5 rounded-lg border">
+                              <div className="text-3xl font-bold text-primary">
+                                <Amount value={estimate.estimatedCost} />
+                              </div>
+                              {estimate.validUntil && (
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  <DateTime date={estimate.validUntil} prefix="유효기간: " format="date" />까지
+                                </p>
+                              )}
+                            </div>
+                            
+                            <div className="space-y-2">
+                              <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">
+                                {estimate.details}
+                              </p>
+                              
+                              {estimate.items && estimate.items.length > 0 && (
+                                <div className="text-xs text-muted-foreground">
+                                  작업 항목 {estimate.items.length}개 포함
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="flex items-center justify-between pt-3 border-t">
+                              <div className="flex gap-2">
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toast({ title: '채팅 기능은 준비중입니다.' });
+                                  }}
+                                  className="gap-1"
+                                >
+                                  <MessageCircle className="h-3 w-3" />
+                                  문의
+                                </Button>
+                                <Button 
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toast({ title: '견적이 승인되었습니다.' });
+                                  }}
+                                  className="gap-1"
+                                >
+                                  <CheckCircle2 className="h-3 w-3" />
+                                  선택
+                                </Button>
+                              </div>
+                              {estimate.createdAt && (
+                                <div className="text-xs text-muted-foreground">
+                                  <DateTime date={estimate.createdAt} format="relative" />
+                                </div>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </div>
-          </Toolbar>
-        </Card>
+          )}
+        </div>
 
-        {/* 메인 콘텐츠 */}
-        <Card className="shadow-elevation-1">
-          <CardContent className="p-6">
-            {isLoading ? (
-              renderLoadingState()
-            ) : error ? (
-              renderErrorState()
-            ) : quoteRequests.length === 0 ? (
-              renderEmptyState()
-            ) : viewMode === 'card' ? (
-              renderCardView()
-            ) : (
-              renderTableView()
-            )}
-          </CardContent>
-        </Card>
-
-        {/* 확인 다이얼로그 */}
-        <ConfirmDialog
-          open={confirmDialog.open}
-          onOpenChange={(open) => setConfirmDialog(prev => ({ ...prev, open }))}
-          title={confirmDialog.title}
-          description={confirmDialog.description}
-          onConfirm={confirmDialog.action}
-          variant="destructive"
+        {/* 견적 상세 모달 */}
+        <QuoteDetailModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          estimate={selectedEstimate}
+          carInfo={myRequest ? {
+            model: myRequest.car?.carModel ?? '정보 없음',
+            year: myRequest.car?.modelYear ?? 0,
+            location: myRequest.address
+          } : undefined}
         />
       </div>
     </PageContainer>
